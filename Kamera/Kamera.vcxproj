@@ -92,8 +92,14 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
+xcopy /E /Y ".\shaders" "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
+mkdir "$(SolutionDir)$(Platform)\$(Configuration)\textures"
+xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -122,7 +128,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="CameraPath.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraScene.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Path.cpp" />
+    <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="ViewPath.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Box.h" />
+    <ClInclude Include="CameraPath.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Enums.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraScene.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Path.h" />
+    <ClInclude Include="Plane.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="ViewPath.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\default.frag">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="shaders\default.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
