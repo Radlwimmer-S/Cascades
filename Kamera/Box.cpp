@@ -2,7 +2,7 @@
 #include "Texture.h"
 
 
-Box::Box(glm::vec3  position, GLfloat size, Texture& texture) : Object(position, GetVertices(size), 8*8, GetIndizes(), 12*3, texture)
+Box::Box(glm::vec3  position, GLfloat size, Texture& texture) : Object_old(position, GetVertices(size), 8 * 8, GetIndizes(), 12, texture)
 {
 }
 
@@ -17,19 +17,19 @@ void Box::Update(GLfloat deltaTime)
 
 void Box::Render(Shader& shader) const
 {
-	Object::Render(shader);
+	Object_old::Render(shader);
 }
 
 GLfloat* Box::GetVertices(GLfloat size)
 {
 	GLfloat* vertices = new GLfloat[8 * 8]{
 		// Positions          // Colors           // Texture Coords
-		 0.5f*size,  0.5f*size,  0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, // Front Top    Right
-		 0.5f*size, -0.5f*size,  0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // Front Bottom Right
+		0.5f*size,  0.5f*size,  0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, // Front Top    Right
+		0.5f*size, -0.5f*size,  0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // Front Bottom Right
 		-0.5f*size, -0.5f*size,  0.5f*size,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, // Front Bottom Left
 		-0.5f*size,  0.5f*size,  0.5f*size,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f, // Front Top    Left 
-		 0.5f*size,  0.5f*size, -0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, // Back  Top    Right
-		 0.5f*size, -0.5f*size, -0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // Back  Bottom Right
+		0.5f*size,  0.5f*size, -0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, // Back  Top    Right
+		0.5f*size, -0.5f*size, -0.5f*size,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // Back  Bottom Right
 		-0.5f*size, -0.5f*size, -0.5f*size,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, // Back  Bottom Left
 		-0.5f*size,  0.5f*size, -0.5f*size,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f  // Back  Top    Left 
 	};

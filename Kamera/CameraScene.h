@@ -1,6 +1,9 @@
 #pragma once
+
 #include "Scene.h"
 #include "Box.h"
+
+class Object;
 
 class CameraScene :
 	public Scene
@@ -16,6 +19,6 @@ public:
 	void ProcessInput(GLfloat deltaTime) override;
 
 private:
-	Box* m_box;
+	Box* m_obj;
 };
 

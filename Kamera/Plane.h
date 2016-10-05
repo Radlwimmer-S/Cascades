@@ -1,7 +1,7 @@
 #pragma once
-#include "Object.h"
+#include "Object_old.h"
 class Plane :
-	public Object
+	public Object_old
 {
 public:
 	Plane(Texture& texture);

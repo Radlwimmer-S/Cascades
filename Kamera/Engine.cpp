@@ -2,11 +2,10 @@
 #include <GL/glew.h>
 #include "Scene.h"
 #include "Shader.h"
-#include "Plane.h"
-#include "Texture.h"
-#include <Soil/SOIL.h>
+#include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
 
-Engine::Engine(): m_shader(nullptr), m_scene(nullptr), m_window(nullptr)
+Engine::Engine(GLFWwindow& window, Shader& shader, Scene& scene, Camera& camera): m_shader(shader), m_scene(scene), m_window(window), m_camera(camera)
 {
 }
 
@@ -15,7 +14,7 @@ Engine::~Engine()
 {
 }
 
-void Engine::Init()
+GLFWwindow* Engine::InitWindow(GLint width, GLint height, const char* title)
 {
 	// Init GLFW
 	glfwInit();
@@ -26,11 +25,11 @@ void Engine::Init()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	m_window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
-	glfwMakeContextCurrent(m_window);
+	GLFWwindow* window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
-	glfwSetKeyCallback(m_window, KeyCallback);
+	glfwSetKeyCallback(window, KeyCallback);
 
 	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
@@ -40,41 +39,37 @@ void Engine::Init()
 	glGetError(); // Call it once to catch glewInit()
 
 	// OpenGL configuration
-	glViewport(0, 0, WIDTH, HEIGHT);
+	glViewport(0, 0, width, height);
 	/*glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+	
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+
+	return window;
 }
 
 void Engine::Start()
 {
-	m_scene->SetState(Running);
+	m_scene.SetState(Running);
 	Loop();
 }
 
 void Engine::Resume()
 {
-	m_scene->SetState(Running);
+	m_scene.SetState(Running);
 }
 
 void Engine::Pause()
 {
-	m_scene->SetState(Paused);
+	m_scene.SetState(Paused);
 }
 
 void Engine::Stop()
 {
-	m_scene->SetState(Stopped);
-}
-
-void Engine::SetShader(Shader* shader)
-{
-	m_shader = shader;
-}
-
-void Engine::SetScene(Scene* scene)
-{
-	m_scene = scene;
+	m_scene.SetState(Stopped);
 }
 
 void Engine::Loop()
@@ -84,7 +79,7 @@ void Engine::Loop()
 	GLfloat lastFrame = 0.0f;
 	
 	// Game loop
-	while (!glfwWindowShouldClose(m_window))
+	while (!glfwWindowShouldClose(&m_window))
 	{
 		// Calculate delta time
 		GLfloat currentFrame = glfwGetTime();
@@ -93,21 +88,31 @@ void Engine::Loop()
 		glfwPollEvents();
 
 		//deltaTime = 0.001f;
-		// Manage user input
-		m_scene->ProcessInput(deltaTime);
+		m_scene.ProcessInput(deltaTime);
 
-		// Update Game state
-		m_scene->Update(deltaTime);
+		m_camera.Update(deltaTime);
+
+		m_scene.Update(deltaTime);
 
 		// Render
-		glClearColor(0.1f, 0.2f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		m_shader->Use();
+		m_shader.Use();
 
-		m_scene->Render(*m_shader);
+		glm::mat4 view = m_camera.GetViewMatrix();
+		GLuint viewLocation = glGetUniformLocation(m_shader.Program, "view");
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 
-		glfwSwapBuffers(m_window);
+		glm::mat4 proj = m_camera.GetProjectionMatrix();
+		GLuint projLocation = glGetUniformLocation(m_shader.Program, "projection");
+		glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+
+		m_scene.Render(m_shader);
+
+		m_camera.Render(m_shader);
+
+		glfwSwapBuffers(&m_window);
 
 	}
 	// Terminate GLFW, clearing any resources allocated by GLFW.

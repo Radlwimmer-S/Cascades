@@ -1,29 +1,20 @@
 #pragma once
-#include <GL/glew.h>
-#include <glm/glm.hpp>
 
-class Shader;
-class Texture;
+#include <GL/glew.h>
+#include "Mesh.h"
+#include "Box.h"
+#include <vector>
 
 class Object
 {
 public:
-	Object(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture);
-	virtual ~Object();
-
-	virtual void Update(GLfloat deltaTime);
-	virtual void Render(Shader& shader) const;
-
-	GLuint GetVAO() const
-	{
-		return m_vao;
-	}
-
+	Object(std::string filePath, glm::vec3 position);
+	~Object();
+	void Update(GLfloat delta_time);
+	void Render(const Shader& shader);
 private:
-	GLuint m_vbo, m_vao, m_ebo;
-	Texture& m_texture;
-	GLsizei m_vertexCount;
-	GLsizei m_indexCount;
+	GLuint m_vbo;
+	std::vector<Mesh*> m_meshes;
 	glm::vec3 m_position;
 };
 

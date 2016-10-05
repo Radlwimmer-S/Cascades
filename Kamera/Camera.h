@@ -2,6 +2,9 @@
 #include <glm/glm.hpp>
 #include "CameraPath.h"
 #include "ViewPath.h"
+#include <glm/gtc/quaternion.hpp>
+
+class Shader;
 
 enum CameraMode
 {
@@ -13,8 +16,16 @@ enum CameraMode
 class Camera
 {
 public:
-	Camera(glm::vec3 position, CameraPath& path, ViewPath& view);
+	Camera();
+	Camera(CameraPath* path);
 	~Camera();
+
+	virtual void Update(GLfloat deltaTime);
+	virtual void Render(Shader& shader);
+	virtual void ProcessInput(GLfloat deltaTime);
+
+	glm::mat4 GetViewMatrix() const;
+	glm::mat4 GetProjectionMatrix() const;
 
 	CameraMode GetMode() const
 	{
@@ -37,9 +48,10 @@ public:
 	}
 
 private:
+
 	CameraMode m_mode;
 	glm::vec3 m_position; 
-	CameraPath& m_path;
-	ViewPath& m_view;
+	glm::quat m_rotation;
+	CameraPath* m_path;
 };
 

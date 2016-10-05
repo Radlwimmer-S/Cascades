@@ -1,57 +1,76 @@
 #include "Object.h"
-#include "Texture.h"
+#include <iostream>
+#include "Global.h"
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "TOL/tiny_obj_loader.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.inl>
 #include "Shader.h"
 
-Object::Object(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture): m_texture(texture), m_vertexCount(vertexCount), m_indexCount(indexCount), m_position(position)
+
+Object::Object(std::string filePath, glm::vec3 position) : m_position(position)
 {
-	glGenVertexArrays(1, &m_vao);
+	tinyobj::attrib_t attrib;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+
+	std::string err;
+	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filePath.c_str());
+
+	if (!err.empty()) { // `err` may contain warning message.
+		std::cerr << err << std::endl;
+	}
+
+	if (!ret) {
+		exit(1);
+	}
+
+	GLuint* vao = new GLuint[shapes.size()];
+	glGenVertexArrays(shapes.size(), vao);
+
 	glGenBuffers(1, &m_vbo);
-	glGenBuffers(1, &m_ebo);
 
-	glBindVertexArray(m_vao);
+	GLuint* ebo = new GLuint[shapes.size()];
+	glGenBuffers(shapes.size(), ebo);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * m_vertexCount, vertices, GL_STATIC_DRAW);
+	// Loop over shapes
+	for (size_t s = 0; s < shapes.size(); s++) {
+		glBindVertexArray(vao[s]);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indexCount, indices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * attrib.vertices.size(), attrib.vertices.data(), GL_STATIC_DRAW);
 
-	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	// TexCoord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[s]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * shapes[s].mesh.indices.size(), shapes[s].mesh.indices.data(), GL_STATIC_DRAW);
+	
+		// Position attribute
+		glVertexAttribPointer(SHADER_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(SHADER_POSITION);
 
-	glBindVertexArray(0); // Unbind m_vao
+		glBindVertexArray(0); // Unbind m_vao
+		
+		m_meshes.push_back(new Mesh(vao[s], shapes[s].mesh.indices.size()));
+	}
 }
+
 
 Object::~Object()
 {
-	// Properly de-allocate all resources once they've outlived their purpose
-	glDeleteVertexArrays(1, &m_vao);
-	glDeleteBuffers(1, &m_vbo);
-	glDeleteBuffers(1, &m_ebo);
 }
 
-void Object::Update(GLfloat deltaTime)
+void Object::Update(GLfloat delta_time)
 {
 }
 
-void Object::Render(Shader& shader) const
+void Object::Render(const Shader& shader)
 {
-	//glTranslatef(m_position[0], m_position[1], m_position[2]);
+	glm::mat4 modelPos;
+	modelPos = glm::translate(modelPos, m_position);
+	GLuint modelLocation = glGetUniformLocation(shader.Program, "model");
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(modelPos));
 
-	// Bind Textures using texture units
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture.GetId());
-	glUniform1i(glGetUniformLocation(shader.Program, "ourTexture"), 0);
-
-	// Render container
-	glBindVertexArray(m_vao);
-	glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	for (std::vector<Mesh*>::iterator it = m_meshes.begin(); it != m_meshes.end(); ++it)
+	{
+		(*it)->Render(shader);
+	}
 }

@@ -134,7 +134,9 @@ xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"</
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraScene.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Object_old.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -149,7 +151,10 @@ xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"</
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraScene.h" />
+    <ClInclude Include="Global.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Object_old.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Scene.h" />

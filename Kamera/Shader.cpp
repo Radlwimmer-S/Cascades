@@ -80,7 +80,7 @@ GLchar* Shader::GetShaderName(GLenum shaderType)
 	case GL_VERTEX_SHADER:
 		return "VERTEX::";
 	case GL_FRAGMENT_SHADER:
-		return "VERTEX::";
+		return "FRAGMENT::";
 	default:
 		return "";
 	}
