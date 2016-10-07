@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "Box.h"
+#include <vector>
 
 class Object;
 
@@ -19,6 +20,6 @@ public:
 	void ProcessInput(GLfloat deltaTime) override;
 
 private:
-	Box* m_obj;
+	std::vector<Model*> m_objects;
 };
 

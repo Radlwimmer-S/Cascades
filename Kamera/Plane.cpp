@@ -1,6 +1,6 @@
 #include "Plane.h"
 
-Plane::Plane(Texture& texture) : Object_old(glm::vec3(0,0,0),GetVertices(1), 4*8, GetIndizes(), 6, texture)
+Plane::Plane(Texture& texture) : SimpleObject(glm::vec3(0,0,0),GetVertices(1), 4*8, GetIndizes(), 6, texture)
 {
 }
 
@@ -14,7 +14,7 @@ void Plane::Update(GLfloat deltaTime)
 
 void Plane::Render(Shader& shader) const
 {
-	Object_old::Render(shader);
+	SimpleObject::Render(shader);
 }
 
 GLfloat* Plane::GetVertices(GLfloat size)

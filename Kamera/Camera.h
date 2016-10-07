@@ -1,7 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "CameraPath.h"
-#include "ViewPath.h"
 #include <glm/gtc/quaternion.hpp>
 
 class Shader;
@@ -22,7 +21,6 @@ public:
 
 	virtual void Update(GLfloat deltaTime);
 	virtual void Render(Shader& shader);
-	virtual void ProcessInput(GLfloat deltaTime);
 
 	glm::mat4 GetViewMatrix() const;
 	glm::mat4 GetProjectionMatrix() const;
@@ -47,11 +45,14 @@ public:
 		m_position = pos;
 	}
 
+	bool KeyCallback(int key, int scancode, int action, int mode);
+	bool CursorPosCallback(double x, double y);
 private:
 
 	CameraMode m_mode;
 	glm::vec3 m_position; 
 	glm::quat m_rotation;
 	CameraPath* m_path;
+	bool m_renderPath;
 };
 

@@ -1,11 +1,19 @@
 #include "CameraScene.h"
 #include "Texture.h"
-#include "Object.h"
 
 CameraScene::CameraScene()
 {
 	Texture* texture = new Texture("textures/container.jpg", "Container");
-	m_obj = new Box(glm::vec3(0, 0, 0), 1, *texture);
+	m_objects.push_back(new Box(glm::vec3(0, 0, +00), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -10), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -20), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -30), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -40), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -50), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -60), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -70), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -80), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -90), glm::vec3(2, 4, 2), *texture));
 }
 
 
@@ -22,7 +30,10 @@ void CameraScene::Update(GLfloat deltaTime)
 	if (m_state != Running)
 		return;
 
-	m_obj->Update(deltaTime);
+	for (std::vector<Model*>::iterator it = m_objects.begin(); it != m_objects.end(); ++it)
+	{
+		(*it)->Update(deltaTime);
+	}
 }
 
 void CameraScene::Render(Shader& shader) const
@@ -30,7 +41,10 @@ void CameraScene::Render(Shader& shader) const
 	if (m_state != Running && m_state != Paused)
 		return;
 
-	m_obj->Render(shader);
+	for (std::vector<Model*>::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it)
+	{
+		(*it)->Render(shader);
+	}
 }
 
 void CameraScene::ProcessInput(GLfloat deltaTime)

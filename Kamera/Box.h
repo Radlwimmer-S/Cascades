@@ -1,16 +1,16 @@
 #pragma once
-#include "Object_old.h"
+#include "Model.h"
 
-class Box : public Object_old
+class Box : public Model
 {
 public:
-	Box(glm::vec3 position, GLfloat size, Texture& texture);
+	Box(glm::vec3 position, glm::vec3 size, Texture& texture);
 	~Box();
 
 	void Update(GLfloat deltaTime) override;
     void Render(Shader& shader) const override;
 private:
-	static GLfloat* GetVertices(GLfloat size);
+	static GLfloat* GetVertices(glm::vec3 size);
 	static GLuint* GetIndizes();
 };
 

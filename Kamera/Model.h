@@ -5,12 +5,12 @@
 class Shader;
 class Texture;
 
-class Object_old
+class Model
 {
 public:
-	Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount);
-	Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture);
-	virtual ~Object_old();
+	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount);
+	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture);
+	virtual ~Model();
 
 	virtual void Update(GLfloat deltaTime);
 	virtual void Render(Shader& shader) const;

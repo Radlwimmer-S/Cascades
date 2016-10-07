@@ -1,11 +1,11 @@
-#include "Object_old.h"
+#include "Model.h"
 #include "Texture.h"
 #include "Shader.h"
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.inl>
 
-Object_old::Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount): m_texture(nullptr), m_vertexCount(vertexCount), m_indexCount(0)
+Model::Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount) : m_texture(nullptr), m_vertexCount(vertexCount), m_indexCount(indexCount), m_position(position)
 {
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
@@ -14,7 +14,10 @@ Object_old::Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCoun
 	glBindVertexArray(m_vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * m_vertexCount, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * m_vertexCount, vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * m_indexCount, indices, GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(SHADER_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
@@ -23,7 +26,7 @@ Object_old::Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCoun
 	glBindVertexArray(0); // Unbind m_vao
 }
 
-Object_old::Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture) : m_texture(&texture), m_vertexCount(vertexCount), m_indexCount(indexCount), m_position(position)
+Model::Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture) : m_texture(&texture), m_vertexCount(vertexCount), m_indexCount(indexCount), m_position(position)
 {
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
@@ -32,10 +35,10 @@ Object_old::Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCoun
 	glBindVertexArray(m_vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * m_vertexCount, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * m_vertexCount, vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indexCount, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * m_indexCount, indices, GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(SHADER_POSITION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
@@ -50,7 +53,7 @@ Object_old::Object_old(glm::vec3 position, GLfloat* vertices, GLsizei vertexCoun
 	glBindVertexArray(0); // Unbind m_vao
 }
 
-Object_old::~Object_old()
+Model::~Model()
 {
 	// Properly de-allocate all resources once they've outlived their purpose
 	glDeleteVertexArrays(1, &m_vao);
@@ -58,11 +61,11 @@ Object_old::~Object_old()
 	glDeleteBuffers(1, &m_ebo);
 }
 
-void Object_old::Update(GLfloat deltaTime)
+void Model::Update(GLfloat deltaTime)
 {
 }
 
-void Object_old::Render(Shader& shader) const
+void Model::Render(Shader& shader) const
 {
 	//glTranslatef(m_position[0], m_position[1], m_position[2]);
 

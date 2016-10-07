@@ -98,7 +98,9 @@
       <Command>mkdir "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
 xcopy /E /Y ".\shaders" "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
 mkdir "$(SolutionDir)$(Platform)\$(Configuration)\textures"
-xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"</Command>
+xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"
+mkdir "$(SolutionDir)$(Platform)\$(Configuration)\objects"
+xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,15 +136,11 @@ xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"</
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraScene.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Object_old.cpp" />
-    <ClCompile Include="Path.cpp" />
-    <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="BaseObject.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="ViewPath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />
@@ -152,23 +150,19 @@ xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"</
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraScene.h" />
     <ClInclude Include="Global.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="Object_old.h" />
-    <ClInclude Include="Path.h" />
-    <ClInclude Include="Plane.h" />
+    <ClInclude Include="BaseObject.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="ViewPath.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\default.frag">
+    <None Include="shaders\default.frag.shader">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
-    <None Include="shaders\default.vs">
+    <None Include="shaders\default.vert.shader">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
       <FileType>Document</FileType>

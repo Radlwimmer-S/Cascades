@@ -6,6 +6,7 @@
 // GLFW
 #include <GLFW/glfw3.h>
 #include "Scene.h"
+#include <stdexcept>
 
 class Camera;
 class Shader;
@@ -13,10 +14,22 @@ class Shader;
 class Engine
 {
 public:
-	Engine(GLFWwindow& window, Shader& shader, Scene& scene, Camera& camera);
-	~Engine();
+	
+	static Engine* Instance()
+	{
+		static CGuard g;   // Speicherbereinigung
+		if (!m_instance)
+			throw std::logic_error("Call Engine::Init beforehand!");
+		return m_instance;
+	}
 
-	static GLFWwindow* InitWindow(GLint width, GLint height, const char* title);
+	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+	static void CursorPosCallback(GLFWwindow* window, double x, double y);
+	static void Init(char* windowTitle);
+	static void Init(char* windowTitle, GLuint width, GLuint height);
+	void SetShader(Shader& shader);
+	void SetScene(Scene& scene);
+	void SetCamera(Camera& camera);
 	void Start();
 	void Resume();
 	void Pause();
@@ -24,12 +37,29 @@ public:
 protected:
 	void Loop();
 
-	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
-	// Window dimensions
-	const GLuint WIDTH = 800, HEIGHT = 600;
-	Shader& m_shader;
-	Scene& m_scene;
+	Shader* m_shader;
+	Scene* m_scene;
 	GLFWwindow& m_window;
-	Camera& m_camera;
+	Camera* m_camera;
+
+	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
+	static Engine* m_instance;
+	explicit Engine(char* windowTitle, bool fullscreen);
+	/* verhindert, dass ein Objekt von auﬂerhalb von Engine erzeugt wird. */
+	Engine(const Engine&);
+	/* verhindert, dass eine weitere Instanz via Kopie-Konstruktor erstellt werden kann */
+	~Engine();
+	class CGuard
+	{
+	public:
+		~CGuard()
+		{
+			if (nullptr != m_instance)
+			{
+				delete m_instance;
+				m_instance = nullptr;
+			}
+		}
+	};
 };
 
