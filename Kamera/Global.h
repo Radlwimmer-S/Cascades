@@ -9,7 +9,7 @@ const int SHADER_TEXTURE = 2;
 static GLuint WIDTH = 1920;
 static GLuint HEIGHT = 1080;
 
-inline glm::quat MakeQuad(GLfloat pitch, GLfloat yaw, GLfloat rotate)
+inline glm::quat MakeQuad(GLfloat pitch, GLfloat yaw, GLfloat roll)
 {
-	return glm::quat(glm::vec3(glm::radians(pitch), glm::radians(yaw), glm::radians(rotate)));
+	return glm::quat(glm::vec3(glm::radians(pitch), glm::radians(yaw), glm::radians(roll)));
 }

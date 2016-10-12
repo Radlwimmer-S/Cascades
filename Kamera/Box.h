@@ -4,7 +4,7 @@
 class Box : public Model
 {
 public:
-	Box(glm::vec3 position, glm::vec3 size, Texture& texture);
+	Box(glm::vec3 position, glm::vec3 size, glm::vec3 color);
 	~Box();
 
 	void Update(GLfloat deltaTime) override;

@@ -7,12 +7,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 
-CameraPath::CameraPath(std::vector<ControlPoint>& controlPoints) : m_controlPoints(controlPoints), m_controlCount(controlPoints.size()), m_duration(controlPoints[controlPoints.size() - 1].TimeStamp), m_timer(0.0f), m_index(0)
+CameraPath::CameraPath(std::vector<ControlPoint>& controlPoints) : m_controlPoints(controlPoints), m_controlCount(controlPoints.size()), m_timer(0.0f), m_duration(controlPoints[controlPoints.size() - 1].TimeStamp)
 {
 	Initialize(false);
 }
 
-CameraPath::CameraPath(std::vector<ControlPoint>& controlPoints, GLuint duration) : m_controlPoints(controlPoints), m_controlCount(controlPoints.size()), m_duration(duration), m_timer(0.0f), m_index(0)
+CameraPath::CameraPath(std::vector<ControlPoint>& controlPoints, GLuint duration) : m_controlPoints(controlPoints), m_controlCount(controlPoints.size()), m_timer(0.0f), m_duration(duration)
 {
 	Initialize(true);
 }
@@ -45,6 +45,10 @@ void CameraPath::Update(GLfloat deltaTime)
 
 void CameraPath::Render(Shader& shader) const
 {
+	glm::vec3 color(1.0f, 0.1f, 0.0f);
+	GLint objectColorLoc = glGetUniformLocation(shader.Program, "objectColor");
+	glUniform3f(objectColorLoc, color.x, color.y, color.z);
+
 	glm::mat4 modelPos;
 	modelPos = glm::translate(modelPos, glm::vec3(0,0,0));
 	GLuint modelLocation = glGetUniformLocation(shader.Program, "model");
@@ -107,17 +111,17 @@ void CameraPath::CalculateApprox()
 {
 	//rotated_point = origin + (orientation_quaternion * (point - origin));
 
-	m_pathApprox = new glm::vec3[PATH_APPROXIMATION]();
+	glm::vec3* pathApprox = new glm::vec3[PATH_APPROXIMATION]();
 	for (int i = 0; i < PATH_APPROXIMATION; i++)
 	{
-		m_pathApprox[i] = GetPosByTime(i* 1.0f / PATH_APPROXIMATION  * m_duration);
+		pathApprox[i] = GetPosByTime(i* 1.0f / PATH_APPROXIMATION  * m_duration);
 	}
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, PATH_APPROXIMATION * 3 * sizeof(GLfloat), m_pathApprox, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, PATH_APPROXIMATION * 3 * sizeof(GLfloat), pathApprox, GL_STATIC_DRAW);
 	glVertexAttribPointer(SHADER_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(SHADER_POSITION);
 

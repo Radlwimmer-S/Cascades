@@ -6,7 +6,7 @@
 #include "Camera.h"
 #include "Global.h"
 
-Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_camera(nullptr), m_window(*InitWindow(windowTitle, fullscreen))
+Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr)
 {}
 
 Engine::~Engine()
@@ -44,6 +44,7 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glfwMakeContextCurrent(window);
 	glfwMaximizeWindow(window);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	// Set the required callback functions
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, CursorPosCallback);
@@ -123,6 +124,14 @@ void Engine::Loop()
 		glm::mat4 proj = m_camera->GetProjectionMatrix();
 		GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
 		glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+
+		glm::vec3 cameraPos = m_camera->GetPosition();
+		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, "lightColor");
+		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, "lightPos");
+		GLint viewPosLoc = glGetUniformLocation(m_shader->Program, "viewPos");
+		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
+		glUniform3f(lightPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
 		m_scene->Render(*m_shader);
 

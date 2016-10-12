@@ -58,10 +58,8 @@ private:
 	std::vector<ControlPoint>& m_controlPoints;
 	GLuint m_controlCount;
 
-	glm::vec3* m_pathApprox;
 	GLuint m_vao;
 
-	GLuint m_index;
 	GLfloat m_timer;
 
 	GLuint m_duration;

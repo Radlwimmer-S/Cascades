@@ -8,8 +8,7 @@ class Texture;
 class Model
 {
 public:
-	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount);
-	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, GLuint* indices, GLsizei indexCount, Texture& texture);
+	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color);
 	virtual ~Model();
 
 	virtual void Update(GLfloat deltaTime);
@@ -21,10 +20,9 @@ public:
 	}
 
 private:
-	GLuint m_vbo, m_vao, m_ebo;
-	Texture* m_texture;
+	GLuint m_vbo, m_vao;
 	GLsizei m_vertexCount;
-	GLsizei m_indexCount;
 	glm::vec3 m_position;
+	glm::vec3 m_color;
 };
 

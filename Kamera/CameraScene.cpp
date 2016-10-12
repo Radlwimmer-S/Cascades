@@ -3,17 +3,16 @@
 
 CameraScene::CameraScene()
 {
-	Texture* texture = new Texture("textures/container.jpg", "Container");
-	m_objects.push_back(new Box(glm::vec3(0, 0, +00), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -10), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -20), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -30), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -40), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -50), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -60), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -70), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -80), glm::vec3(2, 4, 2), *texture));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -90), glm::vec3(2, 4, 2), *texture));
+	m_objects.push_back(new Box(glm::vec3(0, 0, +00), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -10), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -20), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -30), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -40), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -50), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -60), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -70), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -80), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	m_objects.push_back(new Box(glm::vec3(0, 0, -90), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
 }
 
 
