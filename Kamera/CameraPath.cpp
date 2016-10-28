@@ -2,10 +2,11 @@
 #include <vector>
 #include <glm/gtx/spline.hpp>
 #include "Global.h"
-#include <glm/gtc/matrix_transform.inl>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
+#include <glm/gtc/quaternion.hpp>
 
 CameraPath::CameraPath(std::vector<ControlPoint>& controlPoints) : m_controlPoints(controlPoints), m_controlCount(controlPoints.size()), m_timer(0.0f), m_duration(controlPoints[controlPoints.size() - 1].TimeStamp)
 {
@@ -50,7 +51,7 @@ void CameraPath::Render(Shader& shader) const
 	glUniform3f(objectColorLoc, color.x, color.y, color.z);
 
 	glm::mat4 modelPos;
-	modelPos = glm::translate(modelPos, glm::vec3(0,0,0));
+	modelPos = glm::translate(modelPos, glm::vec3(0, 0, 0));
 	GLuint modelLocation = glGetUniformLocation(shader.Program, "model");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(modelPos));
 
@@ -76,7 +77,7 @@ void CameraPath::DoubleControlPoints()
 	{
 		newCP->push_back(m_controlPoints[i]);
 		glm::vec3 position = CatmullRomSpline(m_controlPoints, i + 0.5f);
-		glm::quat rotation = Squad(m_controlPoints, i + 0.5f);
+		glm::quat rotation = glm::normalize(Squad(m_controlPoints, i + 0.5f));
 		GLfloat timestamp = m_controlPoints[i].TimeStamp + (m_controlPoints[i + 1].TimeStamp - m_controlPoints[i].TimeStamp) / 2;
 		newCP->push_back(ControlPoint(position, rotation, timestamp));
 	}
@@ -174,8 +175,10 @@ glm::quat CameraPath::Squad(const std::vector<ControlPoint>& cp, float t) const
 	// parameter on the local curve interval
 	float local_t = glm::fract(t);
 
-	glm::quat s1 = glm::intermediate(cp[i0].Rotation, cp[i1].Rotation, cp[i2].Rotation);
-	glm::quat s2 = glm::intermediate(cp[i1].Rotation, cp[i2].Rotation, cp[i3].Rotation);
+	return glm::normalize(glm::slerp(cp[i1].Rotation, cp[i2].Rotation, local_t));
 
-	return glm::squad(cp[i1].Rotation, cp[i2].Rotation, s1, s2, local_t);
+	glm::quat s1 = glm::normalize(glm::intermediate(cp[i0].Rotation, cp[i1].Rotation, cp[i2].Rotation));
+	glm::quat s2 = glm::normalize(glm::intermediate(cp[i1].Rotation, cp[i2].Rotation, cp[i3].Rotation));
+
+	return glm::normalize(glm::squad(cp[i1].Rotation, cp[i2].Rotation, s1, s2, local_t));
 }

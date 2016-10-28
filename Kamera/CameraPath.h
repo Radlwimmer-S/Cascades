@@ -42,7 +42,7 @@ public:
 		return m_rotation;
 	}
 
-	GLfloat GetDuration()const
+	GLfloat GetDuration() const
 	{
 		return m_duration;
 	}
@@ -54,6 +54,7 @@ private:
 	GLuint GetIndex(GLfloat timestamp) const;
 	glm::vec3 CatmullRomSpline(const std::vector<ControlPoint>& cp, float t) const;
 	glm::quat Squad(const std::vector<ControlPoint>& cp, float t) const;
+	void CheckQuatRotation(glm::quat& q1, glm::quat& q2) const;
 
 	std::vector<ControlPoint>& m_controlPoints;
 	GLuint m_controlCount;

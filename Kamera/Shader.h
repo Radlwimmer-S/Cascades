@@ -12,10 +12,12 @@ public:
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	
 	void Use() const;
+	bool IsValid() const;
 
 private:
 	GLuint LoadShader(const GLchar* shaderPath, GLenum shaderType);
 	static GLchar* GetShaderName(GLenum shaderType);
+	bool m_isValid;
 };
 
 #endif

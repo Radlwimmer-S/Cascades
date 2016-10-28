@@ -102,6 +102,9 @@ void Engine::Loop()
 		// Calculate delta time
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
+#ifdef _DEBUG
+		deltaTime = 1.0f / 60;
+#endif
 		lastFrame = currentFrame;
 		glfwPollEvents();
 

@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 
-Camera::Camera() : m_mode(Overview), m_type(Free), m_position(glm::vec3(0, 0, 0)), m_path(nullptr), m_renderPath(false), m_mouseSensitivity(0.1f)
+Camera::Camera() : m_mode(Overview), m_type(FPS), m_position(glm::vec3(0, 0, 0)), m_path(nullptr), m_renderPath(false), m_mouseSensitivity(0.1f)
 {
 }
 
@@ -16,6 +16,7 @@ Camera::Camera(CameraPath* path) : m_mode(Automatic), m_type(Free), m_position(g
 Camera::~Camera()
 {
 }
+
 
 void Camera::Update(GLfloat deltaTime)
 {
@@ -50,9 +51,13 @@ glm::mat4 Camera::GetViewMatrix() const
 {
 	glm::mat4 translation = glm::mat4(1.0f);
 	translation = glm::translate(translation, -m_position);
-	glm::mat4 rotation = glm::mat4_cast(glm::normalize(m_rotation));
+	glm::mat4 rotation = glm::toMat4(glm::normalize(m_rotation));
 
 	return rotation * translation;
+
+	glm::vec3 center = glm::normalize(glm::vec3(0, 0, -1) * m_rotation);
+	glm::vec3 up = glm::normalize(glm::vec3(0, 1, 0) * m_rotation);
+	return glm::lookAt(m_position, m_position + center, up);
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const

@@ -1,18 +1,15 @@
 #include "CameraScene.h"
 #include "Texture.h"
+#include "TexturedModel.h"
 
 CameraScene::CameraScene()
 {
-	m_objects.push_back(new Box(glm::vec3(0, 0, +00), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -10), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -20), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -30), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -40), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -50), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -60), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -70), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -80), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
-	m_objects.push_back(new Box(glm::vec3(0, 0, -90), glm::vec3(2, 4, 2), glm::vec3(0.7f, 0.7f, 0.7f)));
+	Texture* containerTex = new Texture("textures/container.jpg", "box");
+	m_objects.push_back(new Model(glm::vec3(0, -0.1f, 0), Box::GetVN(glm::vec3(10, 0.1f, 10)), 36, glm::vec3(0.3f, 0.3f, 0.3f)));
+	m_objects.push_back(new TexturedModel(glm::vec3(0, 0.5f, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	m_objects.push_back(new TexturedModel(glm::vec3(2, 0.5f, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	m_objects.push_back(new TexturedModel(glm::vec3(-1, 0.5f, 1), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	m_objects.push_back(new TexturedModel(glm::vec3(5, 0.5f, -3), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
 }
 
 

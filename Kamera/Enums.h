@@ -7,3 +7,10 @@ enum State
 	Paused,
 	Stopped,
 };
+
+enum ColorBlendMode
+{
+	ColorOnly = -1,
+	Mix = 0,
+	TextureOnly = 1,
+};

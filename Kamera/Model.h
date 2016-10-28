@@ -1,28 +1,27 @@
 #pragma once
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include "BaseObject.h"
+#include "Enums.h"
 
 class Shader;
 class Texture;
 
-class Model
+class Model : public BaseObject
 {
 public:
 	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color);
 	virtual ~Model();
 
-	virtual void Update(GLfloat deltaTime);
-	virtual void Render(Shader& shader) const;
+	void Update(GLfloat deltaTime) override;
+	void Render(Shader& shader) const override;
 
-	GLuint GetVAO() const
-	{
-		return m_vao;
-	}
+protected:
+	Model(glm::vec3 position, GLsizei vertexCount, glm::vec3 color);
 
-private:
-	GLuint m_vbo, m_vao;
+	GLuint m_vbo;
 	GLsizei m_vertexCount;
-	glm::vec3 m_position;
 	glm::vec3 m_color;
+	ColorBlendMode m_colorMode;
 };
 

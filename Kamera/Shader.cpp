@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
+Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) : m_isValid(true)
 {
 	GLuint vertex, fragment;
 	GLint success;
@@ -24,6 +24,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 	{
 		glGetProgramInfoLog(Program, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		m_isValid = false;
 	}
 	// Delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertex);
@@ -68,6 +69,7 @@ GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
 	{
 		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 		std::cout << "ERROR::SHADER::" << GetShaderName(shaderType) << "COMPILATION_FAILED\n" << infoLog << std::endl;
+		m_isValid = false;
 	}
 
 	return shader;
@@ -89,4 +91,9 @@ GLchar* Shader::GetShaderName(GLenum shaderType)
 void Shader::Use() const
 {
 	glUseProgram(Program);
+}
+
+bool Shader::IsValid() const
+{
+	return  m_isValid;
 }
