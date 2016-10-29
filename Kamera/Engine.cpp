@@ -165,6 +165,7 @@ void Engine::ConfigureMatrices() const
 
 void Engine::RenderLights() const
 {
+	glCullFace(GL_FRONT);
 	m_shadowShader->Use();
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
@@ -184,6 +185,7 @@ void Engine::RenderLights() const
 		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, "shadowMap");
 		glUniform1i(depthMapPos, 2 + i);
 	}
+	glCullFace(GL_BACK);
 }
 
 void Engine::RenderScene() const

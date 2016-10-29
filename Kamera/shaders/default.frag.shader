@@ -36,10 +36,15 @@ vec3 DetermineFragmentColor(int mode)
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
+
 	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	// Transform to [0,1] range
 	projCoords = projCoords * 0.5 + 0.5;
+	
+	if (projCoords.z > 1.0)
+		return 0.0;
+	
 	// Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
 	float closestDepth = texture(shadowMap, projCoords.xy).r;
 	// Get depth of current fragment from light's perspective
