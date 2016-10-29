@@ -55,10 +55,17 @@ int main()
 		std::cin.ignore();
 		return -1;
 	}
-
-
 	engine->SetShader(*shader);
 
+
+	Shader* shadowShader = new Shader("./shaders/Shadow.vert.shader", "./shaders/Shadow.frag.shader");
+	if (!shader->IsValid())
+	{
+		std::cin.ignore();
+		return -1;
+	}
+	engine->SetShadowShader(*shadowShader);
+	
 	Scene* scene = new CameraScene();
 	engine->SetScene(*scene);
 
@@ -66,6 +73,9 @@ int main()
 	//Camera* camera = new Camera(path);
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
+
+	Light* mainLight = new Light(glm::vec3(0,5,1),MakeQuad(60,10,0),glm::vec3(1,1,1));
+	engine->AddLight(*mainLight);
 
 	engine->Start();
 

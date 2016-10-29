@@ -26,7 +26,7 @@ void CameraScene::Update(GLfloat deltaTime)
 	if (m_state != Running)
 		return;
 
-	for (std::vector<Model*>::iterator it = m_objects.begin(); it != m_objects.end(); ++it)
+	for (std::vector<BaseObject*>::iterator it = m_objects.begin(); it != m_objects.end(); ++it)
 	{
 		(*it)->Update(deltaTime);
 	}
@@ -37,7 +37,7 @@ void CameraScene::Render(Shader& shader) const
 	if (m_state != Running && m_state != Paused)
 		return;
 
-	for (std::vector<Model*>::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it)
+	for (std::vector<BaseObject*>::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it)
 	{
 		(*it)->Render(shader);
 	}

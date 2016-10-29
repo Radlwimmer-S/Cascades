@@ -116,27 +116,10 @@ void Engine::Loop()
 
 		// Render
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		m_shader->Use();
+		RenderLights();
 
-		glm::mat4 view = m_camera->GetViewMatrix();
-		GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
-		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-
-		glm::mat4 proj = m_camera->GetProjectionMatrix();
-		GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
-		glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
-
-		glm::vec3 cameraPos = m_camera->GetPosition();
-		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, "lightColor");
-		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, "lightPos");
-		GLint viewPosLoc = glGetUniformLocation(m_shader->Program, "viewPos");
-		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
-		glUniform3f(lightPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-		glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-
-		m_scene->Render(*m_shader);
+		RenderScene();
 
 		m_camera->Render(*m_shader);
 
@@ -145,6 +128,72 @@ void Engine::Loop()
 	}
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
+}
+
+void Engine::ConfigureShader() const
+{
+	for (int i = 0; i < m_lights.size(); i++)
+	{
+		glm::vec3 lightColor = m_lights[i]->GetColor();
+		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, "lightColor");
+		glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
+
+		glm::vec3 lightPos = m_lights[i]->GetPosition();
+		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, "lightPos");
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		
+		glm::mat4 lightSpaceMatrix = m_lights[i]->GetLightSpace();
+		GLint lightSpaceMatrixLoc = glGetUniformLocation(m_shader->Program, "lightSpaceMatrix");
+		glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+	}
+
+	glm::vec3 cameraPos = m_camera->GetPosition();
+	GLint viewPosLoc = glGetUniformLocation(m_shader->Program, "viewPos");
+	glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+}
+
+void Engine::ConfigureMatrices() const
+{
+	glm::mat4 view = m_camera->GetViewMatrix();
+	GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+
+	glm::mat4 proj = m_camera->GetProjectionMatrix();
+	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
+	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+}
+
+void Engine::RenderLights() const
+{
+	m_shadowShader->Use();
+	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+	{
+		/*(*it)->SetPosition(m_camera->GetPosition());
+		(*it)->SetRotation(m_camera->GetRotation());*/
+
+		(*it)->Activate(*m_shadowShader);
+		m_scene->Render(*m_shadowShader);
+		(*it)->Deactivate();
+	}
+
+	m_shader->Use();
+	for (int i = 0; i < m_lights.size(); ++i)
+	{
+		glActiveTexture(GL_TEXTURE2 + i);
+		glBindTexture(GL_TEXTURE_2D, m_lights[i]->GetDepthMap());
+		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, "shadowMap");
+		glUniform1i(depthMapPos, 2 + i);
+	}
+}
+
+void Engine::RenderScene() const
+{
+	m_shader->Use();
+	ConfigureShader();
+	ConfigureMatrices();
+	glViewport(0, 0, WIDTH, HEIGHT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_scene->Render(*m_shader);
 }
 
 void Engine::Init(char* windowTitle)
@@ -164,6 +213,11 @@ void Engine::SetShader(Shader& shader)
 	m_shader = &shader;
 }
 
+void Engine::SetShadowShader(Shader& shader)
+{
+	m_shadowShader = &shader;
+}
+
 void Engine::SetScene(Scene& scene)
 {
 	m_scene = &scene;
@@ -172,6 +226,11 @@ void Engine::SetScene(Scene& scene)
 void Engine::SetCamera(Camera& camera)
 {
 	m_camera = &camera;
+}
+
+void Engine::AddLight(Light& light)
+{
+	m_lights.push_back(&light);
 }
 
 // Is called whenever a key is pressed/released via GLFW

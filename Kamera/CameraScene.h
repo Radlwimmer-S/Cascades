@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "Box.h"
 #include <vector>
+#include "Light.h"
 
 class Object;
 
@@ -18,8 +19,8 @@ public:
 	void Update(GLfloat deltaTime) override;
 	void Render(Shader& shader) const override;
 	void ProcessInput(GLfloat deltaTime) override;
-
+	
 private:
-	std::vector<Model*> m_objects;
+	std::vector<BaseObject*> m_objects;
 };
 

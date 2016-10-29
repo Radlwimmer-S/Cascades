@@ -14,3 +14,8 @@ enum ColorBlendMode
 	Mix = 0,
 	TextureOnly = 1,
 };
+
+enum LightType
+{
+	Directional, Point
+};

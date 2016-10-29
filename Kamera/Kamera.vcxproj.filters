@@ -54,6 +54,9 @@
     <ClCompile Include="TexturedModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -95,12 +98,21 @@
     <ClInclude Include="TexturedModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.frag.shader">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\default.vert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Shadow.frag.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Shadow.vert.shader">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
