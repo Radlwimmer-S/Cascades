@@ -7,16 +7,24 @@ in VS_OUT{
 	vec2 TexCoords;
 } fs_in;
 
+struct LightSource
+{
+	vec3 Pos;
+	vec3 Color;
+	float far_plane;
+	samplerCube depthMap;
+};
+
+const int LightCount = 2;
+uniform LightSource Light[LightCount];
+
 uniform int mode;
 uniform vec3 objectColor;
 uniform sampler2D objectTexture;
 
 uniform vec3 viewPos;
 
-uniform vec3 lightPos;
-uniform vec3 lightColor;
-uniform float far_plane;
-uniform samplerCube depthMap;
+
 
 vec3 DetermineFragmentColor(int mode)
 {
@@ -35,14 +43,14 @@ vec3 DetermineFragmentColor(int mode)
 	}
 }
 
-float ShadowCalculation(vec3 fragPos)
+float ShadowCalculation(vec3 fragPos, LightSource light)
 {
 	// Get vector between fragment position and light position
-	vec3 fragToLight = fragPos - lightPos;
+	vec3 fragToLight = fragPos - light.Pos;
 	// Use the light to fragment vector to sample from the depth map    
-	float closestDepth = texture(depthMap, fragToLight).r;
+	float closestDepth = texture(light.depthMap, fragToLight).r;
 	// It is currently in linear range between [0,1]. Re-transform back to original value
-	closestDepth *= far_plane;
+	closestDepth *= light.far_plane;
 	// Now get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
 	// Now test for shadows
@@ -62,10 +70,10 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 	);
 
-float SoftShadowCalculation(vec3 fragPos)
+float SoftShadowCalculation(vec3 fragPos, LightSource light)
 {
 	// Get vector between fragment position and light position
-	vec3 fragToLight = fragPos - lightPos;
+	vec3 fragToLight = fragPos - light.Pos;
 	// Get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
 	// Test for shadows with PCF
@@ -73,12 +81,15 @@ float SoftShadowCalculation(vec3 fragPos)
 	float bias = 0.15;
 	int samples = 20;
 	float viewDistance = length(viewPos - fragPos);
-	float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+	float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
 	for (int i = 0; i < samples; ++i)
 	{
-		float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-		closestDepth *= far_plane;   // Undo mapping [0;1]
-		if (currentDepth - bias > closestDepth)
+		float closestDepth = texture(light.depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+		closestDepth *= light.far_plane;   // Undo mapping [0;1]
+
+		float distance = length(light.Pos - fs_in.FragPos);
+		float distanceBias = max(bias, bias * distance / 5.0f);
+		if (currentDepth - distanceBias > closestDepth)
 			shadow += 1.0;
 	}
 	shadow /= float(samples);
@@ -90,9 +101,39 @@ float SoftShadowCalculation(vec3 fragPos)
 	return shadow;
 }
 
+vec3 LightCalculations(vec3 fragPos, LightSource light)
+{
+	float distance = length(light.Pos - fs_in.FragPos);
+	float distanceStrength = (1.0f - distance / light.far_plane);
+
+	// Ambient
+	float ambientStrength = 0.1f;
+	vec3 ambient = ambientStrength * light.Color;
+
+	// Diffuse 
+	float diffuseStrength = 1.0f;
+	vec3 norm = normalize(fs_in.Normal);
+	vec3 lightDir = normalize(light.Pos - fs_in.FragPos);
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = diffuseStrength * diff * light.Color;
+
+	// Specular
+	float specularStrength = 0.1f;
+	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
+	vec3 specular = specularStrength * spec * light.Color;
+
+	// Calculate shadow
+	float shadow = SoftShadowCalculation(fs_in.FragPos, light);
+	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * distanceStrength;
+
+	return lighting;
+}
+
 void main()
 {
-	vec3 color = DetermineFragmentColor(mode);	
+	vec3 color = DetermineFragmentColor(mode);
 
 	//No Normals --> no lighting
 	if (fs_in.Normal == vec3(0.0f, 0.0f, 0.0f))
@@ -101,26 +142,14 @@ void main()
 		return;
 	}
 
-	// Ambient
-	float ambientStrength = 0.1f;
-	vec3 ambient = ambientStrength * lightColor;
+	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
+	for (int i = 0; i < LightCount; i++)
+	{
+		lighting += LightCalculations(fs_in.FragPos, Light[i]);
+	}
 
-	// Diffuse 
-	vec3 norm = normalize(fs_in.Normal);
-	vec3 lightDir = normalize(lightPos - fs_in.FragPos);
-	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
-
-	// Specular
-	float specularStrength = 0.1f;
-	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16);
-	vec3 specular = specularStrength * spec * lightColor;
-
-	// Calculate shadow
-	float shadow = SoftShadowCalculation(fs_in.FragPos);
-	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
+	lighting = clamp(lighting, 0, 1);
+	lighting *= color;
 
 	FragColor = vec4(lighting, 1.0f);
 }

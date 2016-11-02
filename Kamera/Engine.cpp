@@ -6,8 +6,9 @@
 #include "Camera.h"
 #include "Global.h"
 
-Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr)
-{}
+Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
+{
+}
 
 Engine::~Engine()
 {
@@ -25,11 +26,11 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
-	
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); 
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	GLFWmonitor* monitor = nullptr;
@@ -59,7 +60,7 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glGetError(); // Call it once to catch glewInit()
 
 	// OpenGL configuration
-	glViewport(0, 0, WIDTH, HEIGHT); 
+	glViewport(0, 0, WIDTH, HEIGHT);
 	/*glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
@@ -93,13 +94,14 @@ void Engine::Stop()
 	m_scene->SetState(Stopped);
 }
 
-void Engine::PrintData() const
+void Engine::PrintData(int fps) const
 {
 	system("cls");
 	glm::vec3 cameraPos = m_camera->GetPosition();
 	std::cout << "Position: x=" << cameraPos.x << ", y=" << cameraPos.y << ", z=" << cameraPos.z << std::endl;
-	glm::vec3 cameraRot = glm::eulerAngles(m_camera->GetRotation());
+	glm::vec3 cameraRot = glm::eulerAngles(m_camera->GetOrientation());
 	std::cout << "Orientation: Pitch=" << glm::degrees(cameraRot.x) << ", Yaw=" << glm::degrees(cameraRot.y) << ", Roll=" << glm::degrees(cameraRot.z) << std::endl;
+	std::cout << "FPS: " << fps << std::endl;
 }
 
 void Engine::Loop()
@@ -108,6 +110,7 @@ void Engine::Loop()
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrame = 0.0f;
 	GLfloat second = 0.0f;
+	int frame = 0;
 
 	// Game loop
 	while (!glfwWindowShouldClose(&m_window))
@@ -124,12 +127,18 @@ void Engine::Loop()
 
 		//deltaTime = 0.001f;
 
+		if (m_activeObject == -1)
+			m_camera->ProcessInput(m_window);
+		else
+			m_lights[m_activeObject]->ProcessInput(m_window);
+
 		m_camera->Update(deltaTime);
 
 		m_scene->Update(deltaTime);
 
 		// Render
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		//m_lights[1]->SetPosition(m_camera->GetPosition());
 
 		RenderLights();
 
@@ -139,9 +148,12 @@ void Engine::Loop()
 
 		glfwSwapBuffers(&m_window);
 
+		++frame;
+
 		if (second > 1)
 		{
-			PrintData();
+			PrintData(frame);
+			frame = 0;
 			second -= 1;
 		}
 	}
@@ -153,24 +165,25 @@ void Engine::UpdateUniforms() const
 {
 	for (int i = 0; i < m_lights.size(); i++)
 	{
-		glm::vec3 lightColor = m_lights[i]->GetColor();
-		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, "lightColor");
-		glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
-		glCheckError();
-
 		glm::vec3 lightPos = m_lights[i]->GetPosition();
-		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, "lightPos");
+		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].Pos").c_str());
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		glCheckError();
 
-		GLint farPlaneLoc = glGetUniformLocation(m_shader->Program, "far_plane");
+		glm::vec3 lightColor = m_lights[i]->GetColor();
+		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].Color").c_str());
+		glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
+		glCheckError();
+
+		GLint farPlaneLoc = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].far_plane").c_str());
 		glUniform1f(farPlaneLoc, m_lights[i]->GetFarPlane());
 		glCheckError();
-		
-		glActiveTexture(GL_TEXTURE2 + i);
+
+		GLuint shadowTexture = MaxTextures + i;
+		glActiveTexture(GL_TEXTURE0 + shadowTexture);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_lights[i]->GetDepthMap());
-		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, "depthMap");
-		glUniform1i(depthMapPos, 2 + i);
+		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].depthMap").c_str());
+		glUniform1i(depthMapPos, shadowTexture);
 		glCheckError();
 	}
 
@@ -213,6 +226,9 @@ void Engine::RenderScene() const
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_scene->Render(*m_shader);
+	if (true)
+		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+			(*it)->RenderCube(*m_shader);
 }
 
 void Engine::Init(char* windowTitle)
@@ -258,7 +274,14 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	m_instance->m_camera->KeyCallback(key, scancode, action, mode);
+	if (action == GLFW_PRESS && key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
+	{
+		int index = key - GLFW_KEY_0 - 1;
+		if (index >= m_instance->m_lights.size())
+			index = -1;
+		m_instance->m_activeObject = index;
+	}
+
 }
 
 void Engine::CursorPosCallback(GLFWwindow* window, double x, double y)

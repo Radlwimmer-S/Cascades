@@ -1,11 +1,12 @@
 #include "Light.h"
-#include <glm/gtc/matrix_transform.inl>
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include <string>
 #include "Global.h"
+#include "Box.h"
 
-Light::Light(glm::vec3 position, glm::quat rotation, glm::vec3 color, LightType type) : m_position(position), m_rotation(rotation), m_color(color), m_type(type)
+Light::Light(glm::vec3 position, glm::vec3 color, GLfloat farPlane) : BaseObject(position), m_color(color), m_debugCube(new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 0.1f)), 36, V, m_color)), m_farPlane(farPlane)
 {
 	glGenFramebuffers(1, &depthMapFBO);
 
@@ -54,36 +55,21 @@ void Light::PreRender(Shader& shader) const
 	glCheckError();
 }
 
-void Light::ConfigureShader(Shader& shader) const
-{
-
-}
-
 void Light::PostRender() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Light::RenderCube(Shader& shader) const
+{
+	m_debugCube->SetPosition(m_position);
+	m_debugCube->Render(shader);
 }
 
 glm::vec3 Light::GetColor() const
 {
 	return m_color;
 }
-
-glm::vec3 Light::GetPosition() const
-{
-	return m_position;
-}
-
-void Light::SetPosition(glm::vec3 position)
-{
-	m_position = position;
-}
-
-void Light::SetRotation(glm::quat rotation)
-{
-	m_rotation = rotation;
-}
-
 std::vector<glm::mat4> Light::GetShadowMatrices() const
 {
 	glm::mat4 shadowProj = GetProjection();

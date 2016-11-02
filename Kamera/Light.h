@@ -1,45 +1,42 @@
 #pragma once
 #include <GL/glew.h>
 #include <glm/detail/type_vec3.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include "Enums.h"
 #include <vector>
+#include "Model.h"
 
 class Shader;
 
-class Light
+class Light : public BaseObject
 {
 public:
-	Light(glm::vec3 position, glm::quat rotation, glm::vec3 color, LightType type = Directional);
+	Light(glm::vec3 position, glm::vec3 color, GLfloat farPlane);
 	~Light();
 
 	void PreRender(Shader& shader) const;
-	void ConfigureShader(Shader& shader) const;
 	void PostRender() const;
+	void RenderCube(Shader& shader) const;
+
+
 	GLuint GetDepthMap() const
 	{
 		return depthCubemap;
 	}
 
-	static GLfloat GetFarPlane()
+	GLfloat GetFarPlane() const
 	{
-		return 10.0f;
+		return m_farPlane;
 	}
 
 	glm::vec3 GetColor() const;
-	glm::vec3 GetPosition() const;
-	void SetPosition(glm::vec3 position);
-	void SetRotation(glm::quat rotation);
 	std::vector<glm::mat4> GetShadowMatrices() const;
 protected:
 	glm::mat4 GetProjection() const;
 
-	glm::vec3 m_position;
-	glm::quat m_rotation;
 	glm::vec3 m_color;
-	LightType m_type;
 	GLuint depthCubemap;
 	GLuint depthMapFBO;
 	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	BaseObject* m_debugCube;
+	GLfloat m_farPlane;
 };
 

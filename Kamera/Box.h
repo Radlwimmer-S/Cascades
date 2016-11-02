@@ -6,5 +6,6 @@ class Box
 public:
 	static GLfloat* GetVNT(glm::vec3 size);
 	static GLfloat* GetVN(glm::vec3 size);
+	static GLfloat* GetV(glm::vec3 size);
 };
 

@@ -45,12 +45,15 @@ Scene* GetScene()
 {
 	Scene* scene = new Scene();
 	Texture* containerTex = new Texture("textures/container.jpg", "box");
-	scene->AddObject(new Model(glm::vec3(0, -0.1f, 0), MakeQuad(0, 0, 0), Box::GetVN(glm::vec3(10, 0.2f, 10)), 36, glm::vec3(0.3f, 0.3f, 0.3f)));
-	scene->AddObject(new TexturedModel(glm::vec3(1, 3, 0), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(2, 1, 0), MakeQuad(0, 45, 20), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 0), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(0, 1, -2), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(5, 2, -3), MakeQuad(0, 0, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new Model(glm::vec3(5, -0.2f, 3), MakeQuad(0, 0, 0), Box::GetVN(glm::vec3(20, 0.2f, 20)), 36, VN, glm::vec3(0.3f, 0.3f, 0.3f)));
+	scene->AddObject(new TexturedModel(glm::vec3(1, 3, 0), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(2, 1, 0), MakeQuad(0, 45, 20), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 0), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(0, 1, -2), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(5, 2, 3), MakeQuad(0, 0, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(8, 2, 1), MakeQuad(0, 20, 70), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(3, 1, 7), MakeQuad(0, 50, 15), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(5, 2, 3), MakeQuad(0, 0, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
 	return scene;
 }
 
@@ -87,8 +90,10 @@ int main()
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
-	Light* mainLight = new Light(glm::vec3(0, 5, 0), MakeQuad(60, 10, 0), glm::vec3(1, 1, 1));
+	Light* mainLight = new Light(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), 25);
 	engine->AddLight(*mainLight);
+	Light* redLight = new Light(glm::vec3(10, 4, 6), glm::vec3(0.5f, 0, 0), 25);
+	engine->AddLight(*redLight);
 
 	engine->Start();
 

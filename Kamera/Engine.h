@@ -39,7 +39,7 @@ public:
 	void Pause();
 	void Stop();
 protected:
-	void PrintData() const;
+	void PrintData(int frames) const;
 	void Loop();
 	void UpdateUniforms() const;
 	void RenderLights() const;
@@ -51,9 +51,9 @@ protected:
 	GLFWwindow& m_window;
 	Camera* m_camera;
 	std::vector<Light*> m_lights;
-
+	int m_activeObject;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
-
+	const GLuint MaxTextures = 2;
 
 
 

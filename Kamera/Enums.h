@@ -19,3 +19,10 @@ enum LightType
 {
 	Directional, Point
 };
+
+enum VertexFormat
+{
+	V = 3,
+	VN = 6,
+	VNT = 8,
+};
