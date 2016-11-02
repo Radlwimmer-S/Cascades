@@ -185,6 +185,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
       <FileType>Document</FileType>
     </None>
     <None Include="shaders\Shadow.frag.shader" />
+    <None Include="shaders\Shadow.geom.shader" />
     <None Include="shaders\Shadow.vert.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

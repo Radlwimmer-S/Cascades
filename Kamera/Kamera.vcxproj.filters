@@ -115,5 +115,8 @@
     <None Include="shaders\Shadow.vert.shader">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\Shadow.geom.shader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

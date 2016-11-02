@@ -41,8 +41,7 @@ public:
 protected:
 	void PrintData() const;
 	void Loop();
-	void ConfigureShader() const;
-	void ConfigureMatrices() const;
+	void UpdateUniforms() const;
 	void RenderLights() const;
 	void RenderScene() const;
 

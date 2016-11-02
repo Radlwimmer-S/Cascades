@@ -4,31 +4,41 @@
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) : m_isValid(true)
+Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : m_isValid(true)
 {
-	GLuint vertex, fragment;
+	GLuint vertex, fragment, geometry = 0;
 	GLint success;
 	GLchar infoLog[512];
-
-	vertex = LoadShader(vertexPath, GL_VERTEX_SHADER);
-	fragment = LoadShader(fragmentPath, GL_FRAGMENT_SHADER);
-
+	
 	// Shader Program
 	Program = glCreateProgram();
+
+	vertex = LoadShader(vertexPath, GL_VERTEX_SHADER);
 	glAttachShader(Program, vertex);
+
+	fragment = LoadShader(fragmentPath, GL_FRAGMENT_SHADER);
 	glAttachShader(Program, fragment);
+
+	if (geometryPath != nullptr)
+	{
+		geometry = LoadShader(geometryPath, GL_GEOMETRY_SHADER);
+		glAttachShader(Program, geometry);
+	}
+
 	glLinkProgram(Program);
 	// Print linking errors if any
 	glGetProgramiv(Program, GL_LINK_STATUS, &success);
 	if (!success)
 	{
-		glGetProgramInfoLog(Program, 512, NULL, infoLog);
+		glGetProgramInfoLog(Program, 512, nullptr, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 		m_isValid = false;
 	}
 	// Delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
+	if (geometryPath != nullptr)
+		glDeleteShader(geometry);
 }
 
 GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
@@ -59,7 +69,7 @@ GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
 	GLuint shader;
 	GLint success;
 	GLchar infoLog[512];
-	
+
 	shader = glCreateShader(shaderType);
 	glShaderSource(shader, 1, &vShaderCode, nullptr);
 	glCompileShader(shader);
@@ -83,8 +93,10 @@ GLchar* Shader::GetShaderName(GLenum shaderType)
 		return "VERTEX::";
 	case GL_FRAGMENT_SHADER:
 		return "FRAGMENT::";
+	case GL_GEOMETRY_SHADER:
+		return "GEOMETRY::";
 	default:
-		return "";
+		return "UNKNOWN";
 	}
 }
 

@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#define glCheckError() glCheckError_(__FILE__, __LINE__) 
 
 class Shader;
 
@@ -28,8 +27,6 @@ public:
 	}
 
 protected:
-	GLenum glCheckError_(const char* file, int line) const;
-
 	glm::vec3 m_position;
 	glm::quat m_orientation;
 	GLuint m_vao;

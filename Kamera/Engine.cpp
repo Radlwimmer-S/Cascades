@@ -146,69 +146,67 @@ void Engine::Loop()
 	glfwTerminate();
 }
 
-void Engine::ConfigureShader() const
+void Engine::UpdateUniforms() const
 {
 	for (int i = 0; i < m_lights.size(); i++)
 	{
 		glm::vec3 lightColor = m_lights[i]->GetColor();
 		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, "lightColor");
 		glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
+		glCheckError();
 
 		glm::vec3 lightPos = m_lights[i]->GetPosition();
 		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, "lightPos");
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		glCheckError();
 
-		glm::mat4 lightSpaceMatrix = m_lights[i]->GetLightSpace();
-		GLint lightSpaceMatrixLoc = glGetUniformLocation(m_shader->Program, "lightSpaceMatrix");
-		glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+		GLint farPlaneLoc = glGetUniformLocation(m_shader->Program, "far_plane");
+		glUniform1f(farPlaneLoc, m_lights[i]->GetFarPlane());
+		glCheckError();
+		
+		glActiveTexture(GL_TEXTURE2 + i);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_lights[i]->GetDepthMap());
+		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, "depthMap");
+		glUniform1i(depthMapPos, 2 + i);
+		glCheckError();
 	}
 
 	glm::vec3 cameraPos = m_camera->GetPosition();
 	GLint viewPosLoc = glGetUniformLocation(m_shader->Program, "viewPos");
 	glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-}
+	glCheckError();
 
-void Engine::ConfigureMatrices() const
-{
 	glm::mat4 view = m_camera->GetViewMatrix();
 	GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+	glCheckError();
 
 	glm::mat4 proj = m_camera->GetProjectionMatrix();
 	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+	glCheckError();
 }
 
 void Engine::RenderLights() const
 {
-	glCullFace(GL_FRONT);
+	//glCullFace(GL_FRONT);
 	m_shadowShader->Use();
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		/*(*it)->SetPosition(m_camera->GetPosition());
 		(*it)->SetRotation(m_camera->GetRotation());*/
 
-		(*it)->Activate(*m_shadowShader);
+		(*it)->PreRender(*m_shadowShader);
 		m_scene->Render(*m_shadowShader);
-		(*it)->Deactivate();
+		(*it)->PostRender();
 	}
-
-	m_shader->Use();
-	for (int i = 0; i < m_lights.size(); ++i)
-	{
-		glActiveTexture(GL_TEXTURE2 + i);
-		glBindTexture(GL_TEXTURE_2D, m_lights[i]->GetDepthMap());
-		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, "shadowMap");
-		glUniform1i(depthMapPos, 2 + i);
-	}
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 }
 
 void Engine::RenderScene() const
 {
 	m_shader->Use();
-	ConfigureShader();
-	ConfigureMatrices();
+	UpdateUniforms();
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_scene->Render(*m_shader);

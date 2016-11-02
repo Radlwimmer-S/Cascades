@@ -26,7 +26,7 @@ std::vector<ControlPoint>* GetPath()
 	//path->push_back(ControlPoint(glm::vec3(3.5f, 0, 3.5f),	MakeQuad(0, -45, 0))); // 0
 	//path->push_back(ControlPoint(glm::vec3(2, 0, 4.5f),		MakeQuad(0, -22.5f, 0))); // 0
 	//path->push_back(ControlPoint(glm::vec3(0, 0, 5),		MakeQuad(0, 0, 0))); // 1
-	
+
 	path->push_back(ControlPoint(glm::vec3(+2.50f, 0, +10.0f), MakeQuad(0.0f, +00.0f, -30.0f))); // 1
 	path->push_back(ControlPoint(glm::vec3(+1.75f, 0, +07.5f), MakeQuad(0.0f, -30.0f, -15.0f))); // 2
 	path->push_back(ControlPoint(glm::vec3(+0.00f, 0, +05.0f), MakeQuad(0.0f, -45.0f, +00.0f))); // 3
@@ -58,14 +58,14 @@ int main()
 	engine->SetShader(*shader);
 
 
-	Shader* shadowShader = new Shader("./shaders/Shadow.vert.shader", "./shaders/Shadow.frag.shader");
+	Shader* shadowShader = new Shader("./shaders/Shadow.vert.shader", "./shaders/Shadow.frag.shader", "./shaders/Shadow.geom.shader");
 	if (!shader->IsValid())
 	{
 		std::cin.ignore();
 		return -1;
 	}
 	engine->SetShadowShader(*shadowShader);
-	
+
 	Scene* scene = new CameraScene();
 	engine->SetScene(*scene);
 
