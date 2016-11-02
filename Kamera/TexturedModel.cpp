@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 
-TexturedModel::TexturedModel(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color, Texture& texture) : Model(position, vertexCount, color), m_Texture(texture)
+TexturedModel::TexturedModel(glm::vec3 position, glm::quat orientaton, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color, Texture& texture) : Model(position, orientaton, vertexCount, color), m_Texture(texture)
 {
 	const int VertexSize = 8 * sizeof(GLfloat);
 

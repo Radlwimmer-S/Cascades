@@ -9,7 +9,7 @@ class Shader;
 class BaseObject
 {
 public:
-	BaseObject(glm::vec3 position);
+	BaseObject(glm::vec3 position, glm::quat orientaton);
 	virtual ~BaseObject();
 	virtual void Update(GLfloat deltaTime) = 0;
 	virtual void Render(Shader& shader) const = 0;
@@ -21,9 +21,11 @@ public:
 
 	glm::mat4 GetMatrix() const
 	{
-		glm::mat4 model = glm::toMat4(glm::normalize(m_orientation));;
-		model = glm::translate(model, m_position);
-		return model;
+		glm::mat4 translation = glm::mat4(1.0f);
+		translation = glm::translate(translation, m_position);
+		glm::mat4 rotation = glm::toMat4(glm::normalize(m_orientation));
+
+		return translation *  rotation;
 	}
 
 protected:

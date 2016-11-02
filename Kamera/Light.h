@@ -23,7 +23,7 @@ public:
 
 	static GLfloat GetFarPlane()
 	{
-		return 25.0f;
+		return 10.0f;
 	}
 
 	glm::vec3 GetColor() const;

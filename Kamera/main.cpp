@@ -1,10 +1,12 @@
 
 #include "Shader.h"
 #include "Engine.h"
-#include "CameraScene.h"
 #include <filesystem>
 #include "Camera.h"
 #include "Global.h"
+#include "TexturedModel.h"
+#include "Texture.h"
+#include "Box.h"
 
 std::vector<ControlPoint>* GetPath()
 {
@@ -39,6 +41,19 @@ std::vector<ControlPoint>* GetPath()
 	return path;
 }
 
+Scene* GetScene()
+{
+	Scene* scene = new Scene();
+	Texture* containerTex = new Texture("textures/container.jpg", "box");
+	scene->AddObject(new Model(glm::vec3(0, -0.1f, 0), MakeQuad(0, 0, 0), Box::GetVN(glm::vec3(10, 0.2f, 10)), 36, glm::vec3(0.3f, 0.3f, 0.3f)));
+	scene->AddObject(new TexturedModel(glm::vec3(1, 3, 0), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(2, 1, 0), MakeQuad(0, 45, 20), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 0), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(0, 1, -2), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(5, 2, -3), MakeQuad(0, 0, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	return scene;
+}
+
 int main()
 {
 #ifdef _DEBUG
@@ -57,7 +72,6 @@ int main()
 	}
 	engine->SetShader(*shader);
 
-
 	Shader* shadowShader = new Shader("./shaders/Shadow.vert.shader", "./shaders/Shadow.frag.shader", "./shaders/Shadow.geom.shader");
 	if (!shader->IsValid())
 	{
@@ -66,15 +80,14 @@ int main()
 	}
 	engine->SetShadowShader(*shadowShader);
 
-	Scene* scene = new CameraScene();
-	engine->SetScene(*scene);
+	engine->SetScene(*GetScene());
 
 	//CameraPath* path = new CameraPath(*GetPath(), 10);
 	//Camera* camera = new Camera(path);
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
-	Light* mainLight = new Light(glm::vec3(0,5,1),MakeQuad(60,10,0),glm::vec3(1,1,1));
+	Light* mainLight = new Light(glm::vec3(0, 5, 0), MakeQuad(60, 10, 0), glm::vec3(1, 1, 1));
 	engine->AddLight(*mainLight);
 
 	engine->Start();

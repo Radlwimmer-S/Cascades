@@ -4,7 +4,7 @@
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
 
-Model::Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color) : BaseObject(position), m_vertexCount(vertexCount), m_color(color), m_colorMode(ColorOnly)
+Model::Model(glm::vec3 position, glm::quat orientaton, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color) : BaseObject(position, orientaton), m_vertexCount(vertexCount), m_color(color), m_colorMode(ColorOnly)
 {
 	const int VertexSize = 6 * sizeof(GLfloat);
 
@@ -25,7 +25,7 @@ Model::Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, glm::ve
 	glBindVertexArray(0);
 }
 
-Model::Model(glm::vec3 position, GLsizei vertexCount, glm::vec3 color) : BaseObject(position), m_vertexCount(vertexCount), m_color(color), m_colorMode(TextureOnly)
+Model::Model(glm::vec3 position, glm::quat orientaton, GLsizei vertexCount, glm::vec3 color) : BaseObject(position,  orientaton), m_vertexCount(vertexCount), m_color(color), m_colorMode(TextureOnly)
 {
 }
 

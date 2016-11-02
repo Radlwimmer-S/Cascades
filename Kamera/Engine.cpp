@@ -25,10 +25,12 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
+	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); 
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	GLFWmonitor* monitor = nullptr;
 	if (fullscreen)
@@ -57,11 +59,12 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glGetError(); // Call it once to catch glewInit()
 
 	// OpenGL configuration
-	glViewport(0, 0, WIDTH, HEIGHT);
+	glViewport(0, 0, WIDTH, HEIGHT); 
 	/*glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 
+	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);

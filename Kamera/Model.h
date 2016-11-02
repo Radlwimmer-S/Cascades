@@ -10,14 +10,14 @@ class Texture;
 class Model : public BaseObject
 {
 public:
-	Model(glm::vec3 position, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color);
+	Model(glm::vec3 position, glm::quat orientaton, GLfloat* vertices, GLsizei vertexCount, glm::vec3 color);
 	virtual ~Model();
 
 	void Update(GLfloat deltaTime) override;
 	void Render(Shader& shader) const override;
 
 protected:
-	Model(glm::vec3 position, GLsizei vertexCount, glm::vec3 color);
+	Model(glm::vec3 position, glm::quat orientaton, GLsizei vertexCount, glm::vec3 color);
 
 	GLuint m_vbo;
 	GLsizei m_vertexCount;
