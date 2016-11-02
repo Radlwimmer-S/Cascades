@@ -90,11 +90,21 @@ void Engine::Stop()
 	m_scene->SetState(Stopped);
 }
 
+void Engine::PrintData() const
+{
+	system("cls");
+	glm::vec3 cameraPos = m_camera->GetPosition();
+	std::cout << "Position: x=" << cameraPos.x << ", y=" << cameraPos.y << ", z=" << cameraPos.z << std::endl;
+	glm::vec3 cameraRot = glm::eulerAngles(m_camera->GetRotation());
+	std::cout << "Orientation: Pitch=" << glm::degrees(cameraRot.x) << ", Yaw=" << glm::degrees(cameraRot.y) << ", Roll=" << glm::degrees(cameraRot.z) << std::endl;
+}
+
 void Engine::Loop()
 {
 	// DeltaTime variables
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrame = 0.0f;
+	GLfloat second = 0.0f;
 
 	// Game loop
 	while (!glfwWindowShouldClose(&m_window))
@@ -105,6 +115,7 @@ void Engine::Loop()
 #ifdef _DEBUG
 		deltaTime = 1.0f / 60;
 #endif
+		second += deltaTime;
 		lastFrame = currentFrame;
 		glfwPollEvents();
 
@@ -125,6 +136,11 @@ void Engine::Loop()
 
 		glfwSwapBuffers(&m_window);
 
+		if (second > 1)
+		{
+			PrintData();
+			second -= 1;
+		}
 	}
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
@@ -141,7 +157,7 @@ void Engine::ConfigureShader() const
 		glm::vec3 lightPos = m_lights[i]->GetPosition();
 		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, "lightPos");
 		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		
+
 		glm::mat4 lightSpaceMatrix = m_lights[i]->GetLightSpace();
 		GLint lightSpaceMatrixLoc = glGetUniformLocation(m_shader->Program, "lightSpaceMatrix");
 		glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));

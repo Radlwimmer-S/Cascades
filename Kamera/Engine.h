@@ -39,6 +39,7 @@ public:
 	void Pause();
 	void Stop();
 protected:
+	void PrintData() const;
 	void Loop();
 	void ConfigureShader() const;
 	void ConfigureMatrices() const;
