@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include "PointLight.h"
 #include <vector>
+#include "DirectionalLight.h"
 
 class Camera;
 class Shader;
@@ -33,6 +34,7 @@ public:
 	void SetScene(Scene& scene);
 	void SetCamera(Camera& camera);
 	void AddLight(PointLight& light);
+	void AddLight(DirectionalLight& light);
 	void Start();
 	void Resume();
 	void Pause();
@@ -48,7 +50,8 @@ protected:
 	Scene* m_scene;
 	GLFWwindow& m_window;
 	Camera* m_camera;
-	std::vector<PointLight*> m_lights;
+	std::vector<PointLight*> m_pointLights;
+	std::vector<DirectionalLight*> m_dirLights;
 	int m_activeObject;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 	const GLuint MaxTextures = 2;

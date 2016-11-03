@@ -184,6 +184,10 @@ void main()
 	{
 		lighting += CalculatePointLight(fs_in.FragPos, PointLight[i]);
 	}
+	for (int i = 0; i < DirLightCount; i++)
+	{
+		lighting += CalculateDirLight(fs_in.FragPos, DirLight[i]);
+	}
 
 	lighting = clamp(lighting, 0, 1);
 	lighting *= color;

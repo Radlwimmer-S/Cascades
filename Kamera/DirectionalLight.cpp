@@ -44,7 +44,7 @@ void DirectionalLight::UpdateUniforms(Shader& shader, int lightId, int textureId
 	glCheckError();
 
 	glActiveTexture(GL_TEXTURE0 + textureId);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
 	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(lightId) + "].depthMap").c_str());
 	glUniform1i(depthMapPos, textureId);
 	glCheckError();

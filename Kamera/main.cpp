@@ -96,8 +96,11 @@ int main()
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
-	PointLight* mainLight = new PointLight(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), *pointLightShader, 25);
+	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(-10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 25, 1);
 	engine->AddLight(*mainLight);
+
+	PointLight* greenLight = new PointLight(glm::vec3(0, 5, 0), glm::vec3(0, 0.5f, 0), *pointLightShader, 25);
+	engine->AddLight(*greenLight);
 	PointLight* redLight = new PointLight(glm::vec3(10, 4, 6), glm::vec3(0.5f, 0, 0), *pointLightShader, 25);
 	engine->AddLight(*redLight);
 
