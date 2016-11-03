@@ -123,6 +123,51 @@ vec3 CalculatePointLight(vec3 fragPos, PointLightSource light)
 	return lighting;
 }
 
+float CalculateDirShadow(vec3 fragPos, DirLightSource light)
+{
+	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fragPos, 1.0f);
+
+	// perform perspective divide
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	// Transform to [0,1] range
+	projCoords = projCoords * 0.5 + 0.5;
+	// Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+	float closestDepth = texture(light.depthMap, projCoords.xy).r;
+	// Get depth of current fragment from light's perspective
+	float currentDepth = projCoords.z;
+	// Check whether current frag pos is in shadow
+	float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+	return shadow;
+}
+
+vec3 CalculateDirLight(vec3 fragPos, DirLightSource light)
+{
+	// Ambient
+	float ambientStrength = 0.1f;
+	vec3 ambient = ambientStrength * light.Color;
+
+	// Diffuse 
+	float diffuseStrength = 1.0f;
+	vec3 norm = normalize(fs_in.Normal);
+	vec3 lightDir = light.Dir;
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = diffuseStrength * diff * light.Color;
+
+	// Specular
+	float specularStrength = 0.1f;
+	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
+	vec3 specular = specularStrength * spec * light.Color;
+
+	// Calculate shadow
+	float shadow = CalculateDirShadow(fs_in.FragPos, light);
+	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
+
+	return lighting;
+}
+
 void main()
 {
 	vec3 color = DetermineFragmentColor(mode);
