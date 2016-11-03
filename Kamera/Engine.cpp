@@ -130,7 +130,7 @@ void Engine::Loop()
 		if (m_activeObject == -1)
 			m_camera->ProcessInput(m_window);
 		else
-			m_pointLights[m_activeObject]->ProcessInput(m_window);
+			m_lights[m_activeObject]->ProcessInput(m_window);
 
 		m_camera->Update(deltaTime);
 
@@ -163,16 +163,10 @@ void Engine::Loop()
 
 void Engine::UpdateUniforms() const
 {
-	int textureOffset = MaxTextures;
-	for (int i = 0; i < m_pointLights.size(); i++)
+	LightIndexer indizes = LightIndexer(MaxTexturesPerModel);
+	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
-		m_pointLights[i]->UpdateUniforms(*m_shader, i, textureOffset + i);
-	}
-
-	textureOffset += m_pointLights.size();
-	for (int i = 0; i < m_dirLights.size(); i++)
-	{
-		m_dirLights[i]->UpdateUniforms(*m_shader, i, textureOffset + i);
+		(*it)->UpdateUniforms(*m_shader, indizes);
 	}
 
 	glm::vec3 cameraPos = m_camera->GetPosition();
@@ -193,13 +187,7 @@ void Engine::UpdateUniforms() const
 
 void Engine::RenderLights() const
 {
-	for (std::vector<PointLight*>::const_iterator it = m_pointLights.begin(); it != m_pointLights.end(); ++it)
-	{
-		(*it)->PreRender();
-		m_scene->Render((*it)->GetShadowShader());
-		(*it)->PostRender();
-	}
-	for (std::vector<DirectionalLight*>::const_iterator it = m_dirLights.begin(); it != m_dirLights.end(); ++it)
+	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		(*it)->PreRender();
 		m_scene->Render((*it)->GetShadowShader());
@@ -215,7 +203,7 @@ void Engine::RenderScene() const
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_scene->Render(*m_shader);
 	if (true)
-		for (std::vector<PointLight*>::const_iterator it = m_pointLights.begin(); it != m_pointLights.end(); ++it)
+		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			(*it)->RenderDebug(*m_shader);
 }
 
@@ -246,14 +234,9 @@ void Engine::SetCamera(Camera& camera)
 	m_camera = &camera;
 }
 
-void Engine::AddLight(PointLight& light)
+void Engine::AddLight(Light& light)
 {
-	m_pointLights.push_back(&light);
-}
-
-void Engine::AddLight(DirectionalLight& light)
-{
-	m_dirLights.push_back(&light);
+	m_lights.push_back(&light);
 }
 
 // Is called whenever a key is pressed/released via GLFW
@@ -265,7 +248,7 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 	if (action == GLFW_PRESS && key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
 	{
 		int index = key - GLFW_KEY_0 - 1;
-		if (index >= m_instance->m_pointLights.size())
+		if (index >= m_instance->m_lights.size())
 			index = -1;
 		m_instance->m_activeObject = index;
 	}

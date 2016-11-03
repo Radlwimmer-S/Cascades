@@ -15,17 +15,19 @@ struct PointLightSource
 	samplerCube depthMap;
 };
 
+uniform bool UsePointLights = true;
 const int PointLightCount = 2;
 uniform PointLightSource PointLight[PointLightCount];
 
 struct DirLightSource
 {
-	vec3 Dir;
+	vec3 Pos;
 	vec3 Color;
 	mat4 lightSpaceMatrix;
 	sampler2D depthMap;
 };
 
+uniform bool UseDirLights = true;
 const int DirLightCount = 1;
 uniform DirLightSource DirLight[DirLightCount];
 
@@ -135,8 +137,28 @@ float CalculateDirShadow(vec3 fragPos, DirLightSource light)
 	float closestDepth = texture(light.depthMap, projCoords.xy).r;
 	// Get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z;
+	// Calculate bias (based on depth map resolution and slope)
+	vec3 normal = normalize(fs_in.Normal);
+	vec3 lightDir = normalize(-light.Pos);
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
 	// Check whether current frag pos is in shadow
-	float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+	// float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+	// PCF
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
+	for (int x = -1; x <= 1; ++x)
+	{
+		for (int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(light.depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	shadow /= 9.0;
+
+	// Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+	if (projCoords.z > 1.0)
+		shadow = 0.0;
 
 	return shadow;
 }
@@ -150,7 +172,7 @@ vec3 CalculateDirLight(vec3 fragPos, DirLightSource light)
 	// Diffuse 
 	float diffuseStrength = 1.0f;
 	vec3 norm = normalize(fs_in.Normal);
-	vec3 lightDir = light.Dir;
+	vec3 lightDir = normalize(-light.Pos);
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = diffuseStrength * diff * light.Color;
 
@@ -180,14 +202,17 @@ void main()
 	}
 
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
-	for (int i = 0; i < PointLightCount; i++)
-	{
-		lighting += CalculatePointLight(fs_in.FragPos, PointLight[i]);
-	}
-	for (int i = 0; i < DirLightCount; i++)
-	{
-		lighting += CalculateDirLight(fs_in.FragPos, DirLight[i]);
-	}
+	if (UsePointLights)
+		for (int i = 0; i < PointLightCount; i++)
+		{
+			lighting += CalculatePointLight(fs_in.FragPos, PointLight[i]);
+		}
+
+	if (UseDirLights)
+		for (int i = 0; i < DirLightCount; i++)
+		{
+			lighting += CalculateDirLight(fs_in.FragPos, DirLight[i]);
+		}
 
 	lighting = clamp(lighting, 0, 1);
 	lighting *= color;

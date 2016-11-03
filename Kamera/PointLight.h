@@ -11,7 +11,7 @@ public:
 	PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane);
 	virtual ~PointLight();
 
-	void UpdateUniforms(Shader& shader, int lightId, int textureId) override;
+	void UpdateUniforms(Shader& shader, LightIndexer& indizes) override;
 
 	void PreRender() const override;
 	void RenderDebug(Shader& shader) const override;
@@ -19,7 +19,5 @@ public:
 protected:
 	glm::mat4 GetProjection() const override;
 	std::vector<glm::mat4> GetShadowMatrices() const;
-
-	BaseObject* m_debugCube;
 };
 

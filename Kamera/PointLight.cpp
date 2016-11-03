@@ -6,7 +6,7 @@
 #include "Global.h"
 #include "Box.h"
 
-PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane) : Light(position, glm::quat(), color, shadowShader, farPlane),m_debugCube(new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 0.1f)), 36, V, m_color))
+PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane) : Light(position, glm::quat(), color, shadowShader, farPlane)
 {
 	glGenFramebuffers(1, &depthMapFBO);
 
@@ -26,31 +26,36 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 0.1f)), 36, V, m_color);
 }
 
 PointLight::~PointLight()
 {
 }
 
-void PointLight::UpdateUniforms(Shader& shader, int lightId, int textureId)
+void PointLight::UpdateUniforms(Shader& shader, LightIndexer& indizes)
 {
-	GLint lightPosLoc = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(lightId) + "].Pos").c_str());
+	GLint lightPosLoc = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(indizes.PointIndex) + "].Pos").c_str());
 	glUniform3f(lightPosLoc, m_position.x, m_position.y, m_position.z);
 	glCheckError();
 
-	GLint lightColorLoc = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(lightId) + "].Color").c_str());
+	GLint lightColorLoc = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(indizes.PointIndex) + "].Color").c_str());
 	glUniform3f(lightColorLoc, m_color.r, m_color.g, m_color.b);
 	glCheckError();
 
-	GLint farPlaneLoc = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(lightId) + "].far_plane").c_str());
+	GLint farPlaneLoc = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(indizes.PointIndex) + "].far_plane").c_str());
 	glUniform1f(farPlaneLoc, m_farPlane);
 	glCheckError();
 
-	glActiveTexture(GL_TEXTURE0 + textureId);
+	glActiveTexture(GL_TEXTURE0 + indizes.TextureIndex);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap);
-	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(lightId) + "].depthMap").c_str());
-	glUniform1i(depthMapPos, textureId);
+	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("PointLight[" + std::to_string(indizes.PointIndex) + "].depthMap").c_str());
+	glUniform1i(depthMapPos, indizes.TextureIndex);
 	glCheckError();
+
+	++indizes.PointIndex;
+	++indizes.TextureIndex;
 }
 
 void PointLight::PreRender() const

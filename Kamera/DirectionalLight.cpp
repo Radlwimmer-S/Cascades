@@ -1,6 +1,8 @@
 #include "DirectionalLight.h"
 #include "Shader.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "Enums.h"
+#include "Box.h"
 
 
 DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, int farPlane, int nearPlane) : Light(position, glm::quat(), color, shadowShader, farPlane), m_nearPlane(nearPlane)
@@ -23,31 +25,36 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& 
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 1)), 36, V, m_color);
 }
 
 DirectionalLight::~DirectionalLight()
 {
 }
 
-void DirectionalLight::UpdateUniforms(Shader& shader, int lightId, int textureId)
+void DirectionalLight::UpdateUniforms(Shader& shader, LightIndexer& indizes)
 {
-	GLint lightPosLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(lightId) + "].Pos").c_str());
+	GLint lightPosLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(indizes.DirIndex) + "].Pos").c_str());
 	glUniform3f(lightPosLoc, -m_position.x, -m_position.y, -m_position.z);
 	glCheckError();
 
-	GLint lightColorLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(lightId) + "].Color").c_str());
+	GLint lightColorLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(indizes.DirIndex) + "].Color").c_str());
 	glUniform3f(lightColorLoc, m_color.r, m_color.g, m_color.b);
 	glCheckError();
 
-	GLint lightSpaceMatrixLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(lightId) + "].lightSpaceMatrix").c_str());
+	GLint lightSpaceMatrixLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(indizes.DirIndex) + "].lightSpaceMatrix").c_str());
 	glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(GetShadowMatrix())); 
 	glCheckError();
 
-	glActiveTexture(GL_TEXTURE0 + textureId);
+	glActiveTexture(GL_TEXTURE0 + indizes.TextureIndex);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(lightId) + "].depthMap").c_str());
-	glUniform1i(depthMapPos, textureId);
+	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(indizes.DirIndex) + "].depthMap").c_str());
+	glUniform1i(depthMapPos, indizes.TextureIndex);
 	glCheckError();
+
+	++indizes.DirIndex;
+	++indizes.TextureIndex;
 }
 
 void DirectionalLight::PreRender() const
@@ -64,14 +71,23 @@ void DirectionalLight::PreRender() const
 }
 
 void DirectionalLight::RenderDebug(Shader& shader) const
-{}
+{
+	m_debugCube->SetPosition(m_position);
+	m_debugCube->SetOrientation(glm::conjugate(glm::toQuat(GetView())));
+	m_debugCube->Render(shader);
+}
 
 glm::mat4 DirectionalLight::GetProjection() const
 {
 	return glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, m_nearPlane, m_farPlane);
 }
 
+glm::mat4 DirectionalLight::GetView() const
+{
+	return glm::lookAt(m_position, glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
 glm::mat4 DirectionalLight::GetShadowMatrix() const
 {
-	return GetProjection() * glm::lookAt(m_position, glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
+	return GetProjection() * GetView();
 }
