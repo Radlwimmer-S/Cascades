@@ -165,26 +165,7 @@ void Engine::UpdateUniforms() const
 {
 	for (int i = 0; i < m_lights.size(); i++)
 	{
-		glm::vec3 lightPos = m_lights[i]->GetPosition();
-		GLint lightPosLoc = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].Pos").c_str());
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		glCheckError();
-
-		glm::vec3 lightColor = m_lights[i]->GetColor();
-		GLint lightColorLoc = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].Color").c_str());
-		glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
-		glCheckError();
-
-		GLint farPlaneLoc = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].far_plane").c_str());
-		glUniform1f(farPlaneLoc, m_lights[i]->GetFarPlane());
-		glCheckError();
-
-		GLuint shadowTexture = MaxTextures + i;
-		glActiveTexture(GL_TEXTURE0 + shadowTexture);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_lights[i]->GetDepthMap());
-		GLuint depthMapPos = glGetUniformLocation(m_shader->Program, ("Light[" + std::to_string(i) + "].depthMap").c_str());
-		glUniform1i(depthMapPos, shadowTexture);
-		glCheckError();
+		m_lights[i]->UpdateUniforms(*m_shader, i, MaxTextures + i);
 	}
 
 	glm::vec3 cameraPos = m_camera->GetPosition();
@@ -205,18 +186,12 @@ void Engine::UpdateUniforms() const
 
 void Engine::RenderLights() const
 {
-	//glCullFace(GL_FRONT);
-	m_shadowShader->Use();
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
-		/*(*it)->SetPosition(m_camera->GetPosition());
-		(*it)->SetRotation(m_camera->GetRotation());*/
-
-		(*it)->PreRender(*m_shadowShader);
-		m_scene->Render(*m_shadowShader);
+		(*it)->PreRender();
+		m_scene->Render((*it)->GetShadowShader());
 		(*it)->PostRender();
 	}
-	//glCullFace(GL_BACK);
 }
 
 void Engine::RenderScene() const
@@ -246,11 +221,6 @@ void Engine::Init(char* windowTitle, GLuint width, GLuint height)
 void Engine::SetShader(Shader& shader)
 {
 	m_shader = &shader;
-}
-
-void Engine::SetShadowShader(Shader& shader)
-{
-	m_shadowShader = &shader;
 }
 
 void Engine::SetScene(Scene& scene)

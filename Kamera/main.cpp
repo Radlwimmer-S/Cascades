@@ -81,7 +81,6 @@ int main()
 		std::cin.ignore();
 		return -1;
 	}
-	engine->SetShadowShader(*shadowShader);
 
 	engine->SetScene(*GetScene());
 
@@ -90,9 +89,9 @@ int main()
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
-	Light* mainLight = new Light(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), 25);
+	Light* mainLight = new Light(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), *shadowShader, 25);
 	engine->AddLight(*mainLight);
-	Light* redLight = new Light(glm::vec3(10, 4, 6), glm::vec3(0.5f, 0, 0), 25);
+	Light* redLight = new Light(glm::vec3(10, 4, 6), glm::vec3(0.5f, 0, 0), *shadowShader, 25);
 	engine->AddLight(*redLight);
 
 	engine->Start();

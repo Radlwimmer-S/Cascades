@@ -6,7 +6,7 @@
 #include "Global.h"
 #include "Box.h"
 
-Light::Light(glm::vec3 position, glm::vec3 color, GLfloat farPlane) : BaseObject(position), m_color(color), m_debugCube(new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 0.1f)), 36, V, m_color)), m_farPlane(farPlane)
+Light::Light(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane) : BaseObject(position), m_color(color), m_debugCube(new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 0.1f)), 36, V, m_color)), m_farPlane(farPlane), m_shadowShader(shadowShader)
 {
 	glGenFramebuffers(1, &depthMapFBO);
 
@@ -32,25 +32,48 @@ Light::~Light()
 {
 }
 
-void Light::PreRender(Shader& shader) const
+void Light::UpdateUniforms(Shader& shader, int lightId, int textureId)
+{
+	GLint lightPosLoc = glGetUniformLocation(shader.Program, ("Light[" + std::to_string(lightId) + "].Pos").c_str());
+	glUniform3f(lightPosLoc, m_position.x, m_position.y, m_position.z);
+	glCheckError();
+
+	GLint lightColorLoc = glGetUniformLocation(shader.Program, ("Light[" + std::to_string(lightId) + "].Color").c_str());
+	glUniform3f(lightColorLoc, m_color.r, m_color.g, m_color.b);
+	glCheckError();
+
+	GLint farPlaneLoc = glGetUniformLocation(shader.Program, ("Light[" + std::to_string(lightId) + "].far_plane").c_str());
+	glUniform1f(farPlaneLoc, m_farPlane);
+	glCheckError();
+
+	glActiveTexture(GL_TEXTURE0 + textureId);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("Light[" + std::to_string(lightId) + "].depthMap").c_str());
+	glUniform1i(depthMapPos, textureId);
+	glCheckError();
+}
+
+void Light::PreRender() const
 {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
+	m_shadowShader.Use();
+
 	std::vector<glm::mat4> shadowMatrices = GetShadowMatrices();
 	for (GLuint i = 0; i < 6; ++i)
 	{
-		GLint shadowMatrixLoc = glGetUniformLocation(shader.Program, ("shadowMatrices[" + std::to_string(i) + "]").c_str());
+		GLint shadowMatrixLoc = glGetUniformLocation(m_shadowShader.Program, ("shadowMatrices[" + std::to_string(i) + "]").c_str());
 		glUniformMatrix4fv(shadowMatrixLoc, 1, GL_FALSE, glm::value_ptr(shadowMatrices[i]));
 		glCheckError();
 	}
 
-	GLint lightPosLoc = glGetUniformLocation(shader.Program, "lightPos");
+	GLint lightPosLoc = glGetUniformLocation(m_shadowShader.Program, "lightPos");
 	glUniform3f(lightPosLoc, m_position.x, m_position.y, m_position.z);
 	glCheckError();
 	
-	GLint farPlaneLoc = glGetUniformLocation(shader.Program, "far_plane");
+	GLint farPlaneLoc = glGetUniformLocation(m_shadowShader.Program, "far_plane");
 	glUniform1f(farPlaneLoc, GetFarPlane());
 	glCheckError();
 }
@@ -70,6 +93,7 @@ glm::vec3 Light::GetColor() const
 {
 	return m_color;
 }
+
 std::vector<glm::mat4> Light::GetShadowMatrices() const
 {
 	glm::mat4 shadowProj = GetProjection();

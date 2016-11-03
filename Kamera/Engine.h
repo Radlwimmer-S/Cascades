@@ -30,7 +30,6 @@ public:
 	static void Init(char* windowTitle);
 	static void Init(char* windowTitle, GLuint width, GLuint height);
 	void SetShader(Shader& shader);
-	void SetShadowShader(Shader& shader);
 	void SetScene(Scene& scene);
 	void SetCamera(Camera& camera);
 	void AddLight(Light& light);
@@ -46,7 +45,6 @@ protected:
 	void RenderScene() const;
 
 	Shader* m_shader;
-	Shader* m_shadowShader;
 	Scene* m_scene;
 	GLFWwindow& m_window;
 	Camera* m_camera;
