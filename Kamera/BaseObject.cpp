@@ -70,3 +70,12 @@ bool BaseObject::CursorPosCallback(float x, float y)
 {
 	return false;
 }
+
+glm::mat4 BaseObject::GetMatrix() const
+{
+	glm::mat4 translation = glm::mat4(1.0f);
+	translation = glm::translate(translation, m_position);
+	glm::mat4 rotation = glm::toMat4(glm::normalize(m_orientation));
+
+	return translation *  rotation;
+}

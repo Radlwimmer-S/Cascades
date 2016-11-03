@@ -186,7 +186,7 @@ void Engine::UpdateUniforms() const
 
 void Engine::RenderLights() const
 {
-	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+	for (std::vector<PointLight*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		(*it)->PreRender();
 		m_scene->Render((*it)->GetShadowShader());
@@ -202,8 +202,8 @@ void Engine::RenderScene() const
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_scene->Render(*m_shader);
 	if (true)
-		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
-			(*it)->RenderCube(*m_shader);
+		for (std::vector<PointLight*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+			(*it)->RenderDebug(*m_shader);
 }
 
 void Engine::Init(char* windowTitle)
@@ -233,7 +233,7 @@ void Engine::SetCamera(Camera& camera)
 	m_camera = &camera;
 }
 
-void Engine::AddLight(Light& light)
+void Engine::AddLight(PointLight& light)
 {
 	m_lights.push_back(&light);
 }

@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "Scene.h"
 #include <stdexcept>
-#include "Light.h"
+#include "PointLight.h"
 #include <vector>
 
 class Camera;
@@ -32,7 +32,7 @@ public:
 	void SetShader(Shader& shader);
 	void SetScene(Scene& scene);
 	void SetCamera(Camera& camera);
-	void AddLight(Light& light);
+	void AddLight(PointLight& light);
 	void Start();
 	void Resume();
 	void Pause();
@@ -48,7 +48,7 @@ protected:
 	Scene* m_scene;
 	GLFWwindow& m_window;
 	Camera* m_camera;
-	std::vector<Light*> m_lights;
+	std::vector<PointLight*> m_lights;
 	int m_activeObject;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 	const GLuint MaxTextures = 2;

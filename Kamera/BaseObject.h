@@ -29,14 +29,7 @@ public:
 	virtual bool KeyCallback(int key, int scancode, int action, int mode);
 	virtual bool CursorPosCallback(float x, float y);
 
-	glm::mat4 GetMatrix() const
-	{
-		glm::mat4 translation = glm::mat4(1.0f);
-		translation = glm::translate(translation, m_position);
-		glm::mat4 rotation = glm::toMat4(glm::normalize(m_orientation));
-
-		return translation *  rotation;
-	}
+	glm::mat4 GetMatrix() const;
 
 protected:
 	glm::vec3 m_position;

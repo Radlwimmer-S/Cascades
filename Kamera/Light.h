@@ -1,50 +1,30 @@
 #pragma once
-#include <GL/glew.h>
-#include <glm/detail/type_vec3.hpp>
-#include <vector>
-#include "Model.h"
-
-class Shader;
-
+#include "BaseObject.h"
 class Light : public BaseObject
 {
 public:
-	Light(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane);
-	~Light();
+	Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int farPlane);
+	virtual ~Light();
 
-	void UpdateUniforms(Shader& shader, int lightId, int textureId);
+	virtual void UpdateUniforms(Shader& shader, int lightId, int textureId) = 0;
 
-	void PreRender() const;
-	void PostRender() const;
-	void RenderCube(Shader& shader) const;
-
-
-	GLuint GetDepthMap() const
-	{
-		return depthCubemap;
-	}
-
-	GLfloat GetFarPlane() const
-	{
-		return m_farPlane;
-	}
-
+	virtual void PreRender() const = 0;
+	virtual void PostRender() const;
+	virtual void RenderDebug(Shader& shader) const = 0;
+	
 	Shader& GetShadowShader() const
 	{
 		return m_shadowShader;
 	}
 
-	glm::vec3 GetColor() const;
-	std::vector<glm::mat4> GetShadowMatrices() const;
 protected:
-	glm::mat4 GetProjection() const;
+	virtual glm::mat4 GetProjection() const = 0;
 
 	glm::vec3 m_color;
-	GLuint depthCubemap;
+	GLuint depthMap;
 	GLuint depthMapFBO;
 	const GLuint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
-	BaseObject* m_debugCube;
-	GLfloat m_farPlane;
 	Shader& m_shadowShader;
+	GLfloat m_farPlane;
 };
 

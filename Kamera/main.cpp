@@ -75,7 +75,14 @@ int main()
 	}
 	engine->SetShader(*shader);
 
-	Shader* shadowShader = new Shader("./shaders/Shadow.vert.shader", "./shaders/Shadow.frag.shader", "./shaders/Shadow.geom.shader");
+	Shader* pointLightShader = new Shader("./shaders/PointLight.vert.shader", "./shaders/PointLight.frag.shader", "./shaders/PointLight.geom.shader");
+	if (!shader->IsValid())
+	{
+		std::cin.ignore();
+		return -1;
+	}
+
+	Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert.shader", "./shaders/DirectionalLight.frag.shader");
 	if (!shader->IsValid())
 	{
 		std::cin.ignore();
@@ -89,9 +96,9 @@ int main()
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
-	Light* mainLight = new Light(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), *shadowShader, 25);
+	PointLight* mainLight = new PointLight(glm::vec3(0, 5, 0), glm::vec3(1, 1, 1), *pointLightShader, 25);
 	engine->AddLight(*mainLight);
-	Light* redLight = new Light(glm::vec3(10, 4, 6), glm::vec3(0.5f, 0, 0), *shadowShader, 25);
+	PointLight* redLight = new PointLight(glm::vec3(10, 4, 6), glm::vec3(0.5f, 0, 0), *pointLightShader, 25);
 	engine->AddLight(*redLight);
 
 	engine->Start();

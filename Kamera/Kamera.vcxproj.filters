@@ -51,7 +51,13 @@
     <ClCompile Include="TexturedModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,7 +98,13 @@
     <ClInclude Include="TexturedModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -103,13 +115,19 @@
     <None Include="shaders\default.vert.shader">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\Shadow.frag.shader">
+    <None Include="shaders\PointLight.frag.shader">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\Shadow.vert.shader">
+    <None Include="shaders\PointLight.geom.shader">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\Shadow.geom.shader">
+    <None Include="shaders\PointLight.vert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\DirectionalLight.frag.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\DirectionalLight.vert.shader">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

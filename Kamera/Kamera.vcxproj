@@ -145,9 +145,11 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
   <ItemGroup>
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="CameraPath.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BaseObject.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -159,12 +161,14 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
   <ItemGroup>
     <ClInclude Include="Box.h" />
     <ClInclude Include="CameraPath.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="BaseObject.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
@@ -182,9 +186,11 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
       </ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
-    <None Include="shaders\Shadow.frag.shader" />
-    <None Include="shaders\Shadow.geom.shader" />
-    <None Include="shaders\Shadow.vert.shader" />
+    <None Include="shaders\DirectionalLight.frag.shader" />
+    <None Include="shaders\DirectionalLight.vert.shader" />
+    <None Include="shaders\PointLight.frag.shader" />
+    <None Include="shaders\PointLight.geom.shader" />
+    <None Include="shaders\PointLight.vert.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
