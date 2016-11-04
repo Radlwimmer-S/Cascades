@@ -77,17 +77,17 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 	);
 
-float CalculatePointShadow(vec3 fragPos, PointLightSource light)
+float CalculatePointShadow(PointLightSource light)
 {
 	// Get vector between fragment position and light position
-	vec3 fragToLight = fragPos - light.Pos;
+	vec3 fragToLight = fs_in.FragPos - light.Pos;
 	// Get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
 	// Test for shadows with PCF
 	float shadow = 0.0;
 	float bias = 0.15;
 	int samples = 20;
-	float viewDistance = length(viewPos - fragPos);
+	float viewDistance = length(viewPos - fs_in.FragPos);
 	float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
 	for (int i = 0; i < samples; ++i)
 	{
@@ -108,7 +108,7 @@ float CalculatePointShadow(vec3 fragPos, PointLightSource light)
 	return shadow;
 }
 
-vec3 CalculatePointLight(vec3 fragPos, PointLightSource light)
+vec3 CalculatePointLight(PointLightSource light)
 {
 	float distance = length(light.Pos - fs_in.FragPos);
 	float distanceStrength = (1.0f - distance / light.far_plane);
@@ -132,15 +132,15 @@ vec3 CalculatePointLight(vec3 fragPos, PointLightSource light)
 	vec3 specular = specularStrength * spec * light.Color;
 
 	// Calculate shadow
-	float shadow = CalculatePointShadow(fs_in.FragPos, light);
+	float shadow = CalculatePointShadow(light);
 	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * distanceStrength;
 
 	return lighting;
 }
 
-float CalculateDirShadow(vec3 fragPos, DirLightSource light)
+float CalculateDirShadow(DirLightSource light)
 {
-	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fragPos, 1.0f);
+	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
 
 	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -177,7 +177,7 @@ float CalculateDirShadow(vec3 fragPos, DirLightSource light)
 	return shadow;
 }
 
-LightComponents CalculateDirLight(vec3 fragPos, DirLightSource light)
+LightComponents CalculateDirLight(DirLightSource light)
 {		
 	LightComponents lighting;
 
@@ -202,9 +202,9 @@ LightComponents CalculateDirLight(vec3 fragPos, DirLightSource light)
 	return lighting;	
 }
 
-float CalculateCircularShadow(vec3 fragPos, DirLightSource light)
+float CalculateCircularShadow(DirLightSource light)
 {
-	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fragPos, 1.0f);
+	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
 
 	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -229,22 +229,22 @@ void main()
 	if (UsePointLights)
 		for (int i = 0; i < PointLightCount; i++)
 		{
-			lighting += CalculatePointLight(fs_in.FragPos, PointLight[i]);
+			lighting += CalculatePointLight(PointLight[i]);
 		}
 
 	if (UseDirLights)
 		for (int i = 0; i < DirLightCount; i++)
 		{
-			LightComponents light = CalculateDirLight(fs_in.FragPos, DirLight[i]);
-			float shadow = CalculateDirShadow(fs_in.FragPos, DirLight[i]);
+			LightComponents light = CalculateDirLight(DirLight[i]);
+			float shadow = CalculateDirShadow(DirLight[i]);
 			lighting += (light.Ambient + (1.0 - shadow) * (light.Diffuse + light.Specular)) * DirLight[i].Color;
 		}
 
 	if (UseSpotLights)
 		for (int i = 0; i < SpotLightCount; i++)
 		{
-			LightComponents light = CalculateDirLight(fs_in.FragPos, SpotLight[i]);
-			float shadow = clamp (CalculateDirShadow(fs_in.FragPos, SpotLight[i]) + CalculateCircularShadow(fs_in.FragPos, SpotLight[i]), 0, 1);
+			LightComponents light = CalculateDirLight(SpotLight[i]);
+			float shadow = clamp (CalculateDirShadow(SpotLight[i]) + CalculateCircularShadow(SpotLight[i]), 0, 1);
 			lighting += (light.Ambient + (1.0 - shadow) * (light.Diffuse + light.Specular)) * SpotLight[i].Color;
 		}
 
