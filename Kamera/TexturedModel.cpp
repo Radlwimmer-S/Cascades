@@ -17,9 +17,10 @@ TexturedModel::~TexturedModel()
 
 void TexturedModel::Render(Shader& shader) const
 {
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_Texture.GetId());
-	glUniform1i(glGetUniformLocation(shader.Program, "objectTexture"), 0);
+	glUniform1i(glGetUniformLocation(shader.Program, "objectTexture"), 1);
+	glCheckError();
 
 	Model::Render(shader);
 }

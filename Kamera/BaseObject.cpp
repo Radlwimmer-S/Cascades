@@ -1,11 +1,11 @@
 #include "BaseObject.h"
 #include <GLFW/glfw3.h>
 
-BaseObject::BaseObject(glm::vec3 position) : m_position(position), m_orientation(glm::quat())
+BaseObject::BaseObject(glm::vec3 position) : BaseObject(position, glm::quat())
 {
 }
 
-BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton)
+BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton), m_isEnabled(true)
 {
 }
 
@@ -43,6 +43,16 @@ glm::quat BaseObject::GetOrientation() const
 void BaseObject::Rotate(glm::quat rotation)
 {
 	m_orientation = glm::normalize(glm::quat(rotation) * m_orientation);
+}
+
+void BaseObject::IsEnabled(bool isEnabled)
+{
+	m_isEnabled = isEnabled;
+}
+
+bool BaseObject::IsEnabled() const
+{
+	return m_isEnabled;
 }
 
 void BaseObject::ProcessInput(GLFWwindow& window)

@@ -6,16 +6,15 @@ public:
 	DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane = 1);
 	virtual ~DirectionalLight();
 
-	void UpdateUniforms(Shader& shader, LightIndexer& indizes) override;
+	void UpdateUniforms(Shader& shader, int lightIndex, int textureIndex) override;
 
 	void PreRender() const override;
 	void RenderDebug(Shader& shader) const override;
 
 protected:
+	int GetType() override;
 	glm::mat4 GetProjection() const override;
 	glm::mat4 GetView() const;
 	glm::mat4 GetShadowMatrix() const;
-
-	GLfloat m_nearPlane;
 };
 

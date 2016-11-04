@@ -7,9 +7,8 @@ public:
 	SpotLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat fovy, GLfloat farPlane, GLfloat nearPlane = 1);
 	virtual ~SpotLight();
 
-	void UpdateUniforms(Shader& shader, LightIndexer& indizes) override;
-
 protected:
+	int GetType() override;
 	glm::mat4 GetProjection() const override;
 	float m_fovy;
 };

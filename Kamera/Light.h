@@ -3,10 +3,10 @@
 class Light : public BaseObject
 {
 public:
-	Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int farPlane);
+	Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane);
 	virtual ~Light();
 
-	virtual void UpdateUniforms(Shader& shader, LightIndexer& indizes) = 0;
+	virtual void UpdateUniforms(Shader& shader, int lightIndex, int textureIndex);
 
 	virtual void PreRender() const = 0;
 	virtual void PostRender() const;
@@ -17,6 +17,8 @@ public:
 		return m_shadowShader;
 	}
 
+	virtual int GetType() = 0;
+
 protected:
 	virtual glm::mat4 GetProjection() const = 0;
 
@@ -26,6 +28,7 @@ protected:
 	const GLuint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 	Shader& m_shadowShader;
 	GLfloat m_farPlane;
+	GLfloat m_nearPlane;
 
 	BaseObject* m_debugCube;
 };

@@ -68,7 +68,7 @@ int main()
 
 	Engine* engine = Engine::Instance();
 
-	Shader* shader = new Shader("./shaders/default.vert.shader", "./shaders/default.frag.shader");
+	Shader* shader = new Shader("./shaders/default.vert.shader", "./shaders/uniformLight.frag.shader");
 	if (!shader->IsValid())
 	{
 		std::cin.ignore();
@@ -99,14 +99,14 @@ int main()
 
 	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 50, -10);
 	engine->AddLight(*mainLight);
+	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 10, 10), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 30, 50, 1);
+	engine->AddLight(*flashLight);
 
 	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
 	engine->AddLight(*greenLight);
 	PointLight* redLight = new PointLight(glm::vec3(5, 4, 3), glm::vec3(0.5f, 0, 0), *pointLightShader, 25);
 	engine->AddLight(*redLight);
 
-	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 10, 10), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 30, 50, 1);
-	engine->AddLight(*flashLight);
 
 	engine->Start();
 

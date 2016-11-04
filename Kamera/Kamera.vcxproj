@@ -193,6 +193,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <None Include="shaders\PointLight.frag.shader" />
     <None Include="shaders\PointLight.geom.shader" />
     <None Include="shaders\PointLight.vert.shader" />
+    <None Include="shaders\uniformLight.frag.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,6 +10,9 @@ const int SHADER_TEXTURE = 2;
 const int KEY_COUNT = 512;
 const float KEY_SENSITIVITY = 0.05f;
 const float MOUSE_SENSITIVITY = 0.005f;
+const int DIR_LIGHT = 0;
+const int SPOT_LIGHT = 1;
+const int POINT_LIGHT = 2;
 
 static GLuint WIDTH = 1920;
 static GLuint HEIGHT = 1080;

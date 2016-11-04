@@ -136,5 +136,8 @@
     <None Include="shaders\DirectionalLight.vert.shader">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\uniformLight.frag.shader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

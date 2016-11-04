@@ -163,10 +163,9 @@ void Engine::Loop()
 
 void Engine::UpdateUniforms() const
 {
-	LightIndexer indizes = LightIndexer(MaxTexturesPerModel);
-	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+	for (int i = 0; i < m_lights.size(); ++i)
 	{
-		(*it)->UpdateUniforms(*m_shader, indizes);
+		m_lights[i]->UpdateUniforms(*m_shader, i, MaxTexturesPerModel + i);
 	}
 
 	glm::vec3 cameraPos = m_camera->GetPosition();

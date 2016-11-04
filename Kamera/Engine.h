@@ -52,7 +52,7 @@ protected:
 	std::vector<Light*> m_lights;
 	int m_activeObject;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
-	const GLuint MaxTexturesPerModel = 2;
+	const GLuint MaxTexturesPerModel = 3;
 
 
 

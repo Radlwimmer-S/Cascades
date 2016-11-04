@@ -24,6 +24,9 @@ public:
 	void SetOrientation(glm::quat orientation);
 	glm::quat GetOrientation() const;
 	void Rotate(glm::quat rotation);
+
+	void IsEnabled(bool isEnabled);
+	bool IsEnabled() const;
 	
 	virtual void ProcessInput(GLFWwindow& window);
 	virtual bool KeyCallback(int key, int scancode, int action, int mode);
@@ -34,5 +37,6 @@ public:
 protected:
 	glm::vec3 m_position;
 	glm::quat m_orientation;
+	bool m_isEnabled;
 };
 
