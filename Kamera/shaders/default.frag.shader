@@ -108,37 +108,32 @@ float CalculatePointShadow(PointLightSource light)
 	return shadow;
 }
 
-vec3 CalculatePointLight(PointLightSource light)
+LightComponents CalculatePointLight(PointLightSource light)
 {
-	float distance = length(light.Pos - fs_in.FragPos);
-	float distanceStrength = (1.0f - distance / light.far_plane);
+	LightComponents lighting;
 
 	// Ambient
 	float ambientStrength = 0.1f;
-	vec3 ambient = ambientStrength * light.Color;
+	lighting.Ambient = ambientStrength;
 
 	// Diffuse 
 	float diffuseStrength = 1.0f;
 	vec3 norm = normalize(fs_in.Normal);
 	vec3 lightDir = normalize(light.Pos - fs_in.FragPos);
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = diffuseStrength * diff * light.Color;
+	lighting.Diffuse = diffuseStrength * diff;
 
 	// Specular
 	float specularStrength = 0.1f;
 	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
-	vec3 specular = specularStrength * spec * light.Color;
-
-	// Calculate shadow
-	float shadow = CalculatePointShadow(light);
-	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * distanceStrength;
+	lighting.Specular = specularStrength * spec;
 
 	return lighting;
 }
 
-float CalculateDirShadow(DirLightSource light)
+float CalculateDirShadow(DirLightSource light, float baseBias)
 {
 	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
 
@@ -154,7 +149,9 @@ float CalculateDirShadow(DirLightSource light)
 	// Calculate bias (based on depth map resolution and slope)
 	vec3 normal = normalize(fs_in.Normal);
 	vec3 lightDir = normalize(light.Pos);
-	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+	float bias = max(baseBias / 10 * (1.0 - dot(normal, lightDir)), baseBias);
+
 	// Check whether current frag pos is in shadow
 	// float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
 	// PCF
@@ -214,6 +211,12 @@ float CalculateCircularShadow(DirLightSource light)
 	return clamp(distanceToCenter * distanceToCenter, 0, 1);
 }
 
+float CalculateDistanceShadow(PointLightSource light)
+{
+	float distance = length(light.Pos - fs_in.FragPos);
+	return distance / light.far_plane;
+}
+
 void main()
 {
 	vec3 color = DetermineFragmentColor(mode);
@@ -229,14 +232,18 @@ void main()
 	if (UsePointLights)
 		for (int i = 0; i < PointLightCount; i++)
 		{
-			lighting += CalculatePointLight(PointLight[i]);
+			LightComponents light = CalculatePointLight(PointLight[i]);
+			float shadow = CalculatePointShadow(PointLight[i]);
+			float distance = CalculateDistanceShadow(PointLight[i]);
+			shadow = clamp(shadow + distance, 0, 1);
+			lighting += (light.Ambient + (1.0 - shadow) * (light.Diffuse + light.Specular)) * PointLight[i].Color;
 		}
 
 	if (UseDirLights)
 		for (int i = 0; i < DirLightCount; i++)
 		{
 			LightComponents light = CalculateDirLight(DirLight[i]);
-			float shadow = CalculateDirShadow(DirLight[i]);
+			float shadow = CalculateDirShadow(DirLight[i], 0.005);
 			lighting += (light.Ambient + (1.0 - shadow) * (light.Diffuse + light.Specular)) * DirLight[i].Color;
 		}
 
@@ -244,7 +251,9 @@ void main()
 		for (int i = 0; i < SpotLightCount; i++)
 		{
 			LightComponents light = CalculateDirLight(SpotLight[i]);
-			float shadow = clamp (CalculateDirShadow(SpotLight[i]) + CalculateCircularShadow(SpotLight[i]), 0, 1);
+			float shadow = CalculateDirShadow(SpotLight[i], 0.001);
+			float circular = CalculateCircularShadow(SpotLight[i]);
+			shadow = clamp(shadow + circular, 0, 1);
 			lighting += (light.Ambient + (1.0 - shadow) * (light.Diffuse + light.Specular)) * SpotLight[i].Color;
 		}
 
