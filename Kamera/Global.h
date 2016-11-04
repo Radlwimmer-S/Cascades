@@ -26,6 +26,7 @@ struct LightIndexer
 	LightIndexer(int textureOffset) : TextureIndex(textureOffset) {}
 
 	int DirIndex = 0;
+	int SpotIndex = 0;
 	int PointIndex = 0;
 	int TextureIndex = 0;
 };

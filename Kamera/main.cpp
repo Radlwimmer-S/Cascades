@@ -7,6 +7,7 @@
 #include "TexturedModel.h"
 #include "Texture.h"
 #include "Box.h"
+#include "SpotLight.h"
 
 std::vector<ControlPoint>* GetPath()
 {
@@ -76,14 +77,14 @@ int main()
 	engine->SetShader(*shader);
 
 	Shader* pointLightShader = new Shader("./shaders/PointLight.vert.shader", "./shaders/PointLight.frag.shader", "./shaders/PointLight.geom.shader");
-	if (!shader->IsValid())
+	if (!pointLightShader->IsValid())
 	{
 		std::cin.ignore();
 		return -1;
 	}
 
 	Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert.shader", "./shaders/DirectionalLight.frag.shader");
-	if (!shader->IsValid())
+	if (!directionalLightShader->IsValid())
 	{
 		std::cin.ignore();
 		return -1;
@@ -96,13 +97,16 @@ int main()
 	Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
-	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 50, 1);
+	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 50, -10);
 	engine->AddLight(*mainLight);
 
-	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 25);
+	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
 	engine->AddLight(*greenLight);
 	PointLight* redLight = new PointLight(glm::vec3(5, 4, 3), glm::vec3(0.5f, 0, 0), *pointLightShader, 25);
 	engine->AddLight(*redLight);
+
+	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 10, 10), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 30, 50, 1);
+	engine->AddLight(*flashLight);
 
 	engine->Start();
 

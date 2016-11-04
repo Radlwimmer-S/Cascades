@@ -3,7 +3,7 @@
 class DirectionalLight : public Light
 {
 public:
-	DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, int farPlane, int nearPlane);
+	DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane = 1);
 	virtual ~DirectionalLight();
 
 	void UpdateUniforms(Shader& shader, LightIndexer& indizes) override;

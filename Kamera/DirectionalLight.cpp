@@ -5,7 +5,7 @@
 #include "Box.h"
 
 
-DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, int farPlane, int nearPlane) : Light(position, glm::quat(), color, shadowShader, farPlane), m_nearPlane(nearPlane)
+DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, glm::quat(), color, shadowShader, farPlane), m_nearPlane(nearPlane)
 {
 	glGenFramebuffers(1, &depthMapFBO);
 	// - Create depth texture
@@ -36,7 +36,7 @@ DirectionalLight::~DirectionalLight()
 void DirectionalLight::UpdateUniforms(Shader& shader, LightIndexer& indizes)
 {
 	GLint lightPosLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(indizes.DirIndex) + "].Pos").c_str());
-	glUniform3f(lightPosLoc, -m_position.x, -m_position.y, -m_position.z);
+	glUniform3f(lightPosLoc, m_position.x, m_position.y, m_position.z);
 	glCheckError();
 
 	GLint lightColorLoc = glGetUniformLocation(shader.Program, ("DirLight[" + std::to_string(indizes.DirIndex) + "].Color").c_str());
