@@ -197,7 +197,7 @@ vec3 CalculateDirLightSource(in LightSource light)
 
 vec3 CalculateSpotLightSource(in LightSource light)
 {
-	LightComponents components = CalculateLight(light, normalize(light.Pos));
+	LightComponents components = CalculateLight(light, normalize(light.Pos - fs_in.FragPos));
 	float shadow = CalculateDirShadow(light, 0.001);
 	float circular = CalculateCircularShadow(light);
 	shadow = clamp(shadow + circular, 0, 1);

@@ -252,6 +252,15 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 		m_instance->m_activeObject = index;
 	}
 
+	if (action == GLFW_PRESS && key == GLFW_KEY_DELETE)
+	{
+		int index = m_instance->m_activeObject;
+		if (index != -1)
+		{
+			Light* activeLight = m_instance->m_lights[index];
+			activeLight->IsEnabled(!activeLight->IsEnabled());
+		}
+	}
 }
 
 void Engine::CursorPosCallback(GLFWwindow* window, double x, double y)
