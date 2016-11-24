@@ -123,8 +123,8 @@ void CameraPath::CalculateApprox()
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, PATH_APPROXIMATION * 3 * sizeof(GLfloat), pathApprox, GL_STATIC_DRAW);
-	glVertexAttribPointer(SHADER_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(SHADER_POSITION);
+	glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(VS_IN_POSITION);
 
 	glBindVertexArray(0); // Unbind vao
 }

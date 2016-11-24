@@ -28,7 +28,7 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	m_debugCube = new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 0.1f)), 36, V, m_color);
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 0.1f)), 12, m_color);
 }
 
 PointLight::~PointLight()

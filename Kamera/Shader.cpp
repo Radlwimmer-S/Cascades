@@ -3,13 +3,15 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "Shlwapi.h"
+#include "Pathcch.h"
 
 Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : m_isValid(true)
 {
 	GLuint vertex, fragment, geometry = 0;
 	GLint success;
 	GLchar infoLog[512];
-	
+
 	// Shader Program
 	Program = glCreateProgram();
 
@@ -41,9 +43,8 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLcha
 		glDeleteShader(geometry);
 }
 
-GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
+std::string Shader::ReadFile(const GLchar* shaderPath)
 {
-	// 1. Retrieve the vertex/fragment source code from filePath
 	std::string shaderCode;
 	std::ifstream shaderFile;
 	// ensures ifstream objects can throw exceptions:
@@ -64,6 +65,15 @@ GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
 	{
 		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ\n" << shaderPath << std::endl;
 	}
+
+	return shaderCode;
+}
+
+GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
+{
+	std::string shaderCode = ReadFile(shaderPath);	
+	HandleIncludes(shaderCode, shaderPath);
+
 	const GLchar* vShaderCode = shaderCode.c_str();
 	// 2. Compile shader
 	GLuint shader;
@@ -83,6 +93,26 @@ GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
 	}
 
 	return shader;
+}
+
+void Shader::HandleIncludes(std::string& shaderCode, const GLchar* shaderPath)
+{
+	GLchar parentPath[MAX_PATH];
+	_splitpath_s(shaderPath, nullptr, 0, parentPath, MAX_PATH, nullptr, 0, nullptr, 0);
+
+	char includeText[] = "#pragma include \"";
+	int textLength = sizeof(includeText) - 1;
+		
+	for (size_t includeStart = shaderCode.find(includeText, 0); includeStart != std::string::npos; includeStart = shaderCode.find(includeText, 0))
+	{
+		size_t includeEnd = shaderCode.find("\"", includeStart + textLength);
+		std::string filePath(parentPath);
+		std::string fileName = shaderCode.substr(includeStart + textLength, (includeEnd)- (includeStart + textLength));
+
+		filePath.append(fileName);
+		std::string includeCode = ReadFile(filePath.c_str());
+		shaderCode.replace(includeStart, (includeEnd + 1) - includeStart, includeCode);
+	}
 }
 
 GLchar* Shader::GetShaderName(GLenum shaderType)

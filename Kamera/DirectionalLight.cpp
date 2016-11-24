@@ -27,7 +27,7 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	m_debugCube = new Model(m_position, glm::quat(), Box::GetV(glm::vec3(0.1f, 0.1f, 1)), 36, V, m_color);
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 1)), 12, m_color);
 }
 
 DirectionalLight::~DirectionalLight()

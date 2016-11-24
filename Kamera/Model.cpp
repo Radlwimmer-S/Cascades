@@ -4,34 +4,15 @@
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
 
-Model::Model(glm::vec3 position, glm::quat orientaton, GLfloat* vertices, GLsizei vertexCount, VertexFormat vertexFormat, glm::vec3 color) : BaseObject(position, orientaton), m_vertexCount(vertexCount), m_color(color), m_colorMode(ColorOnly)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color) : BaseObject(position, orientaton), triCount(triCount), m_color(color), m_colorMode(ColorOnly)
 {
-	const int VertexSize = vertexFormat * sizeof(GLfloat);
-
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount * VertexSize, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, triCount * sizeof(Triangle), tris, GL_STATIC_DRAW);
 
-	glBindVertexArray(m_vao);
-	// Position attribute
-	glVertexAttribPointer(SHADER_POSITION, 3, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)0);
-	glEnableVertexAttribArray(SHADER_POSITION);
-	if (vertexFormat >= VN)
-	{
-		// Normal attribute
-		glVertexAttribPointer(SHADER_NORMAL, 3, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(SHADER_NORMAL);
-		if (vertexFormat == VNT)
-		{
-			// Texture attribute
-			glVertexAttribPointer(SHADER_TEXTURE, 2, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)(6 * sizeof(GLfloat)));
-			glEnableVertexAttribArray(SHADER_TEXTURE);
-		}
-	}
-
-	glBindVertexArray(0);
+	Vertex::ConfigVertexArrayObject(m_vao);
 }
 
 Model::~Model()
@@ -61,7 +42,7 @@ void Model::Render(Shader& shader) const
 
 	glBindVertexArray(m_vao);
 	glCheckError();
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, triCount * 3);
 
 	glCheckError();
 

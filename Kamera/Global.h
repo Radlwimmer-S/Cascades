@@ -4,9 +4,10 @@
 #include <iostream>
 
 const int PATH_APPROXIMATION = 100;
-const int SHADER_POSITION = 0;
-const int SHADER_NORMAL = 1;
-const int SHADER_TEXTURE = 2;
+const int VS_IN_POSITION = 0;
+const int VS_IN_NORMAL = 1;
+const int VS_IN_UV = 2;
+const int VS_IN_TANGENT = 3;
 const int KEY_COUNT = 512;
 const float KEY_SENSITIVITY = 0.05f;
 const float MOUSE_SENSITIVITY = 0.005f;

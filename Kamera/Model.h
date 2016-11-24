@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "BaseObject.h"
 #include "Enums.h"
+#include "Triangle.h"
 
 class Shader;
 class Texture;
@@ -10,7 +11,7 @@ class Texture;
 class Model : public BaseObject
 {
 public:
-	Model(glm::vec3 position, glm::quat orientaton, GLfloat* vertices, GLsizei vertexCount, VertexFormat vertexFormat, glm::vec3 color);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color);
 	virtual ~Model();
 
 	void Update(GLfloat deltaTime) override;
@@ -22,7 +23,7 @@ public:
 	}
 protected:
 	GLuint m_vbo;
-	GLsizei m_vertexCount;
+	GLsizei triCount;
 	glm::vec3 m_color;
 	ColorBlendMode m_colorMode;
 	GLuint m_vao;

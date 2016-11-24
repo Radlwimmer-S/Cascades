@@ -9,6 +9,7 @@
 #include "Box.h"
 #include "SpotLight.h"
 
+
 std::vector<ControlPoint>* GetPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
@@ -45,16 +46,18 @@ std::vector<ControlPoint>* GetPath()
 Scene* GetScene()
 {
 	Scene* scene = new Scene();
+	Texture* floorTex = new Texture("textures/brickwall.jpg", "wall");
+	Texture* floorNormal = new Texture("textures/brickwall_normal.jpg", "wall_normal");
+	scene->AddObject(new TexturedModel(glm::vec3(0, -0.2f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(20, 0.2f, 20), glm::vec2(10, 10)), 12, glm::vec3(0.3f, 0.3f, 0.3f), *floorTex, floorNormal));
 	Texture* containerTex = new Texture("textures/container.jpg", "box");
-	scene->AddObject(new Model(glm::vec3(0, -0.2f, 0), MakeQuad(0, 0, 0), Box::GetVN(glm::vec3(20, 0.2f, 20)), 36, VN, glm::vec3(0.3f, 0.3f, 0.3f)));
-	scene->AddObject(new TexturedModel(glm::vec3(-4, 3, -3), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-7, 1, -3), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 4), MakeQuad(0, 50, 15), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetVNT(glm::vec3(1, 1, 1)), 36, VNT, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-4, 3, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-7, 1, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 4), MakeQuad(0, 50, 15), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
 	return scene;
 }
 
@@ -99,7 +102,7 @@ int main()
 
 	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 50, -10);
 	engine->AddLight(*mainLight);
-	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 10, 10), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 30, 50, 1);
+	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 5, 10), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 60, 50, 1);
 	engine->AddLight(*flashLight);
 
 	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);

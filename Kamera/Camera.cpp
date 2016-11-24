@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 
-Camera::Camera() : BaseObject(glm::vec3(0, 20, 0), MakeQuad(90, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
+Camera::Camera() : BaseObject(glm::vec3(0, 25, 0), MakeQuad(90, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
 {
 }
 
