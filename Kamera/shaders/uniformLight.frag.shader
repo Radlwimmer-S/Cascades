@@ -50,14 +50,12 @@ uniform LightSource Lights[LIGHT_COUNT];
 uniform int mode;
 uniform vec3 objectColor;
 uniform sampler2D objectTexture;
+
 uniform sampler2D normalMap;
+uniform float bumbiness = 2f;
+vec3 normal;
 
 uniform vec3 viewPos;
-
-bool IsTextureBound(in sampler2D tex)
-{
-	return textureSize(tex, 0).x > 0;
-}
 
 vec3 DetermineFragmentColor(in int mode)
 {
@@ -124,7 +122,7 @@ LightComponents CalculateLight(in LightSource light, in vec3 lightDir)
 
 	// Diffuse 
 	float diffuseStrength = 1.0f;
-	vec3 norm = normalize(fs_in.Normal);
+	vec3 norm = normalize(normal);
 	float diff = max(dot(norm, lightDir), 0.0);
 	lighting.Diffuse = diffuseStrength * diff;
 
@@ -152,7 +150,6 @@ float CalculateDirShadow(in LightSource light, in float baseBias)
 	// Get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z;
 	// Calculate bias (based on depth map resolution and slope)
-	vec3 normal = normalize(fs_in.Normal);
 	vec3 lightDir = normalize(light.Pos);
 
 	float bias = max(baseBias / 10 * (1.0 - dot(normal, lightDir)), baseBias);
@@ -227,19 +224,31 @@ void main()
 {
 	vec3 color = DetermineFragmentColor(mode);
 
-	//No Normals --> no lighting
-	if (fs_in.Normal == vec3(0.0f, 0.0f, 0.0f) || !EnableLighting)
+	if (!EnableLighting)
 	{
 		FragColor = vec4(color, 1.0f);
 		return;
 	}
 
-	if (IsTextureBound(normalMap))
+	if (texture(normalMap, fs_in.UV).rgb != vec3(0.0f, 0.0f, 0.0f))
 	{
 		// Obtain normal from normal map in range [0,1]
-		//fs_in.Normal = texture(normalMap, fs_in.UV).rgb;
+		normal = texture(normalMap, fs_in.UV).rgb;
 		// Transform normal vector to range [-1,1]
-		//fs_in.Normal = normalize(normal * 2.0 - 1.0);
+		normal = normalize(normal * 2.0 - 1.0);
+		// Apply "Bumpiness"
+		normal = normalize(normal * vec3(bumbiness, bumbiness, 1.0f));
+		// Convert to global
+		normal = normalize(fs_in.TBN * normal);
+	}
+	else if (fs_in.Normal != vec3(0.0f, 0.0f, 0.0f))
+	{
+		normal = fs_in.Normal;
+	}
+	else
+	{
+		FragColor = vec4(color, 1.0f);
+		return;
 	}
 
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);

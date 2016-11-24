@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "Global.h"
+#include <algorithm>
 
 Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
@@ -182,6 +183,10 @@ void Engine::UpdateUniforms() const
 	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
+
+	GLuint bumbinessLocation = glGetUniformLocation(m_shader->Program, "bumbiness");
+	glUniform1f(bumbinessLocation, m_bumpiness);
+	glCheckError();
 }
 
 void Engine::RenderLights() const
@@ -244,23 +249,43 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	if (action == GLFW_PRESS && key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
-	{
-		int index = key - GLFW_KEY_0 - 1;
-		if (index >= m_instance->m_lights.size())
-			index = -1;
-		m_instance->m_activeObject = index;
-	}
-
-	if (action == GLFW_PRESS && key == GLFW_KEY_DELETE)
-	{
-		int index = m_instance->m_activeObject;
-		if (index != -1)
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		switch (key)
 		{
-			Light* activeLight = m_instance->m_lights[index];
-			activeLight->IsEnabled(!activeLight->IsEnabled());
+		case GLFW_KEY_0:
+		case GLFW_KEY_1:
+		case GLFW_KEY_2:
+		case GLFW_KEY_3:
+		case GLFW_KEY_4:
+		case GLFW_KEY_5:
+		case GLFW_KEY_6:
+		case GLFW_KEY_7:
+		case GLFW_KEY_8:
+		case GLFW_KEY_9:
+		{
+			int index = key - GLFW_KEY_0 - 1;
+			if (index >= m_instance->m_lights.size())
+				index = -1;
+			m_instance->m_activeObject = index;
+		} break;
+
+		case GLFW_KEY_DELETE:
+		{
+			int index = m_instance->m_activeObject;
+			if (index != -1)
+			{
+				Light* activeLight = m_instance->m_lights[index];
+				activeLight->IsEnabled(!activeLight->IsEnabled());
+			}
+		} break;
+
+		case GLFW_KEY_KP_SUBTRACT:
+			m_instance->m_bumpiness = std::fmaxf(0, m_instance->m_bumpiness - 0.1f);
+			break;
+		case GLFW_KEY_KP_ADD:
+			m_instance->m_bumpiness = std::fminf(2, m_instance->m_bumpiness + 0.1f);
+			break;
 		}
-	}
 }
 
 void Engine::CursorPosCallback(GLFWwindow* window, double x, double y)

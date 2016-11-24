@@ -19,19 +19,23 @@ void TexturedModel::Render(Shader& shader) const
 {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_Texture.GetId());
-	glUniform1i(glGetUniformLocation(shader.Program, "objectTexture"), 1);
+	int textureLoc = glGetUniformLocation(shader.Program, "objectTexture");
+	glUniform1i(textureLoc, 1);
 	glCheckError();
 
+	GLint normalLoc = glGetUniformLocation(shader.Program, "normalMap");
 	if (m_normalMap != nullptr)
 	{
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_normalMap->GetId());
-		glUniform1i(glGetUniformLocation(shader.Program, "normalMap"), 2);
+		glUniform1i(normalLoc, 2);
 		glCheckError();
 	}
 
 	Model::Render(shader);
 	
-	glUniform1i(glGetUniformLocation(shader.Program, "objectTexture"), 0);
-	glUniform1i(glGetUniformLocation(shader.Program, "normalMap"), 0);
+	glUniform1i(textureLoc, 0);
+	glCheckError();
+	glUniform1i(normalLoc, 0);
+	glCheckError();
 }

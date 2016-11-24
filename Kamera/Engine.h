@@ -51,11 +51,9 @@ protected:
 	Camera* m_camera;
 	std::vector<Light*> m_lights;
 	int m_activeObject;
+	float m_bumpiness = 1.0f;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 	const GLuint MaxTexturesPerModel = 3;
-
-
-
 
 	static Engine* m_instance;
 	explicit Engine(char* windowTitle, bool fullscreen);

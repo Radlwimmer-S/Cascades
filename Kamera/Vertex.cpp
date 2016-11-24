@@ -30,7 +30,7 @@ void Vertex::ConfigVertexArrayObject(GLuint vao)
 
 	// Texture attribute
 	glVertexAttribPointer(VS_IN_TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(8 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(VS_IN_UV);
+	glEnableVertexAttribArray(VS_IN_TANGENT);
 
 	glBindVertexArray(0);
 }
