@@ -8,7 +8,7 @@ Camera::Camera() : BaseObject(glm::vec3(0, 10, 10), MakeQuad(45, 0, 0)), m_mode(
 {
 }
 
-Camera::Camera(CameraPath* path) : BaseObject(glm::vec3(0, 0, 0)), m_mode(Automatic), m_type(FPS), m_path(path), m_renderPath(true)
+Camera::Camera(CameraPath* path) : BaseObject(glm::vec3(0, 10, 10), MakeQuad(45, 0, 0)), m_mode(Manual), m_type(FPS), m_path(path), m_renderPath(false)
 {
 }
 

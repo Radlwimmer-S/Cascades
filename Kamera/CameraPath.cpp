@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include <glm/gtc/quaternion.hpp>
+#include "Box.h"
 
 CameraPath::CameraPath(std::vector<ControlPoint>& controlPoints) : m_controlPoints(controlPoints), m_controlCount(controlPoints.size()), m_timer(0.0f), m_duration(controlPoints[controlPoints.size() - 1].TimeStamp)
 {
@@ -27,8 +28,9 @@ void CameraPath::Initialize(bool recalculateTimeSteps)
 	//DoubleControlPoints();
 	//DoubleControlPoints();
 	//if (recalculateTimeSteps)
-		CalculateTimeSteps();
+	CalculateTimeSteps();
 	CalculateApprox();
+	m_debugCube = new Model(glm::vec3(0), glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 0.1f)), 12, glm::vec3(1.0f, 0.1f, 0.0f));
 }
 
 void CameraPath::Update(GLfloat deltaTime)
@@ -58,6 +60,12 @@ void CameraPath::Render(Shader& shader) const
 	glBindVertexArray(m_vao);
 	glDrawArrays(GL_LINE_STRIP, 0, PATH_APPROXIMATION);
 	glBindVertexArray(0);
+
+	for (std::vector<ControlPoint>::const_iterator it = m_controlPoints.begin(); it != m_controlPoints.end(); ++it)
+	{
+		m_debugCube->SetPosition(it->Position);
+		m_debugCube->Render(shader);
+	}
 }
 
 glm::vec3 CameraPath::GetPosByTime(GLfloat timestamp) const
@@ -72,7 +80,7 @@ glm::quat CameraPath::GetRotByTime(GLfloat timestamp) const
 
 void CameraPath::DoubleControlPoints()
 {
-	std::vector<ControlPoint>* newCP = new std::vector<ControlPoint>();
+	/*std::vector<ControlPoint>* newCP = new std::vector<ControlPoint>();
 	for (int i = 0; i < m_controlCount - 1; i++)
 	{
 		newCP->push_back(m_controlPoints[i]);
@@ -83,7 +91,7 @@ void CameraPath::DoubleControlPoints()
 	}
 	newCP->push_back(m_controlPoints[m_controlCount - 1]);
 	m_controlPoints = *newCP;
-	m_controlCount = 2 * m_controlCount - 1;
+	m_controlCount = 2 * m_controlCount - 1;*/
 }
 
 void CameraPath::CalculateTimeSteps()
@@ -153,10 +161,10 @@ GLuint CameraPath::GetIndex(GLfloat timestamp) const
 glm::vec3 CameraPath::CatmullRomSpline(const std::vector<ControlPoint>& cp, float t) const
 {
 	// indices of the relevant control points
-	int i0 = glm::clamp<int>(t - 1, 0, cp.size() - 1);
-	int i1 = glm::clamp<int>(t - 0, 0, cp.size() - 1);
-	int i2 = glm::clamp<int>(t + 1, 0, cp.size() - 1);
-	int i3 = glm::clamp<int>(t + 2, 0, cp.size() - 1);
+	int i0 = (int)((t - 1) + cp.size()) % cp.size();
+	int i1 = t;
+	int i2 = (int)(t + 1) % cp.size();
+	int i3 = (int)(t + 2) % cp.size();
 
 	// parameter on the local curve interval
 	float local_t = glm::fract(t);
@@ -167,18 +175,33 @@ glm::vec3 CameraPath::CatmullRomSpline(const std::vector<ControlPoint>& cp, floa
 glm::quat CameraPath::Squad(const std::vector<ControlPoint>& cp, float t) const
 {
 	// indices of the relevant control points
-	int i0 = glm::clamp<int>(t - 1, 0, cp.size() - 1);
-	int i1 = glm::clamp<int>(t - 0, 0, cp.size() - 1);
-	int i2 = glm::clamp<int>(t + 1, 0, cp.size() - 1);
-	int i3 = glm::clamp<int>(t + 2, 0, cp.size() - 1);
+	int i0 = (int)((t - 1) + cp.size()) % cp.size();
+	int i1 = t;
+	int i2 = (int)(t + 1) % cp.size();
+	int i3 = (int)(t + 2) % cp.size();
 
 	// parameter on the local curve interval
 	float local_t = glm::fract(t);
 
+	glm::vec3 v0 = ClampAngles(cp[i0].Rotation - cp[i1].Rotation);
+	glm::quat q0 = MakeQuad(v0);
+	glm::vec3 v1 = glm::vec3(0);
+	glm::quat q1 = MakeQuad(v1);
+	glm::vec3 v2 = ClampAngles(cp[i2].Rotation - cp[i1].Rotation);
+	glm::quat q2 = MakeQuad(v2);
+	glm::vec3 v3 = ClampAngles(cp[i3].Rotation - cp[i1].Rotation);
+	glm::quat q3 = MakeQuad(v3);
+
 	//return glm::normalize(glm::slerp(cp[i1].Rotation, cp[i2].Rotation, local_t));
 
-	glm::quat s1 = glm::normalize(glm::intermediate(cp[i0].Rotation, cp[i1].Rotation, cp[i2].Rotation));
-	glm::quat s2 = glm::normalize(glm::intermediate(cp[i1].Rotation, cp[i2].Rotation, cp[i3].Rotation));
+	glm::quat s1 = glm::intermediate(q0, q1, q2);
+	glm::quat s2 = glm::intermediate(q1, q2, q3);
 
-	return glm::normalize(glm::squad(cp[i1].Rotation, cp[i2].Rotation, s1, s2, local_t));
+	glm::quat modify = glm::squad(q1, q2, s1, s2, local_t);
+
+	glm::vec3 modifyVec = glm::degrees(glm::eulerAngles(modify));
+
+	glm::vec3 rot = cp[i1].Rotation + modifyVec;
+
+	return glm::normalize(MakeQuad(rot));
 }

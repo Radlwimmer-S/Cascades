@@ -2,20 +2,21 @@
 #include <vector>
 #include <glm/gtx/quaternion.hpp>
 #include <GL/glew.h>
+#include "Model.h"
 
 class Shader;
 
 struct ControlPoint
 {
-	ControlPoint() : Position(glm::vec3()), Rotation(glm::quat()), TimeStamp(0)
+	ControlPoint() : Position(glm::vec3()), Rotation(glm::vec3()), TimeStamp(0)
 	{}
-	ControlPoint(glm::vec3 position, glm::quat rotation) : Position(position), Rotation(rotation), TimeStamp(0)
+	ControlPoint(glm::vec3 position, glm::vec3 rotation) : Position(position), Rotation(rotation), TimeStamp(0)
 	{}
-	ControlPoint(glm::vec3 position, glm::quat rotation, GLfloat timeStamp) : Position(position), Rotation(rotation), TimeStamp(timeStamp)
+	ControlPoint(glm::vec3 position, glm::vec3 rotation, GLfloat timeStamp) : Position(position), Rotation(rotation), TimeStamp(timeStamp)
 	{}
 
 	glm::vec3 Position;
-	glm::quat Rotation;
+	glm::vec3 Rotation;
 	GLfloat TimeStamp;
 };
 
@@ -54,7 +55,6 @@ private:
 	GLuint GetIndex(GLfloat timestamp) const;
 	glm::vec3 CatmullRomSpline(const std::vector<ControlPoint>& cp, float t) const;
 	glm::quat Squad(const std::vector<ControlPoint>& cp, float t) const;
-	void CheckQuatRotation(glm::quat& q1, glm::quat& q2) const;
 
 	std::vector<ControlPoint>& m_controlPoints;
 	GLuint m_controlCount;
@@ -66,5 +66,7 @@ private:
 	GLuint m_duration;
 	glm::vec3 m_position;
 	glm::quat m_rotation;
+
+	Model* m_debugCube;
 };
 
