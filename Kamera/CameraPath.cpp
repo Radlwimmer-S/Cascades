@@ -24,9 +24,9 @@ CameraPath::~CameraPath()
 
 void CameraPath::Initialize(bool recalculateTimeSteps)
 {
-	DoubleControlPoints();
-	DoubleControlPoints();
-	if (recalculateTimeSteps)
+	//DoubleControlPoints();
+	//DoubleControlPoints();
+	//if (recalculateTimeSteps)
 		CalculateTimeSteps();
 	CalculateApprox();
 }
@@ -175,7 +175,7 @@ glm::quat CameraPath::Squad(const std::vector<ControlPoint>& cp, float t) const
 	// parameter on the local curve interval
 	float local_t = glm::fract(t);
 
-	return glm::normalize(glm::slerp(cp[i1].Rotation, cp[i2].Rotation, local_t));
+	//return glm::normalize(glm::slerp(cp[i1].Rotation, cp[i2].Rotation, local_t));
 
 	glm::quat s1 = glm::normalize(glm::intermediate(cp[i0].Rotation, cp[i1].Rotation, cp[i2].Rotation));
 	glm::quat s2 = glm::normalize(glm::intermediate(cp[i1].Rotation, cp[i2].Rotation, cp[i3].Rotation));

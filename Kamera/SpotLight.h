@@ -4,7 +4,7 @@ class SpotLight :
 	public DirectionalLight
 {
 public:
-	SpotLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat fovy, GLfloat farPlane, GLfloat nearPlane = 1);
+	SpotLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat fovy, GLfloat farPlane, GLfloat nearPlane = 0.1f);
 	virtual ~SpotLight();
 
 protected:

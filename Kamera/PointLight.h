@@ -8,7 +8,7 @@ class Shader;
 class PointLight : public Light
 {
 public:
-	PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane);
+	PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane = 0.1f);
 	virtual ~PointLight();
 
 	void UpdateUniforms(Shader& shader, int lightIndex, int textureIndex) override;

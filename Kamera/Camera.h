@@ -29,6 +29,8 @@ public:
 	void Update(GLfloat deltaTime) override;
 	void Render(Shader& shader)const override;
 
+	void Move(glm::vec3 direction, GLfloat speed) override;
+
 	glm::mat4 GetViewMatrix() const;
 	glm::mat4 GetProjectionMatrix() const;
 
@@ -42,7 +44,6 @@ public:
 		m_mode = mode;
 	}
 
-	void ProcessInput(GLFWwindow& window) override;
 	bool CursorPosCallback(float x, float y) override;
 protected:
 	CameraMode m_mode;

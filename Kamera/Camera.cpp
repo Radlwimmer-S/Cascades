@@ -4,11 +4,11 @@
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 
-Camera::Camera() : BaseObject(glm::vec3(0, 25, 0), MakeQuad(90, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
+Camera::Camera() : BaseObject(glm::vec3(0, 10, 10), MakeQuad(45, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
 {
 }
 
-Camera::Camera(CameraPath* path) : BaseObject(glm::vec3(0, 0, 0)), m_mode(Automatic), m_type(Free), m_path(path), m_renderPath(false)
+Camera::Camera(CameraPath* path) : BaseObject(glm::vec3(0, 0, 0)), m_mode(Automatic), m_type(FPS), m_path(path), m_renderPath(true)
 {
 }
 
@@ -31,6 +31,12 @@ void Camera::Update(GLfloat deltaTime)
 		m_orientation = MakeQuad(90, 0, 90);
 		break;
 	case Automatic:
+		if (m_path == nullptr)
+		{
+			m_mode = Manual;
+			break;
+		}
+
 		m_position = m_path->GetPosition() + glm::vec3(0, 0.25f, 0);
 		m_orientation = m_path->GetRotation();
 		break;
@@ -45,13 +51,20 @@ void Camera::Render(Shader& shader)const
 		m_path->Render(shader);
 }
 
+void Camera::Move(glm::vec3 direction, GLfloat speed)
+{
+	m_mode = Manual;
+
+	BaseObject::Move(direction, speed);
+}
+
 glm::mat4 Camera::GetViewMatrix() const
 {
-	glm::mat4 translation = glm::mat4(1.0f);
+	/*glm::mat4 translation = glm::mat4(1.0f);
 	translation = glm::translate(translation, -m_position);
 	glm::mat4 rotation = glm::toMat4(glm::normalize(m_orientation));
 
-	return rotation * translation;
+	return rotation * translation;*/
 
 	glm::vec3 center = glm::normalize(glm::vec3(0, 0, -1) * m_orientation);
 	glm::vec3 up = glm::normalize(glm::vec3(0, 1, 0) * m_orientation);
@@ -86,10 +99,4 @@ bool Camera::CursorPosCallback(float x, float y)
 	m_mousePos = newMousePos;
 
 	return true;
-}
-
-void Camera::ProcessInput(GLFWwindow& window)
-{
-	if (m_mode == Manual)
-		BaseObject::ProcessInput(window);
 }

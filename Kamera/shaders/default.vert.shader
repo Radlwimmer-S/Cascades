@@ -20,7 +20,7 @@ void main()
 {
 	gl_Position = projection * view *  model * vec4(position, 1.0f);
 	vs_out.FragPos = vec3(model * vec4(position, 1.0f));
-	vs_out.UV = uv;
+	vs_out.UV = vec2(uv.x, 1 - uv.y);
 	vs_out.Normal = mat3(transpose(inverse(model))) * normal;
 
 	vec3 T = normalize(vec3(model * vec4(tangent, 0.0)));

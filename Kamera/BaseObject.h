@@ -17,22 +17,22 @@ public:
 	virtual void Update(GLfloat deltaTime) {}
 	virtual void Render(Shader& shader) const {}
 
-	void SetPosition(glm::vec3 position);
-	glm::vec3 GetPosition() const;
-	void Move(glm::vec3 direction, GLfloat speed);
+	virtual void SetPosition(glm::vec3 position);
+	virtual glm::vec3 GetPosition() const;
+	virtual void Move(glm::vec3 direction, GLfloat speed);
 
-	void SetOrientation(glm::quat orientation);
-	glm::quat GetOrientation() const;
-	void Rotate(glm::quat rotation);
+	virtual void SetOrientation(glm::quat orientation);
+	virtual glm::quat GetOrientation() const;
+	virtual void Rotate(glm::quat rotation);
 
-	void IsEnabled(bool isEnabled);
-	bool IsEnabled() const;
+	virtual void IsEnabled(bool isEnabled);
+	virtual bool IsEnabled() const;
 	
 	virtual void ProcessInput(GLFWwindow& window);
 	virtual bool KeyCallback(int key, int scancode, int action, int mode);
 	virtual bool CursorPosCallback(float x, float y);
 
-	glm::mat4 GetMatrix() const;
+	virtual glm::mat4 GetMatrix() const;
 
 protected:
 	glm::vec3 m_position;

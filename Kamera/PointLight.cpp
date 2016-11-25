@@ -6,7 +6,7 @@
 #include "Global.h"
 #include "Box.h"
 
-PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane) : Light(position, glm::quat(), color, shadowShader, 1, farPlane)
+PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, glm::quat(), color, shadowShader, nearPlane, farPlane)
 {
 	glGenFramebuffers(1, &depthMapFBO);
 

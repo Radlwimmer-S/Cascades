@@ -82,7 +82,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
 	vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
-);
+	);
 
 float CalculatePointShadow(in LightSource light)
 {
@@ -90,23 +90,35 @@ float CalculatePointShadow(in LightSource light)
 	vec3 fragToLight = fs_in.FragPos - light.Pos;
 	// Get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
-	// Test for shadows with PCF
+	float bias = 0.05;
 	float shadow = 0.0;
-	float bias = 0.15;
-	int samples = 20;
-	float viewDistance = length(viewPos - fs_in.FragPos);
-	float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
-	for (int i = 0; i < samples; ++i)
-	{
-		float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-		closestDepth *= light.far_plane;   // Undo mapping [0;1]
 
-		float distance = length(light.Pos - fs_in.FragPos);
-		float distanceBias = max(bias, bias * distance / 5.0f);
-		if (currentDepth - distanceBias > closestDepth)
-			shadow += 1.0;
+	if (!SoftShadows)
+	{
+		// Use the light to fragment vector to sample from the depth map    
+		float closestDepth = texture(light.depthCube, fragToLight).r;
+		// It is currently in linear range between [0,1]. Re-transform back to original value
+		closestDepth *= light.far_plane;
+		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 	}
-	shadow /= float(samples);
+	else
+	{
+		// Test for shadows with PCF
+		int samples = 20;
+		float viewDistance = length(viewPos - fs_in.FragPos);
+		float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
+		for (int i = 0; i < samples; ++i)
+		{
+			float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+			closestDepth *= light.far_plane;   // Undo mapping [0;1]
+
+			float distance = length(light.Pos - fs_in.FragPos);
+			float distanceBias = max(bias, bias * distance / 5.0f);
+			if (currentDepth - distanceBias > closestDepth)
+				shadow += 1.0;
+		}
+		shadow /= float(samples);
+	}
 
 	// return shadow;
 	return shadow;
@@ -144,6 +156,11 @@ float CalculateDirShadow(in LightSource light, in float baseBias)
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	// Transform to [0,1] range
 	projCoords = projCoords * 0.5 + 0.5;
+
+	// Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+	if (projCoords.z > 1.0)
+		return 0.0;
+
 	// Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
 	float closestDepth = texture(light.depthMap, projCoords.xy).r;
 
@@ -154,24 +171,24 @@ float CalculateDirShadow(in LightSource light, in float baseBias)
 
 	float bias = max(baseBias / 10 * (1.0 - dot(normal, lightDir)), baseBias);
 
-	// Check whether current frag pos is in shadow
-	// float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-	// PCF
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
-	for (int x = -1; x <= 1; ++x)
+	// Check whether current frag pos is in shadow
+	if (!SoftShadows)
+		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	else
 	{
-		for (int y = -1; y <= 1; ++y)
+		// PCF	
+		vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
+		for (int x = -1; x <= 1; ++x)
 		{
-			float pcfDepth = texture(light.depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
-			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+			for (int y = -1; y <= 1; ++y)
+			{
+				float pcfDepth = texture(light.depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
+				shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+			}
 		}
+		shadow /= 9.0;
 	}
-	shadow /= 9.0;
-
-	// Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-	if (projCoords.z > 1.0)
-	shadow = 0.0;
 
 	return shadow;
 }

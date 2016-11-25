@@ -173,12 +173,14 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClInclude Include="Light.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TexturedModel.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="UpdateInfo.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>

@@ -28,6 +28,7 @@ public:
 
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	static void CursorPosCallback(GLFWwindow* window, double x, double y);
+	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	static void Init(char* windowTitle);
 	static void Init(char* windowTitle, GLuint width, GLuint height);
 	void SetShader(Shader& shader);
@@ -52,6 +53,7 @@ protected:
 	std::vector<Light*> m_lights;
 	int m_activeObject;
 	float m_bumpiness = 1.0f;
+	bool m_softShadows = true;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 	const GLuint MaxTexturesPerModel = 3;
 

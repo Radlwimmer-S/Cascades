@@ -13,33 +13,16 @@
 std::vector<ControlPoint>* GetPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
-	//path->push_back(ControlPoint(glm::vec3(0, 0, 5),		MakeQuad(0, 0, 0))); // 1
-	//path->push_back(ControlPoint(glm::vec3(-2, 0, 4.5f),	MakeQuad(0, 22.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(-3.5f, 0, 3.5f), MakeQuad(0, 45, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(-4.5f, 0, 2),	MakeQuad(0, 67.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(-5, 0, 0),		MakeQuad(0, 90, 0))); // 2
-	//path->push_back(ControlPoint(glm::vec3(-4.5f, 0, -2),	MakeQuad(0, 112.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(-3.5f, 0, -3.5f),MakeQuad(0, 135, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(-2, 0, -4.5f),	MakeQuad(0, 157.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(0, 0, -5),		MakeQuad(0, 180, 0))); // 3
-	//path->push_back(ControlPoint(glm::vec3(2, 0, -4.5f),	MakeQuad(0, -157.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(3.5f, 0, -3.5f), MakeQuad(0, -135, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(4.5f, 0, -2),	MakeQuad(0, -112.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(5, 0, 0),		MakeQuad(0, -90, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(4.5f, 0, 2),		MakeQuad(0, -67.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(3.5f, 0, 3.5f),	MakeQuad(0, -45, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(2, 0, 4.5f),		MakeQuad(0, -22.5f, 0))); // 0
-	//path->push_back(ControlPoint(glm::vec3(0, 0, 5),		MakeQuad(0, 0, 0))); // 1
-
-	path->push_back(ControlPoint(glm::vec3(+2.50f, 0, +10.0f), MakeQuad(0.0f, +00.0f, -30.0f))); // 1
-	path->push_back(ControlPoint(glm::vec3(+1.75f, 0, +07.5f), MakeQuad(0.0f, -30.0f, -15.0f))); // 2
-	path->push_back(ControlPoint(glm::vec3(+0.00f, 0, +05.0f), MakeQuad(0.0f, -45.0f, +00.0f))); // 3
-	path->push_back(ControlPoint(glm::vec3(-1.75f, 0, +02.5f), MakeQuad(0.0f, -30.0f, +15.0f))); // 4
-	path->push_back(ControlPoint(glm::vec3(-2.50f, 0, +00.0f), MakeQuad(0.0f, +00.0f, +30.0f))); // 5
-	path->push_back(ControlPoint(glm::vec3(-1.75f, 0, -02.5f), MakeQuad(0.0f, +30.0f, +15.0f))); // 6
-	path->push_back(ControlPoint(glm::vec3(+0.00f, 0, -05.0f), MakeQuad(0.0f, +45.0f, +00.0f))); // 7
-	path->push_back(ControlPoint(glm::vec3(+1.75f, 0, -07.5f), MakeQuad(0.0f, +30.0f, -15.0f))); // 8
-	path->push_back(ControlPoint(glm::vec3(+2.50f, 0, -10.0f), MakeQuad(0.0f, +00.0f, -30.0f))); // 9
+	path->push_back(ControlPoint(glm::vec3(1.90088, 2.71778, 8.36604), MakeQuad(43.5854, 49.3878, 35.8498)));
+	path->push_back(ControlPoint(glm::vec3(5.5548, 2.16439, 6.6418), MakeQuad(0.597455, 4.29696, 0.0447613)));
+	path->push_back(ControlPoint(glm::vec3(6.07589, 2.09267, -1.36941), MakeQuad(13.1986, -74.6709, -12.7447)));
+	path->push_back(ControlPoint(glm::vec3(1.68801, 2.0471, -4.55512), MakeQuad(176.958, -48.1796, -177.732)));
+	path->push_back(ControlPoint(glm::vec3(-1.5213, 1.71298, -0.850699), MakeQuad(11.594, -56.7565, -9.73634)));
+	path->push_back(ControlPoint(glm::vec3(-4.77908, 1.43391, -4.22467), MakeQuad(96.988, -81.0292, -97.0736)));
+	path->push_back(ControlPoint(glm::vec3(-9.22049, 1.24461, -4.98984), MakeQuad(174.254, 31.579, 176.984)));
+	path->push_back(ControlPoint(glm::vec3(-9.26498, 1.11791, 0.951546), MakeQuad(-7.14398, 78.5915, -7.00425)));
+	path->push_back(ControlPoint(glm::vec3(-3.84344, 1.22615, 6.16254), MakeQuad(-7.92887, 79.7276, -7.80336)));
+	path->push_back(ControlPoint(glm::vec3(1.90088, 2.71778, 8.36604), MakeQuad(43.5854, 49.3878, 35.8498)));
 	return path;
 }
 
@@ -48,16 +31,23 @@ Scene* GetScene()
 	Scene* scene = new Scene();
 	Texture* floorTex = new Texture("textures/brickwall.jpg", "wall");
 	Texture* floorNormal = new Texture("textures/brickwall_normal.jpg", "wall_normal");
-	scene->AddObject(new TexturedModel(glm::vec3(0, -0.2f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(20, 0.2f, 20), glm::vec2(10, 10)), 12, glm::vec3(0.3f, 0.3f, 0.3f), *floorTex, floorNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(0, -0.1f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(20, 0.2f, 20), glm::vec2(10, 10)), 12, glm::vec3(0.3f, 0.3f, 0.3f), *floorTex, floorNormal));
 	Texture* containerTex = new Texture("textures/container.jpg", "box");
-	scene->AddObject(new TexturedModel(glm::vec3(-4, 3, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-7, 1, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 4), MakeQuad(0, 50, 15), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
-	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex));
+	Texture* containerNormal = new Texture("textures/container_normal.jpg", "box_normal");
+	scene->AddObject(new TexturedModel(glm::vec3(7, 0.5f, 6), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex, containerNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(-4, 3, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex, containerNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(-7, 1, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex, containerNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex, containerNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(-2, 1, 4), MakeQuad(0, 50, 15), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex, containerNormal));
+	Texture* containerSmallTex = new Texture("textures/container_small.jpg", "box");
+	Texture* containerSmallNormal = new Texture("textures/container_small_normal.jpg", "box_normal");
+	scene->AddObject(new TexturedModel(glm::vec3(6.25f, 0.25f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(6.25f, 0.75f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(5.75f, 0.25f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerSmallTex, containerSmallNormal));
 	return scene;
 }
 
@@ -95,9 +85,9 @@ int main()
 
 	engine->SetScene(*GetScene());
 
-	//CameraPath* path = new CameraPath(*GetPath(), 10);
-	//Camera* camera = new Camera(path);
-	Camera* camera = new Camera();
+	CameraPath* path = new CameraPath(*GetPath(), 20);
+	Camera* camera = new Camera(path);
+	//Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
 	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 50, -10);

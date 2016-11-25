@@ -52,6 +52,7 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	// Set the required callback functions
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, CursorPosCallback);
+	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
 	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
@@ -62,8 +63,8 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 
 	// OpenGL configuration
 	glViewport(0, 0, WIDTH, HEIGHT);
-	/*glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
+	//glEnable(GL_CULL_FACE);
+	/*glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 
 	glEnable(GL_MULTISAMPLE);
@@ -97,12 +98,14 @@ void Engine::Stop()
 
 void Engine::PrintData(int fps) const
 {
+#ifndef _DEBUG
 	system("cls");
 	glm::vec3 cameraPos = m_camera->GetPosition();
 	std::cout << "Position: x=" << cameraPos.x << ", y=" << cameraPos.y << ", z=" << cameraPos.z << std::endl;
 	glm::vec3 cameraRot = glm::eulerAngles(m_camera->GetOrientation());
 	std::cout << "Orientation: Pitch=" << glm::degrees(cameraRot.x) << ", Yaw=" << glm::degrees(cameraRot.y) << ", Roll=" << glm::degrees(cameraRot.z) << std::endl;
 	std::cout << "FPS: " << fps << std::endl;
+#endif
 }
 
 void Engine::Loop()
@@ -187,16 +190,22 @@ void Engine::UpdateUniforms() const
 	GLuint bumbinessLocation = glGetUniformLocation(m_shader->Program, "bumbiness");
 	glUniform1f(bumbinessLocation, m_bumpiness);
 	glCheckError();
+
+	GLuint softShadowLocation = glGetUniformLocation(m_shader->Program, "SoftShadows");
+	glUniform1f(softShadowLocation, m_softShadows);
+	glCheckError();
 }
 
 void Engine::RenderLights() const
 {
+	glCullFace(GL_FRONT);
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		(*it)->PreRender();
 		m_scene->Render((*it)->GetShadowShader());
 		(*it)->PostRender();
 	}
+	glCullFace(GL_BACK);
 }
 
 void Engine::RenderScene() const
@@ -269,6 +278,16 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 			m_instance->m_activeObject = index;
 		} break;
 
+		case GLFW_KEY_F1:
+			m_instance->m_camera->SetMode(Overview);
+			break;
+		case GLFW_KEY_F2:
+			m_instance->m_camera->SetMode(Automatic);
+			break;
+		case GLFW_KEY_F3:
+			m_instance->m_camera->SetMode(Manual);
+			break;
+
 		case GLFW_KEY_DELETE:
 		{
 			int index = m_instance->m_activeObject;
@@ -285,12 +304,27 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 		case GLFW_KEY_KP_ADD:
 			m_instance->m_bumpiness = std::fminf(2, m_instance->m_bumpiness + 0.1f);
 			break;
+
+		case GLFW_KEY_ENTER:
+			m_instance->m_softShadows = !m_instance->m_softShadows;
+			break;
 		}
 }
 
 void Engine::CursorPosCallback(GLFWwindow* window, double x, double y)
 {
 	m_instance->m_camera->CursorPosCallback(x, y);
+}
+
+void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS)
+	{
+		glm::vec3 cameraPos = m_instance->m_camera->GetPosition();
+		glm::vec3 cameraRot = glm::eulerAngles(m_instance->m_camera->GetOrientation());
+		std::cout << "path->push_back(ControlPoint(glm::vec3(" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z
+				  << "), MakeQuad(" << glm::degrees(cameraRot.x) << ", " << glm::degrees(cameraRot.y) << ", " << glm::degrees(cameraRot.z) << ")));" << std::endl;
+	}
 }
 
 Engine* Engine::m_instance = nullptr;
