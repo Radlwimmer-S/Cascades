@@ -10,7 +10,7 @@
 Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
 	glGenFramebuffers(1, &m_framebuffer);
-	glGenTextures(1, &m_multisampleTex);
+	glGenRenderbuffers(1, &m_multisampleTex);
 	glGenRenderbuffers(1, &m_renderbuffer);
 	SetAASettings();
 }
@@ -127,21 +127,19 @@ void Engine::PrintData(int fps) const
 }
 
 void Engine::SetAASettings() const
-{
-	glEnable(GL_MULTISAMPLE);
-	
+{	
 	// Framebuffers
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glCheckError();	
 
-	// Create a multisampled color attachment texture
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_multisampleTex);
+	// Create a multisampled color attachment
+	glBindRenderbuffer(GL_RENDERBUFFER, m_multisampleTex);
 	glCheckError();
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA32F, WIDTH, HEIGHT, GL_TRUE);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_RGBA8, WIDTH, HEIGHT);
 	glCheckError();
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_multisampleTex, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_multisampleTex);
 	glCheckError();
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glCheckError();
 	
 	// Create a renderbuffer object for depth and stencil attachments
@@ -158,6 +156,8 @@ void Engine::SetAASettings() const
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
+
+	glEnable(GL_MULTISAMPLE);
 
 	if (m_samples == 1)
 	{
@@ -218,15 +218,14 @@ void Engine::Loop()
 
 		m_scene->Update(deltaTime);
 
-		// Render
+		//m_lights[1]->SetPosition(m_camera->GetPosition());
+		
+		RenderLights();
+
 		// 1. Draw scene as normal in multisampled buffers
 		glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-		glCheckError();
-		glViewport(0, 0, WIDTH, HEIGHT);
 		glClearColor(.1f, .1f, .1f, 1.0f);
-		//m_lights[1]->SetPosition(m_camera->GetPosition());
-
-		RenderLights();
+		glCheckError();
 
 		RenderScene();
 
@@ -237,7 +236,7 @@ void Engine::Loop()
 		glCheckError();
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
 		glCheckError();
-		glBlitFramebuffer(1, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		glCheckError();
 
 		glfwSwapBuffers(&m_window);
