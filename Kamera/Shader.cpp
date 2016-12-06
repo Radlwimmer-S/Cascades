@@ -53,6 +53,13 @@ std::string Shader::ReadFile(const GLchar* shaderPath)
 	{
 		// Open files
 		shaderFile.open(shaderPath);
+
+		if (!shaderFile.good())
+		{
+			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ\n" << shaderPath << std::endl;
+			std::cin.ignore();
+		}
+
 		std::stringstream shaderStream;
 		// Read file's buffer contents into streams
 		shaderStream << shaderFile.rdbuf();

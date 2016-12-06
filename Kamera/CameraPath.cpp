@@ -175,7 +175,7 @@ glm::vec3 CameraPath::CatmullRomSpline(const std::vector<ControlPoint>& cp, floa
 glm::quat CameraPath::Squad(const std::vector<ControlPoint>& cp, float t) const
 {
 	// indices of the relevant control points
-	int i0 = (int)((t - 1) + cp.size()) % cp.size();
+	int i0 = (int)(t - 1 + cp.size()) % cp.size();
 	int i1 = t;
 	int i2 = (int)(t + 1) % cp.size();
 	int i3 = (int)(t + 2) % cp.size();
@@ -183,25 +183,18 @@ glm::quat CameraPath::Squad(const std::vector<ControlPoint>& cp, float t) const
 	// parameter on the local curve interval
 	float local_t = glm::fract(t);
 
-	glm::vec3 v0 = ClampAngles(cp[i0].Rotation - cp[i1].Rotation);
-	glm::quat q0 = MakeQuad(v0);
-	glm::vec3 v1 = glm::vec3(0);
-	glm::quat q1 = MakeQuad(v1);
-	glm::vec3 v2 = ClampAngles(cp[i2].Rotation - cp[i1].Rotation);
-	glm::quat q2 = MakeQuad(v2);
-	glm::vec3 v3 = ClampAngles(cp[i3].Rotation - cp[i1].Rotation);
-	glm::quat q3 = MakeQuad(v3);
+	glm::quat q0(ClampAngles(cp[i0].Orientation - cp[i1].Orientation));
+	glm::quat q1;
+	glm::quat q2(ClampAngles(cp[i2].Orientation - cp[i1].Orientation));
+	glm::quat q3(ClampAngles(cp[i3].Orientation - cp[i1].Orientation));
 
 	//return glm::normalize(glm::slerp(cp[i1].Rotation, cp[i2].Rotation, local_t));
 
 	glm::quat s1 = glm::intermediate(q0, q1, q2);
 	glm::quat s2 = glm::intermediate(q1, q2, q3);
 
-	glm::quat modify = glm::squad(q1, q2, s1, s2, local_t);
+	glm::quat rotation = glm::squad(q1, q2, s1, s2, local_t);
+	glm::vec3 orientation = cp[i1].Orientation + glm::eulerAngles(rotation);
 
-	glm::vec3 modifyVec = glm::degrees(glm::eulerAngles(modify));
-
-	glm::vec3 rot = cp[i1].Rotation + modifyVec;
-
-	return glm::normalize(MakeQuad(rot));
+	return glm::quat(orientation);
 }

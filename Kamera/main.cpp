@@ -1,27 +1,27 @@
 
+#pragma once
 #include "Shader.h"
 #include "Engine.h"
-#include <filesystem>
 #include "Camera.h"
 #include "Global.h"
 #include "TexturedModel.h"
 #include "Texture.h"
 #include "Box.h"
 #include "SpotLight.h"
-
+#include "PointLight.h"
 
 std::vector<ControlPoint>* GetPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
-	path->push_back(ControlPoint(glm::vec3(+0.0, +2.0, +5.0), glm::vec3(0, 0, 0)));
-	path->push_back(ControlPoint(glm::vec3(-3.5, +2.0, +3.5), glm::vec3(0, 45, 0)));
-	path->push_back(ControlPoint(glm::vec3(-5.0, +2.0, +0.0), glm::vec3(0, 90, 0)));
-	path->push_back(ControlPoint(glm::vec3(-3.5, +2.0, -3.5), glm::vec3(0, 135, 0)));
-	path->push_back(ControlPoint(glm::vec3(+0.0, +2.0, -5.0), glm::vec3(0, 180, 0)));
-	path->push_back(ControlPoint(glm::vec3(+3.5, +2.0, -3.5), glm::vec3(0, -135, 0)));
-	path->push_back(ControlPoint(glm::vec3(+5.0, +2.0, +0.0), glm::vec3(0, -90, 0)));
-	path->push_back(ControlPoint(glm::vec3(+3.5, +2.0, +3.5), glm::vec3(0, -45, 0)));
-	path->push_back(ControlPoint(glm::vec3(+0.0, +2.0, +5.0), glm::vec3(0, 0, 0)));
+	path->push_back(ControlPoint(glm::vec3(+0.0, +2.0, +5.0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(-3.5, +2.0, +3.5), glm::radians(glm::vec3(0, 45, 0))));
+	path->push_back(ControlPoint(glm::vec3(-5.0, +2.0, +0.0), glm::radians(glm::vec3(0, 90, 0))));
+	path->push_back(ControlPoint(glm::vec3(-3.5, +2.0, -3.5), glm::radians(glm::vec3(0, 135, 0))));
+	path->push_back(ControlPoint(glm::vec3(+0.0, +2.0, -5.0), glm::radians(glm::vec3(0, 180, 0))));
+	path->push_back(ControlPoint(glm::vec3(+3.5, +2.0, -3.5), glm::radians(glm::vec3(0, -135, 0))));
+	path->push_back(ControlPoint(glm::vec3(+5.0, +2.0, +0.0), glm::radians(glm::vec3(0, -90, 0))));
+	path->push_back(ControlPoint(glm::vec3(+3.5, +2.0, +3.5), glm::radians(glm::vec3(0, -45, 0))));
+	path->push_back(ControlPoint(glm::vec3(+0.0, +2.0, +5.0), glm::radians(glm::vec3(0, 0, 0))));
 	return path;
 }
 
@@ -60,7 +60,7 @@ int main()
 
 	Engine* engine = Engine::Instance();
 
-	Shader* shader = new Shader("./shaders/default.vert.shader", "./shaders/uniformLight.frag.shader");
+	Shader* shader = new Shader("./shaders/default.vert", "./shaders/default.frag");
 	if (!shader->IsValid())
 	{
 		std::cin.ignore();
@@ -68,14 +68,14 @@ int main()
 	}
 	engine->SetShader(*shader);
 
-	Shader* pointLightShader = new Shader("./shaders/PointLight.vert.shader", "./shaders/PointLight.frag.shader", "./shaders/PointLight.geom.shader");
+	Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.frag", "./shaders/PointLight.geom");
 	if (!pointLightShader->IsValid())
 	{
 		std::cin.ignore();
 		return -1;
 	}
 
-	Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert.shader", "./shaders/DirectionalLight.frag.shader");
+	Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert", "./shaders/DirectionalLight.frag");
 	if (!directionalLightShader->IsValid())
 	{
 		std::cin.ignore();

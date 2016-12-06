@@ -151,28 +151,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\default.frag.shader">
+    <None Include="shaders\default.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\default.vert.shader">
+    <None Include="shaders\DirectionalLight.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\PointLight.frag.shader">
+    <None Include="shaders\DirectionalLight.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\PointLight.geom.shader">
+    <None Include="shaders\PointLight.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\PointLight.vert.shader">
+    <None Include="shaders\PointLight.geom">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\DirectionalLight.frag.shader">
+    <None Include="shaders\PointLight.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\DirectionalLight.vert.shader">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\uniformLight.frag.shader">
+    <None Include="shaders\default.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

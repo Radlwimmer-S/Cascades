@@ -28,7 +28,7 @@ void Camera::Update(GLfloat deltaTime)
 	{
 	case Overview:
 		m_position = glm::vec3(0.0f, 20.0f, 0.0f);
-		m_orientation = MakeQuad(90, 0, 90);
+		m_orientation = MakeQuad(90, 0, 0);
 		break;
 	case Automatic:
 		if (m_path == nullptr)

@@ -8,15 +8,15 @@ class Shader;
 
 struct ControlPoint
 {
-	ControlPoint() : Position(glm::vec3()), Rotation(glm::vec3()), TimeStamp(0)
+	ControlPoint() : Position(glm::vec3()), Orientation(glm::vec3()), TimeStamp(0)
 	{}
-	ControlPoint(glm::vec3 position, glm::vec3 rotation) : Position(position), Rotation(rotation), TimeStamp(0)
+	ControlPoint(glm::vec3 position, glm::vec3 rotation) : Position(position), Orientation(rotation), TimeStamp(0)
 	{}
-	ControlPoint(glm::vec3 position, glm::vec3 rotation, GLfloat timeStamp) : Position(position), Rotation(rotation), TimeStamp(timeStamp)
+	ControlPoint(glm::vec3 position, glm::vec3 rotation, GLfloat timeStamp) : Position(position), Orientation(rotation), TimeStamp(timeStamp)
 	{}
 
 	glm::vec3 Position;
-	glm::vec3 Rotation;
+	glm::vec3 Orientation;
 	GLfloat TimeStamp;
 };
 

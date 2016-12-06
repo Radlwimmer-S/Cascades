@@ -184,22 +184,17 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\default.frag.shader">
+    <None Include="shaders\default.vert">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
-    <None Include="shaders\default.vert.shader">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
-      <FileType>Document</FileType>
-    </None>
-    <None Include="shaders\DirectionalLight.frag.shader" />
-    <None Include="shaders\DirectionalLight.vert.shader" />
-    <None Include="shaders\PointLight.frag.shader" />
-    <None Include="shaders\PointLight.geom.shader" />
-    <None Include="shaders\PointLight.vert.shader" />
-    <None Include="shaders\uniformLight.frag.shader" />
+    <None Include="shaders\DirectionalLight.frag" />
+    <None Include="shaders\DirectionalLight.vert" />
+    <None Include="shaders\PointLight.frag" />
+    <None Include="shaders\PointLight.geom" />
+    <None Include="shaders\PointLight.vert" />
+    <None Include="shaders\default.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

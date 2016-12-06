@@ -68,11 +68,11 @@ GLenum static glCheckError_(const char *file, int line)
 
 inline float ClampAngles(const float orientation)
 {
-	if (orientation > 180)
-		return orientation - 2 * 180;
+	if (orientation > glm::pi<float>())
+		return orientation - glm::two_pi<float>();
 
-	if (orientation < -180)
-		return  orientation + 2 * 180;
+	if (orientation < -glm::pi<float>())
+		return  orientation + glm::two_pi<float>();
 
 	return orientation;
 }
