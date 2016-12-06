@@ -89,10 +89,10 @@ int main()
 	//Camera* camera = new Camera();
 	engine->SetCamera(*camera);
 
+	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 5, 10), MakeQuad(22.5f, 45, 0), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 60, 50, 1);
+	engine->AddLight(*flashLight);
 	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 0.5f), *directionalLightShader, 50, -10);
 	engine->AddLight(*mainLight);
-	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 5, 10), glm::vec3(0.5f, 0.5f, 0.5f), *directionalLightShader, 60, 50, 1);
-	engine->AddLight(*flashLight);
 
 	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
 	engine->AddLight(*greenLight);

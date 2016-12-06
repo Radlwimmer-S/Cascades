@@ -211,14 +211,18 @@ void Engine::Loop()
 
 		if (m_activeObject == -1)
 			m_camera->ProcessInput(m_window);
+		else if (m_activeObject == 0)
+		{
+			m_camera->ProcessInput(m_window);
+			m_lights[0]->SetPosition(m_camera->GetPosition() + glm::normalize(glm::vec3(0, -.5f, -1) * m_camera->GetOrientation()));
+			m_lights[0]->SetOrientation(m_camera->GetOrientation());
+		}
 		else
 			m_lights[m_activeObject]->ProcessInput(m_window);
 
 		m_camera->Update(deltaTime);
 
 		m_scene->Update(deltaTime);
-
-		//m_lights[1]->SetPosition(m_camera->GetPosition());
 		
 		RenderLights();
 

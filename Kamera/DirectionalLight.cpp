@@ -5,7 +5,11 @@
 #include "Box.h"
 
 
-DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, glm::quat(), color, shadowShader, nearPlane, farPlane)
+DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : DirectionalLight(position, glm::quat(), color, shadowShader, farPlane, nearPlane)
+{
+}
+
+DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, orientation, color, shadowShader, nearPlane, farPlane)
 {
 	glGenFramebuffers(1, &depthMapFBO);
 

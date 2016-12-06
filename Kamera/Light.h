@@ -20,8 +20,6 @@ public:
 	virtual int GetType() = 0;
 
 protected:
-	virtual glm::mat4 GetProjection() const = 0;
-
 	glm::vec3 m_color;
 	GLuint depthMap;
 	GLuint depthMapFBO;

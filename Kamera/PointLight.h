@@ -18,7 +18,7 @@ public:
 		
 protected:
 	int GetType() override;
-	glm::mat4 GetProjection() const override;
+	glm::mat4 GetProjection() const;
 	std::vector<glm::mat4> GetShadowMatrices() const;
 };
 

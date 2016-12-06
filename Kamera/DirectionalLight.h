@@ -12,9 +12,10 @@ public:
 	void RenderDebug(Shader& shader) const override;
 
 protected:
+	DirectionalLight(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane = 0.1f);
 	int GetType() override;
-	glm::mat4 GetProjection() const override;
-	glm::mat4 GetView() const;
+	virtual glm::mat4 GetProjection() const;
+	virtual glm::mat4 GetView() const;
 	glm::mat4 GetShadowMatrix() const;
 };
 
