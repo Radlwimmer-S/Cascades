@@ -9,6 +9,10 @@
 
 Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
+	glGenFramebuffers(1, &m_framebuffer);
+	glGenTextures(1, &m_multisampleTex);
+	glGenRenderbuffers(1, &m_renderbuffer);
+	SetAASettings();
 }
 
 Engine::~Engine()
@@ -32,7 +36,6 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	GLFWmonitor* monitor = nullptr;
 	if (fullscreen)
@@ -46,7 +49,8 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, windowTitle, monitor, nullptr);
 	glfwMakeContextCurrent(window);
-	glfwMaximizeWindow(window);
+	if (fullscreen)
+		glfwMaximizeWindow(window);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	// Set the required callback functions
@@ -60,6 +64,23 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glewInit();
 
 	glGetError(); // Call it once to catch glewInit()
+	/*
+	GLint fMSSamples = 16, fMSCoverageSamples = 8;
+	if (GLEW_NV_framebuffer_multisample_coverage)
+	{
+		GLint n_modes;
+		glGetIntegerv(GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV, &n_modes);
+		GLint *modes = new GLint[2 * n_modes];
+		glGetIntegerv(GL_MULTISAMPLE_COVERAGE_MODES_NV, modes);
+
+		for (int i = 0; i < n_modes; ++i)
+		{
+			if (modes[i * 2 + 1] == fMSSamples && modes[i * 2] > fMSCoverageSamples)
+				fMSCoverageSamples = modes[i * 2];
+		}
+
+		delete[] modes;
+	}*/
 
 	// OpenGL configuration
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -67,7 +88,6 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	/*glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 
-	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
@@ -98,14 +118,72 @@ void Engine::Stop()
 
 void Engine::PrintData(int fps) const
 {
-#ifndef _DEBUG
+#ifdef _DEBUG
 	system("cls");
-	glm::vec3 cameraPos = m_camera->GetPosition();
-	std::cout << "Position: x=" << cameraPos.x << ", y=" << cameraPos.y << ", z=" << cameraPos.z << std::endl;
-	glm::vec3 cameraRot = glm::eulerAngles(m_camera->GetOrientation());
-	std::cout << "Orientation: Pitch=" << glm::degrees(cameraRot.x) << ", Yaw=" << glm::degrees(cameraRot.y) << ", Roll=" << glm::degrees(cameraRot.z) << std::endl;
 	std::cout << "FPS: " << fps << std::endl;
+	std::cout << "Samples: " << m_samples << std::endl;
+	std::cout << "AAMode: " << m_aaMode << std::endl;
 #endif
+}
+
+void Engine::SetAASettings() const
+{
+	glEnable(GL_MULTISAMPLE);
+	
+	// Framebuffers
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+	glCheckError();	
+
+	// Create a multisampled color attachment texture
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_multisampleTex);
+	glCheckError();
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA32F, WIDTH, HEIGHT, GL_TRUE);
+	glCheckError();
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_multisampleTex, 0);
+	glCheckError();
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	glCheckError();
+	
+	// Create a renderbuffer object for depth and stencil attachments
+	glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffer);
+	glCheckError();
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+	glCheckError();
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbuffer);
+	glCheckError();
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glCheckError();	
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glCheckError();
+
+	if (m_samples == 1)
+	{
+		glDisable(GL_MULTISAMPLE);
+		return;
+	}
+
+	switch (m_aaMode)
+	{
+	case Fastest:
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
+		glCheckError();
+		break;
+	case Nicest:
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+		glCheckError();
+		break;
+	case NV_Fastest:
+		glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_FASTEST);
+		glCheckError();
+		break;
+	case NV_Nicest:
+		glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
+		glCheckError();
+		break;
+	}
 }
 
 void Engine::Loop()
@@ -141,7 +219,11 @@ void Engine::Loop()
 		m_scene->Update(deltaTime);
 
 		// Render
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		// 1. Draw scene as normal in multisampled buffers
+		glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+		glCheckError();
+		glViewport(0, 0, WIDTH, HEIGHT);
+		glClearColor(.1f, .1f, .1f, 1.0f);
 		//m_lights[1]->SetPosition(m_camera->GetPosition());
 
 		RenderLights();
@@ -149,6 +231,14 @@ void Engine::Loop()
 		RenderScene();
 
 		m_camera->Render(*m_shader);
+
+		// 2. Now blit multisampled buffer(s) to default framebuffers		
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer); // Make sure your multisampled FBO is the read 
+		glCheckError();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
+		glCheckError();
+		glBlitFramebuffer(1, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glCheckError();
 
 		glfwSwapBuffers(&m_window);
 
@@ -298,11 +388,29 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 			}
 		} break;
 
-		case GLFW_KEY_KP_SUBTRACT:
+		case GLFW_KEY_KP_1:
 			m_instance->m_bumpiness = std::fmaxf(0, m_instance->m_bumpiness - 0.1f);
 			break;
-		case GLFW_KEY_KP_ADD:
+		case GLFW_KEY_KP_7:
 			m_instance->m_bumpiness = std::fminf(2, m_instance->m_bumpiness + 0.1f);
+			break;
+
+		case GLFW_KEY_KP_2:
+			m_instance->m_samples = (m_instance->m_samples / 2 > 0) ? m_instance->m_samples / 2 : 16;
+			m_instance->SetAASettings();
+			break;
+		case GLFW_KEY_KP_8:
+			m_instance->m_samples = (m_instance->m_samples * 2 <= 16) ? m_instance->m_samples * 2 : 1;
+			m_instance->SetAASettings();
+			break;
+
+		case GLFW_KEY_KP_3:
+			m_instance->m_aaMode = static_cast<AAMode>((m_instance->m_aaMode - 1 + AAModeCount) % AAModeCount);
+			m_instance->SetAASettings();
+			break;
+		case GLFW_KEY_KP_9:
+			m_instance->m_aaMode = static_cast<AAMode>((m_instance->m_aaMode + 1) % AAModeCount);
+			m_instance->SetAASettings();
 			break;
 
 		case GLFW_KEY_ENTER:
@@ -323,7 +431,7 @@ void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int
 		glm::vec3 cameraPos = m_instance->m_camera->GetPosition();
 		glm::vec3 cameraRot = glm::eulerAngles(m_instance->m_camera->GetOrientation());
 		std::cout << "path->push_back(ControlPoint(glm::vec3(" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z
-				  << "), MakeQuad(" << glm::degrees(cameraRot.x) << ", " << glm::degrees(cameraRot.y) << ", " << glm::degrees(cameraRot.z) << ")));" << std::endl;
+			<< "), MakeQuad(" << glm::degrees(cameraRot.x) << ", " << glm::degrees(cameraRot.y) << ", " << glm::degrees(cameraRot.z) << ")));" << std::endl;
 	}
 }
 

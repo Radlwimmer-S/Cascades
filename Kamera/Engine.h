@@ -7,12 +7,20 @@
 #include <GLFW/glfw3.h>
 #include "Scene.h"
 #include <stdexcept>
-#include "PointLight.h"
 #include <vector>
 #include "DirectionalLight.h"
 
 class Camera;
 class Shader;
+
+enum AAMode
+{
+	Fastest = 0,
+	Nicest = 1,
+	NV_Fastest = 2,
+	NV_Nicest = 3
+};
+const int AAModeCount = 4;
 
 class Engine
 {
@@ -41,6 +49,7 @@ public:
 	void Stop();
 protected:
 	void PrintData(int frames) const;
+	void SetAASettings() const;	
 	void Loop();
 	void UpdateUniforms() const;
 	void RenderLights() const;
@@ -56,6 +65,10 @@ protected:
 	bool m_softShadows = true;
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 	const GLuint MaxTexturesPerModel = 3;
+
+	AAMode m_aaMode = NV_Fastest;
+	int m_samples = 4;
+	GLuint m_framebuffer, m_multisampleTex, m_renderbuffer;
 
 	static Engine* m_instance;
 	explicit Engine(char* windowTitle, bool fullscreen);
