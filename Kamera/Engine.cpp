@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Global.h"
 #include <algorithm>
+#include <sstream>
 
 Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
@@ -64,23 +65,6 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glewInit();
 
 	glGetError(); // Call it once to catch glewInit()
-	/*
-	GLint fMSSamples = 16, fMSCoverageSamples = 8;
-	if (GLEW_NV_framebuffer_multisample_coverage)
-	{
-		GLint n_modes;
-		glGetIntegerv(GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV, &n_modes);
-		GLint *modes = new GLint[2 * n_modes];
-		glGetIntegerv(GL_MULTISAMPLE_COVERAGE_MODES_NV, modes);
-
-		for (int i = 0; i < n_modes; ++i)
-		{
-			if (modes[i * 2 + 1] == fMSSamples && modes[i * 2] > fMSCoverageSamples)
-				fMSCoverageSamples = modes[i * 2];
-		}
-
-		delete[] modes;
-	}*/
 
 	// OpenGL configuration
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -121,36 +105,62 @@ void Engine::PrintData(int fps) const
 #ifdef _DEBUG
 	system("cls");
 	std::cout << "FPS: " << fps << std::endl;
-	std::cout << "Samples: " << m_samples << std::endl;
-	std::cout << "AAMode: " << m_aaMode << std::endl;
+	std::cout << "Samples: " << m_colorSamples << std::endl;
+	std::cout << "Coverage: " << m_coverageSamples << std::endl;
+	std::cout << "AAMode: " << ParseAAMode() << std::endl;
 #endif
 }
 
 void Engine::SetAASettings() const
-{	
+{
 	// Framebuffers
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-	glCheckError();	
+	glCheckError();
 
-	// Create a multisampled color attachment
-	glBindRenderbuffer(GL_RENDERBUFFER, m_multisampleTex);
-	glCheckError();
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_RGBA8, WIDTH, HEIGHT);
-	glCheckError();
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_multisampleTex);
-	glCheckError();
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glCheckError();
-	
-	// Create a renderbuffer object for depth and stencil attachments
-	glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffer);
-	glCheckError();
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
-	glCheckError();
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbuffer);
-	glCheckError();
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glCheckError();	
+	if (GLEW_NV_framebuffer_multisample_coverage)
+	{
+		// Create a multisampled color attachment
+		glBindRenderbuffer(GL_RENDERBUFFER, m_multisampleTex);
+		glCheckError();
+		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_coverageSamples, m_colorSamples, GL_RGBA8, WIDTH, HEIGHT);
+		glCheckError();
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_multisampleTex);
+		glCheckError();
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glCheckError();
+
+		// Create a renderbuffer object for depth and stencil attachments
+		glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffer);
+		glCheckError();
+		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_coverageSamples, m_colorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+		glCheckError();
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbuffer);
+		glCheckError();
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glCheckError();
+	}
+	else
+	{
+		// Create a multisampled color attachment
+		glBindRenderbuffer(GL_RENDERBUFFER, m_multisampleTex);
+		glCheckError();
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_colorSamples, GL_RGBA8, WIDTH, HEIGHT);
+		glCheckError();
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_multisampleTex);
+		glCheckError();
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glCheckError();
+
+		// Create a renderbuffer object for depth and stencil attachments
+		glBindRenderbuffer(GL_RENDERBUFFER, m_renderbuffer);
+		glCheckError();
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_colorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+		glCheckError();
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbuffer);
+		glCheckError();
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glCheckError();
+	}
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
@@ -159,27 +169,13 @@ void Engine::SetAASettings() const
 
 	glEnable(GL_MULTISAMPLE);
 
-	if (m_samples == 1)
-	{
-		glDisable(GL_MULTISAMPLE);
-		return;
-	}
-
 	switch (m_aaMode)
 	{
 	case Fastest:
-		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
-		glCheckError();
-		break;
-	case Nicest:
-		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-		glCheckError();
-		break;
-	case NV_Fastest:
 		glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_FASTEST);
 		glCheckError();
 		break;
-	case NV_Nicest:
+	case Nicest:
 		glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
 		glCheckError();
 		break;
@@ -223,12 +219,13 @@ void Engine::Loop()
 		m_camera->Update(deltaTime);
 
 		m_scene->Update(deltaTime);
-		
+
 		RenderLights();
 
 		// 1. Draw scene as normal in multisampled buffers
 		glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-		glClearColor(.1f, .1f, .1f, 1.0f);
+		//glClearColor(.1f, .1f, .1f, 1.0f);
+		glClearColor(1, 1, 1, 1.0f);
 		glCheckError();
 
 		RenderScene();
@@ -311,6 +308,34 @@ void Engine::RenderScene() const
 	if (true)
 		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			(*it)->RenderDebug(*m_shader);
+}
+
+std::string Engine::ParseAAMode() const
+{
+	if (m_coverageSamples == 0)
+		return "Deaktiviert";
+
+	std::stringstream ss;
+
+	if ((m_coverageSamples == 8 || m_coverageSamples == 16) && (m_colorSamples == 4 || m_colorSamples == 8))
+	{
+		ss << m_coverageSamples;
+		if (m_colorSamples == 8)
+			ss << "xQ (Quality) CSAA";
+		else
+			ss << "x CSAA";
+
+		return ss.str();
+	}
+
+	if (m_colorSamples == 0 || m_coverageSamples >= m_colorSamples)
+	{
+		ss << m_coverageSamples << "x MSAA";
+		return ss.str();
+	}
+
+	ss << "Custom CSAA";
+	return ss.str();
 }
 
 void Engine::Init(char* windowTitle)
@@ -399,20 +424,29 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 			break;
 
 		case GLFW_KEY_KP_2:
-			m_instance->m_samples = (m_instance->m_samples / 2 > 0) ? m_instance->m_samples / 2 : 16;
+			m_instance->m_colorSamples = (m_instance->m_colorSamples - 1 >= 0) ? m_instance->m_colorSamples - 1 : 16;
 			m_instance->SetAASettings();
 			break;
 		case GLFW_KEY_KP_8:
-			m_instance->m_samples = (m_instance->m_samples * 2 <= 16) ? m_instance->m_samples * 2 : 1;
+			m_instance->m_colorSamples = (m_instance->m_colorSamples + 1 <= 16) ? m_instance->m_colorSamples + 1 : 0;
 			m_instance->SetAASettings();
 			break;
 
 		case GLFW_KEY_KP_3:
-			m_instance->m_aaMode = static_cast<AAMode>((m_instance->m_aaMode - 1 + AAModeCount) % AAModeCount);
+			m_instance->m_coverageSamples = (m_instance->m_coverageSamples - 1 >= 0) ? m_instance->m_coverageSamples - 1 : 16;
 			m_instance->SetAASettings();
 			break;
 		case GLFW_KEY_KP_9:
-			m_instance->m_aaMode = static_cast<AAMode>((m_instance->m_aaMode + 1) % AAModeCount);
+			m_instance->m_coverageSamples = (m_instance->m_coverageSamples + 1 <= 16) ? m_instance->m_coverageSamples + 1 : 0;
+			m_instance->SetAASettings();
+			break;
+
+		case GLFW_KEY_KP_ADD:
+			m_instance->m_aaMode = Nicest;
+			m_instance->SetAASettings();
+			break;
+		case GLFW_KEY_KP_SUBTRACT:
+			m_instance->m_aaMode = Fastest;
 			m_instance->SetAASettings();
 			break;
 

@@ -17,10 +17,8 @@ enum AAMode
 {
 	Fastest = 0,
 	Nicest = 1,
-	NV_Fastest = 2,
-	NV_Nicest = 3
 };
-const int AAModeCount = 4;
+const int AAModeCount = 2;
 
 class Engine
 {
@@ -54,6 +52,7 @@ protected:
 	void UpdateUniforms() const;
 	void RenderLights() const;
 	void RenderScene() const;
+	std::string ParseAAMode() const;
 
 	Shader* m_shader;
 	Scene* m_scene;
@@ -66,8 +65,8 @@ protected:
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 	const GLuint MaxTexturesPerModel = 3;
 
-	AAMode m_aaMode = NV_Fastest;
-	int m_samples = 4;
+	AAMode m_aaMode = Fastest;
+	int m_colorSamples = 4, m_coverageSamples = 8;
 	GLuint m_framebuffer, m_multisampleTex, m_renderbuffer;
 
 	static Engine* m_instance;
