@@ -9,16 +9,12 @@
 #include <stdexcept>
 #include <vector>
 #include "DirectionalLight.h"
+#include "RenderInfo.h"
+#include "AntiAliasingInfo.h"
 
 class Camera;
 class Shader;
 
-enum AAMode
-{
-	Fastest = 0,
-	Nicest = 1,
-};
-const int AAModeCount = 2;
 
 class Engine
 {
@@ -31,12 +27,11 @@ public:
 			throw std::logic_error("Call Engine::Init beforehand!");
 		return m_instance;
 	}
-
+	static void Init(char* windowTitle);
+	static void Init(char* windowTitle, GLuint width, GLuint height);
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	static void CursorPosCallback(GLFWwindow* window, double x, double y);
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	static void Init(char* windowTitle);
-	static void Init(char* windowTitle, GLuint width, GLuint height);
 	void SetShader(Shader& shader);
 	void SetScene(Scene& scene);
 	void SetCamera(Camera& camera);
@@ -46,28 +41,34 @@ public:
 	void Pause();
 	void Stop();
 protected:
-	void PrintData(int frames) const;
-	void SetAASettings() const;	
+	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+	void m_CursorPosCallback(GLFWwindow* window, double x, double y);
+	void m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	void MoveActiveObject();
 	void Loop();
 	void UpdateUniforms() const;
 	void RenderLights() const;
 	void RenderScene() const;
+	void RenderHud() const;
+	void PrintData(int frames) const;
+	void SetAASettings() const;
 	std::string ParseAAMode() const;
+
+	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 
 	Shader* m_shader;
 	Scene* m_scene;
 	GLFWwindow& m_window;
 	Camera* m_camera;
 	std::vector<Light*> m_lights;
-	int m_activeObject;
-	float m_bumpiness = 1.0f;
-	bool m_softShadows = true;
-	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
-	const GLuint MaxTexturesPerModel = 3;
 
-	AAMode m_aaMode = Fastest;
-	int m_colorSamples = 4, m_coverageSamples = 8;
-	GLuint m_framebuffer, m_multisampleTex, m_renderbuffer;
+	int m_activeObject;
+	GLuint m_framebuffer;
+
+	RenderInfo m_renderInfo;
+	AntiAliasingInfo m_aaInfo;	
+
+	const GLuint MaxTexturesPerModel = 3;
 
 	static Engine* m_instance;
 	explicit Engine(char* windowTitle, bool fullscreen);

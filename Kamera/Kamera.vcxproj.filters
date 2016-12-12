@@ -34,6 +34,12 @@
     <Filter Include="Source Files\Objects">
       <UniqueIdentifier>{a09f246f-6c6b-4d68-a6f3-2e0a4ac7cdf7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\HUD">
+      <UniqueIdentifier>{24c04a4c-326e-4dcf-a794-000cd715a814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HUD">
+      <UniqueIdentifier>{05ad07de-563f-417d-ac79-01fbff059f2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,6 +92,12 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Source Files\HUD</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +161,18 @@
     <ClInclude Include="UpdateInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>Header Files\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="AntiAliasingInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
@@ -170,6 +194,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\default.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Text.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Text.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

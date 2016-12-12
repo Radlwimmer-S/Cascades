@@ -96,7 +96,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimp-vc140-mt.lib;freetype27d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
@@ -131,7 +131,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimp-vc140-mt.lib;freetype27.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
@@ -148,6 +148,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Font.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
@@ -156,18 +157,22 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TexturedModel.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AntiAliasingInfo.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="CameraPath.h" />
+    <ClInclude Include="Character.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Font.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="BaseObject.h" />
     <ClInclude Include="Light.h" />
@@ -177,6 +182,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SpotLight.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TexturedModel.h" />
     <ClInclude Include="Triangle.h" />
@@ -195,6 +201,8 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <None Include="shaders\PointLight.geom" />
     <None Include="shaders\PointLight.vert" />
     <None Include="shaders\default.frag" />
+    <None Include="shaders\Text.frag" />
+    <None Include="shaders\Text.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
