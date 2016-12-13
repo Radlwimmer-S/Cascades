@@ -11,7 +11,9 @@
 #include "DirectionalLight.h"
 #include "RenderInfo.h"
 #include "AntiAliasingInfo.h"
+#include "Font.h"
 
+class Hud;
 class Camera;
 class Shader;
 
@@ -36,6 +38,7 @@ public:
 	void SetScene(Scene& scene);
 	void SetCamera(Camera& camera);
 	void AddLight(Light& light);
+	void SetHud(Hud& hud);
 	void Start();
 	void Resume();
 	void Pause();
@@ -52,7 +55,6 @@ protected:
 	void RenderHud() const;
 	void PrintData(int frames) const;
 	void SetAASettings() const;
-	std::string ParseAAMode() const;
 
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 
@@ -60,6 +62,7 @@ protected:
 	Scene* m_scene;
 	GLFWwindow& m_window;
 	Camera* m_camera;
+	Hud* m_hud;
 	std::vector<Light*> m_lights;
 
 	int m_activeObject;

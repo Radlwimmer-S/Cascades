@@ -103,8 +103,8 @@
 xcopy /E /Y ".\shaders" "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
 mkdir "$(SolutionDir)$(Platform)\$(Configuration)\textures"
 xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"
-mkdir "$(SolutionDir)$(Platform)\$(Configuration)\objects"
-xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Command>
+mkdir "$(SolutionDir)$(Platform)\$(Configuration)\fonts"
+xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,8 +138,8 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
 xcopy /E /Y ".\shaders" "$(SolutionDir)$(Platform)\$(Configuration)\shaders"
 mkdir "$(SolutionDir)$(Platform)\$(Configuration)\textures"
 xcopy /E /Y ".\textures" "$(SolutionDir)$(Platform)\$(Configuration)\textures"
-mkdir "$(SolutionDir)$(Platform)\$(Configuration)\objects"
-xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Command>
+mkdir "$(SolutionDir)$(Platform)\$(Configuration)\fonts"
+xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -149,6 +149,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Hud.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
@@ -175,6 +176,7 @@ xcopy /E /Y ".\objects" "$(SolutionDir)$(Platform)\$(Configuration)\objects"</Co
     <ClInclude Include="Font.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="BaseObject.h" />
+    <ClInclude Include="Hud.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Model.h" />

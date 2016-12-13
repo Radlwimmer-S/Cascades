@@ -12,15 +12,21 @@ Font::Font(char* font, glm::ivec2 size)
 	FT_Library ft;
 	// All functions return a value different than 0 whenever an error occurred
 	if (FT_Init_FreeType(&ft))
+	{
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		return;
+	}
 
 	// Load font as face
 	FT_Face face;
 	if (FT_New_Face(ft, font, 0, &face))
+	{
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		return;
+	}
 
 	// Set size to load glyphs as
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(face, size.x, size.y);
 
 	// Disable byte-alignment restriction
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -73,7 +79,12 @@ Font::~Font()
 {
 }
 
-const Character& Font::GetChar(const GLchar c)
+const Character& Font::GetChar(const GLchar c) const
 {
-	return Characters[c];
+	return Characters.at(c);
+}
+
+glm::ivec2 Font::GetSize() const
+{
+	return GetChar('A').Size;
 }

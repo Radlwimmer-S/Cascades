@@ -7,6 +7,7 @@
 #include "Global.h"
 #include <algorithm>
 #include <sstream>
+#include "Hud.h"
 
 Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
@@ -73,7 +74,6 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
@@ -134,6 +134,11 @@ void Engine::AddLight(Light& light)
 	m_lights.push_back(&light);
 }
 
+void Engine::SetHud(Hud& hud)
+{
+	m_hud = &hud;
+}
+
 void Engine::Loop()
 {
 	// DeltaTime variables
@@ -141,6 +146,7 @@ void Engine::Loop()
 	GLfloat lastFrame = 0.0f;
 	GLfloat second = 0.0f;
 	int frame = 0;
+	int fps = 0;
 
 	// Game loop
 	while (!glfwWindowShouldClose(&m_window))
@@ -161,12 +167,25 @@ void Engine::Loop()
 
 		m_camera->Update(deltaTime);
 		m_scene->Update(deltaTime);
+		m_hud->Update(fps, m_renderInfo, m_aaInfo);
 
 		RenderLights();
+
+		// 1. Draw scene as normal in multisampled buffers
+		glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+		glCheckError();
 
 		RenderScene();
 
 		RenderHud();
+
+		// 2. Now blit multisampled buffer(s) to default framebuffers		
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer); // Make sure your multisampled FBO is the read 
+		glCheckError();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
+		glCheckError();
+		glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glCheckError();
 
 		glfwSwapBuffers(&m_window);
 
@@ -174,6 +193,7 @@ void Engine::Loop()
 
 		if (second > 1)
 		{
+			fps = frame;
 			PrintData(frame);
 			frame = 0;
 			second -= 1;
@@ -228,14 +248,9 @@ void Engine::RenderLights() const
 
 void Engine::RenderScene() const
 {
-
-	// 1. Draw scene as normal in multisampled buffers
-	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-	glCheckError();
-
 	glViewport(0, 0, WIDTH, HEIGHT);
 
-	glClearColor(.3f, .3f, .3f, 1.0f);
+	glClearColor(.05f, .05f, .05f, 1.0f);
 
 	m_shader->Use();
 	UpdateUniforms();
@@ -247,18 +262,14 @@ void Engine::RenderScene() const
 			(*it)->RenderDebug(*m_shader);
 
 	m_camera->Render(*m_shader);
-
-	// 2. Now blit multisampled buffer(s) to default framebuffers		
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer); // Make sure your multisampled FBO is the read 
-	glCheckError();
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
-	glCheckError();
-	glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	glCheckError();
 }
 
 void Engine::RenderHud() const
 {
+	glEnable(GL_BLEND);
+	glViewport(0, 0, WIDTH, HEIGHT);
+	m_hud->Render();
+	glDisable(GL_BLEND);
 }
 
 void Engine::PrintData(int fps) const
@@ -268,7 +279,7 @@ void Engine::PrintData(int fps) const
 	std::cout << "FPS: " << fps << std::endl;
 	std::cout << "Samples: " << m_aaInfo.ColorSamples << std::endl;
 	std::cout << "Coverage: " << m_aaInfo.CoverageSamples << std::endl;
-	std::cout << "AAMode: " << ParseAAMode() << std::endl;
+	std::cout << "AAMode: " << m_aaInfo.ParseAAMode() << std::endl;
 #endif
 }
 
@@ -324,34 +335,6 @@ void Engine::MoveActiveObject()
 	}
 	else
 		m_lights[m_activeObject]->ProcessInput(m_window);
-}
-
-std::string Engine::ParseAAMode() const
-{
-	if (m_aaInfo.CoverageSamples == 0)
-		return "Deaktiviert";
-
-	std::stringstream ss;
-
-	if ((m_aaInfo.CoverageSamples == 8 || m_aaInfo.CoverageSamples == 16) && (m_aaInfo.ColorSamples == 4 || m_aaInfo.ColorSamples == 8))
-	{
-		ss << m_aaInfo.CoverageSamples;
-		if (m_aaInfo.ColorSamples == 8)
-			ss << "xQ (Quality) CSAA";
-		else
-			ss << "x CSAA";
-
-		return ss.str();
-	}
-
-	if (m_aaInfo.ColorSamples == 0 || m_aaInfo.CoverageSamples >= m_aaInfo.ColorSamples)
-	{
-		ss << m_aaInfo.CoverageSamples << "x MSAA";
-		return ss.str();
-	}
-
-	ss << "Custom CSAA";
-	return ss.str();
 }
 
 void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)

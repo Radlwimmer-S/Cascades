@@ -40,11 +40,20 @@ void Text::Render(Shader& shader) const
 	std::string::const_iterator c;
 	for (c = string_.begin(); c != string_.end(); ++c)
 	{
-		Character ch = font_.GetChar(*c);
-		auto x = *c;
+		if (*c == '\n')
+		{
+			Character ch = font_.GetChar('A');
 
-		GLfloat xpos = pos_.x + ch.Bearing.x * scale_;
-		GLfloat ypos = pos_.y - (ch.Size.y - ch.Bearing.y) * scale_;
+			charPos.x = pos_.x;
+			charPos.y = charPos.y - 1.5f * ch.Size.y * scale_;
+
+			continue;
+		}
+		
+		Character ch = font_.GetChar(*c);
+		
+		GLfloat xpos = charPos.x + ch.Bearing.x * scale_;
+		GLfloat ypos = charPos.y - (ch.Size.y - ch.Bearing.y) * scale_;
 
 		GLfloat w = ch.Size.x * scale_;
 		GLfloat h = ch.Size.y * scale_;
@@ -72,4 +81,9 @@ void Text::Render(Shader& shader) const
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Text::SetString(const std::string& string)
+{
+	string_ = string;
 }

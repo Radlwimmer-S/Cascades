@@ -15,6 +15,8 @@ public:
 
 	void Render(Shader& shader) const;
 
+	void SetString(const std::string& string);
+
 protected:
 	std::string string_;
 	Font& font_;
