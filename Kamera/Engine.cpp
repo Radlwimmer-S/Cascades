@@ -171,21 +171,9 @@ void Engine::Loop()
 
 		RenderLights();
 
-		// 1. Draw scene as normal in multisampled buffers
-		glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-		glCheckError();
-
 		RenderScene();
 
 		RenderHud();
-
-		// 2. Now blit multisampled buffer(s) to default framebuffers		
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer); // Make sure your multisampled FBO is the read 
-		glCheckError();
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
-		glCheckError();
-		glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		glCheckError();
 
 		glfwSwapBuffers(&m_window);
 
@@ -248,6 +236,10 @@ void Engine::RenderLights() const
 
 void Engine::RenderScene() const
 {
+	// 1. Draw scene as normal in multisampled buffers
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+	glCheckError();
+
 	glViewport(0, 0, WIDTH, HEIGHT);
 
 	glClearColor(.05f, .05f, .05f, 1.0f);
@@ -262,14 +254,27 @@ void Engine::RenderScene() const
 			(*it)->RenderDebug(*m_shader);
 
 	m_camera->Render(*m_shader);
+
+	// 2. Now blit multisampled buffer(s) to default framebuffers		
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer); // Make sure your multisampled FBO is the read 
+	glCheckError();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
+	glCheckError();
+	glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glCheckError();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 void Engine::RenderHud() const
 {
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glViewport(0, 0, WIDTH, HEIGHT);
 	m_hud->Render();
 	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void Engine::PrintData(int fps) const
@@ -293,9 +298,9 @@ void Engine::SetAASettings() const
 	glBindRenderbuffer(GL_RENDERBUFFER, m_aaInfo.ColorBuffer);
 	glCheckError();
 	if (GLEW_NV_framebuffer_multisample_coverage)
-		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_aaInfo.CoverageSamples, m_aaInfo.ColorSamples, GL_RGBA8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_aaInfo.CoverageSamples - 1 , m_aaInfo.ColorSamples - 1, GL_RGBA8, WIDTH, HEIGHT);
 	else
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_aaInfo.ColorSamples, GL_RGBA8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_aaInfo.ColorSamples - 1, GL_RGBA8, WIDTH, HEIGHT);
 	glCheckError();
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_aaInfo.ColorBuffer);
 	glCheckError();
@@ -306,9 +311,9 @@ void Engine::SetAASettings() const
 	glBindRenderbuffer(GL_RENDERBUFFER, m_aaInfo.DepthBuffer);
 	glCheckError();
 	if (GLEW_NV_framebuffer_multisample_coverage)
-		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_aaInfo.CoverageSamples, m_aaInfo.ColorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_aaInfo.CoverageSamples - 1, m_aaInfo.ColorSamples - 1, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
 	else
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_aaInfo.ColorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_aaInfo.ColorSamples - 1, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
 	glCheckError();
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_aaInfo.DepthBuffer);
 	glCheckError();
@@ -396,20 +401,20 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			break;
 
 		case GLFW_KEY_KP_2:
-			m_aaInfo.ColorSamples = (m_aaInfo.ColorSamples - 1 >= 0) ? m_aaInfo.ColorSamples - 1 : 16;
+			m_aaInfo.ColorSamples = (m_aaInfo.ColorSamples - 1 >= 1) ? m_aaInfo.ColorSamples - 1 : 16;
 			SetAASettings();
 			break;
 		case GLFW_KEY_KP_8:
-			m_aaInfo.ColorSamples = (m_aaInfo.ColorSamples + 1 <= 16) ? m_aaInfo.ColorSamples + 1 : 0;
+			m_aaInfo.ColorSamples = (m_aaInfo.ColorSamples + 1 <= 16) ? m_aaInfo.ColorSamples + 1 : 1;
 			SetAASettings();
 			break;
 
 		case GLFW_KEY_KP_3:
-			m_aaInfo.CoverageSamples = (m_aaInfo.CoverageSamples - 1 >= 0) ? m_aaInfo.CoverageSamples - 1 : 16;
+			m_aaInfo.CoverageSamples = (m_aaInfo.CoverageSamples - 1 >= 1) ? m_aaInfo.CoverageSamples - 1 : 16;
 			SetAASettings();
 			break;
 		case GLFW_KEY_KP_9:
-			m_aaInfo.CoverageSamples = (m_aaInfo.CoverageSamples + 1 <= 16) ? m_aaInfo.CoverageSamples + 1 : 0;
+			m_aaInfo.CoverageSamples = (m_aaInfo.CoverageSamples + 1 <= 16) ? m_aaInfo.CoverageSamples + 1 : 1;
 			SetAASettings();
 			break;
 

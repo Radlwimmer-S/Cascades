@@ -11,7 +11,7 @@ struct AntiAliasingInfo
 
 	std::string ParseAAMode() const
 	{
-		if (CoverageSamples == 0)
+		if (CoverageSamples == 1)
 			return "Deaktiviert";
 
 		std::stringstream ss;
@@ -27,7 +27,7 @@ struct AntiAliasingInfo
 			return ss.str();
 		}
 
-		if (ColorSamples == 0 || CoverageSamples >= ColorSamples)
+		if (ColorSamples == 1 || CoverageSamples >= ColorSamples)
 		{
 			ss << CoverageSamples << "x MSAA";
 			return ss.str();
