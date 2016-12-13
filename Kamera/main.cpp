@@ -31,7 +31,7 @@ Scene* GetScene()
 	Scene* scene = new Scene();
 	Texture* floorTex = new Texture("textures/brickwall.jpg", "wall");
 	Texture* floorNormal = new Texture("textures/brickwall_normal.jpg", "wall_normal");
-	scene->AddObject(new TexturedModel(glm::vec3(0, -0.1f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(20, 0.2f, 20), glm::vec2(10, 10)), 12, glm::vec3(0.3f, 0.3f, 0.3f), *floorTex, floorNormal));
+	scene->AddObject(new TexturedModel(glm::vec3(0, -0.1f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(20, 0.2f, 20), glm::vec3(10, .1f, 10)), 12, glm::vec3(0.3f, 0.3f, 0.3f), *floorTex, floorNormal));
 	Texture* containerTex = new Texture("textures/container.jpg", "box");
 	Texture* containerNormal = new Texture("textures/container_normal.jpg", "box_normal");
 	scene->AddObject(new TexturedModel(glm::vec3(7, 0.5f, 6), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), *containerTex, containerNormal));
@@ -99,7 +99,7 @@ int main()
 
 	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 5, 10), MakeQuad(22.5f, 45, 0), glm::vec3(0.8f, 0.8f, 0.8f), *directionalLightShader, 60, 50, 1);
 	engine->AddLight(*flashLight);
-	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, 1.f), *directionalLightShader, 50, -10);
+	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, .5f), *directionalLightShader, 50, -10);
 	engine->AddLight(*mainLight);
 
 	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
