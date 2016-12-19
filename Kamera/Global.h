@@ -2,6 +2,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 const int PATH_APPROXIMATION = 100;
 const int VS_IN_POSITION = 0;
@@ -24,17 +25,6 @@ static GLuint HEIGHT = 1080;
 #define glCheckError() 
 #endif
 
-struct LightIndexer
-{
-	LightIndexer() {}
-	LightIndexer(int textureOffset) : TextureIndex(textureOffset) {}
-
-	int DirIndex = 0;
-	int SpotIndex = 0;
-	int PointIndex = 0;
-	int TextureIndex = 0;
-};
-
 inline glm::quat MakeQuad(GLfloat pitch, GLfloat yaw, GLfloat roll)
 {
 	return glm::quat(glm::vec3(glm::radians(pitch), glm::radians(yaw), glm::radians(roll)));
@@ -43,6 +33,31 @@ inline glm::quat MakeQuad(GLfloat pitch, GLfloat yaw, GLfloat roll)
 inline glm::quat MakeQuad(glm::vec3 v)
 {
 	return MakeQuad(v.x, v.y, v.z);
+}
+
+inline void PrintCSAA()
+{
+	if (GLEW_NV_framebuffer_multisample_coverage)
+	{
+		int maxModes;
+		glGetIntegerv(GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV, &maxModes);
+		if (maxModes != 0)
+		{
+			int* modes = new int[2 * maxModes];
+			glGetIntegerv(GL_MULTISAMPLE_COVERAGE_MODES_NV, modes);
+
+			std::cout << "Coverage|Color" << std::endl;
+			std::setfill(' ');
+			for (int i = 0; i < maxModes; ++i)
+			{
+				std::cout << std::setw(8) << modes[2 * i] << '|' << modes[2 * i + 1] << std::endl;
+			}
+		}
+		else
+			std::cout << "No CSAA modes found";
+	}
+	else
+		std::cout << "CSAA-Extension not available";
 }
 
 GLenum static glCheckError_(const char *file, int line)

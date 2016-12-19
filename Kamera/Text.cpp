@@ -42,10 +42,10 @@ void Text::Render(Shader& shader) const
 	{
 		if (*c == '\n')
 		{
-			Character ch = font_.GetChar('A');
+			glm::ivec2 size = font_.GetSize();
 
 			charPos.x = pos_.x;
-			charPos.y = charPos.y - 1.5f * ch.Size.y * scale_;
+			charPos.y = charPos.y - 1.5f * size.y * scale_;
 
 			continue;
 		}

@@ -279,23 +279,7 @@ void Engine::PrintData(int fps) const
 #ifdef _DEBUG
 	system("cls");
 
-	if (GLEW_NV_framebuffer_multisample_coverage)
-	{
-		int maxModes;
-		glGetIntegerv(GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV, &maxModes);
-		if (maxModes != 0)
-		{
-			int* modes = new int[2 * maxModes];
-			glGetIntegerv(GL_MULTISAMPLE_COVERAGE_MODES_NV, modes);
-
-			std::cout << "Coverage|Color" << std::endl;
-			std::setfill(' ');
-			for (int i = 0; i < maxModes; ++i)
-			{
-				std::cout << std::setw(8) << modes[2 * i] << '|' << modes[2 * i + 1] << std::endl;
-			}
-		}
-	}
+	PrintCSAA();
 #endif
 }
 
