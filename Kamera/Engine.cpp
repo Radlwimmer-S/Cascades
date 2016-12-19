@@ -11,7 +11,7 @@
 
 Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
-	glGenFramebuffersEXT(1, &m_framebuffer);
+	glGenFramebuffers(1, &m_framebuffer);
 	m_aaInfo.Init();
 	SetAASettings();
 }
@@ -235,7 +235,7 @@ void Engine::RenderLights() const
 void Engine::RenderScene() const
 {
 	// 1. Draw scene as normal in multisampled buffers
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glCheckError();
 
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -253,15 +253,15 @@ void Engine::RenderScene() const
 	m_camera->Render(*m_shader);
 
 	// 2. Now blit multisampled buffer(s) to default framebuffers		
-	glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, m_framebuffer); // Make sure your multisampled FBO is the read 
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer); // Make sure your multisampled FBO is the read 
 	glCheckError();
-	glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0); // Make sure no FBO is set as the draw 
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Make sure no FBO is set as the draw 
 	glCheckError();
-	glBlitFramebufferEXT(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glCheckError();
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 void Engine::RenderHud() const
@@ -310,44 +310,44 @@ void Engine::SetAASettings()
 	}
 
 	// Framebuffers
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glCheckError();
 
 	// Create a renderbuffer object for color attachment
-	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_aaInfo.ColorBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_aaInfo.ColorBuffer);
 	glCheckError();
 
 	if (GLEW_NV_framebuffer_multisample_coverage)
-		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER_EXT, m_aaInfo.CoverageSamples, m_aaInfo.ColorSamples, GL_RGBA8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_aaInfo.CoverageSamples, m_aaInfo.ColorSamples, GL_RGBA8, WIDTH, HEIGHT);
 	else
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER_EXT, m_aaInfo.ColorSamples, GL_RGBA8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_aaInfo.ColorSamples, GL_RGBA8, WIDTH, HEIGHT);
 	glCheckError();
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER_EXT, m_aaInfo.ColorBuffer);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_aaInfo.ColorBuffer);
 	glCheckError();
 
-	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glCheckError();
 
 	// Create a renderbuffer object for depth and stencil attachments
-	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_aaInfo.DepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_aaInfo.DepthBuffer);
 	glCheckError();
 	if (GLEW_NV_framebuffer_multisample_coverage)
-		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER_EXT, m_aaInfo.CoverageSamples, m_aaInfo.ColorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisampleCoverageNV(GL_RENDERBUFFER, m_aaInfo.CoverageSamples, m_aaInfo.ColorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
 	else
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER_EXT, m_aaInfo.ColorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_aaInfo.ColorSamples, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
 	glCheckError();
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER_EXT, m_aaInfo.DepthBuffer);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_aaInfo.DepthBuffer);
 	glCheckError();
-	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glCheckError();
 
 	if (GLEW_NV_framebuffer_multisample_coverage)
 		glGetIntegerv(GL_COLOR_SAMPLES_NV, &m_aaInfo.ActiveColorSamples);
 	glGetIntegerv(GL_SAMPLES, &m_aaInfo.ActiveCoverageSamples);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE)
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
 
 	glEnable(GL_MULTISAMPLE_ARB);

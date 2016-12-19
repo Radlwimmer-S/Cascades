@@ -16,8 +16,8 @@ struct AntiAliasingInfo
 
 	void Init()
 	{
-		glGenRenderbuffersEXT(1, &ColorBuffer);
-		glGenRenderbuffersEXT(1, &DepthBuffer);
+		glGenRenderbuffers(1, &ColorBuffer);
+		glGenRenderbuffers(1, &DepthBuffer);
 
 
 		if (GLEW_NV_framebuffer_multisample_coverage)

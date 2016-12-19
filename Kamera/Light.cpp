@@ -38,5 +38,5 @@ void Light::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex)
 
 void Light::PostRender() const
 {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
