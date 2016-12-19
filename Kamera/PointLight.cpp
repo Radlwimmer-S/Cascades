@@ -21,11 +21,11 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, depthMapFBO);
+	glFramebufferTexture(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT, depthMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	m_debugCube = new Model(m_position, glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 0.1f)), 12, m_color);
@@ -49,7 +49,7 @@ void PointLight::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex
 void PointLight::PreRender() const
 {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	m_shadowShader.Use();

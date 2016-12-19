@@ -4,7 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 Hud::Hud(Font& font, Shader& shader) : m_font(font), m_shader(shader),
 m_fpsText(Text("", m_font, glm::vec2(25, HEIGHT - 50), 1, glm::vec3(1, 1, 0))),
 m_aaText(Text("", m_font, glm::vec2(25, HEIGHT - 100), 1, glm::vec3(1, 1, 0)))
@@ -24,8 +23,9 @@ void Hud::Update(int fps, const RenderInfo& renderInfo, const AntiAliasingInfo& 
 
 	ss.str("");
 
-	ss << "Samples: " << aaInfo.ColorSamples << std::endl;
-	ss << "Coverage: " << aaInfo.CoverageSamples << std::endl;
+	ss << "Color Samples: " << aaInfo.ActiveColorSamples << " (" << aaInfo.ColorSamples << ")" << std::endl;
+	ss << "Coverage Samples: " << aaInfo.ActiveCoverageSamples << " (" << aaInfo.CoverageSamples << ")" << std::endl;
+	ss << "Quality: " << ((aaInfo.Quality == GL_NICEST) ? "Nicest" : "Fastest") << std::endl;
 	ss << "AAMode: " << aaInfo.ParseAAMode();
 	m_aaText.SetString(ss.str());
 }
@@ -33,7 +33,7 @@ void Hud::Update(int fps, const RenderInfo& renderInfo, const AntiAliasingInfo& 
 void Hud::Render() const
 {
 	m_shader.Use();
-	
+
 	glm::mat4 proj = glm::ortho(0.0f, static_cast<GLfloat>(WIDTH), 0.0f, static_cast<GLfloat>(HEIGHT));
 	GLuint projLocation = glGetUniformLocation(m_shader.Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));

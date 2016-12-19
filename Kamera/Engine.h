@@ -54,7 +54,7 @@ protected:
 	void RenderScene() const;
 	void RenderHud() const;
 	void PrintData(int frames) const;
-	void SetAASettings() const;
+	void SetAASettings();
 
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 

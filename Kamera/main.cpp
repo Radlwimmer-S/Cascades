@@ -53,65 +53,74 @@ Scene* GetScene()
 
 int main()
 {
+	try {
 #ifdef _DEBUG
-	Engine::Init("Camera", 1900, 1000);
+		Engine::Init("Camera", 1900, 1000);
 #else
-	Engine::Init("Camera");
+		Engine::Init("Camera");
 #endif
 
-	Engine* engine = Engine::Instance();
+		Engine* engine = Engine::Instance();
 
-	Shader* shader = new Shader("./shaders/default.vert", "./shaders/default.frag");
-	if (!shader->IsValid())
+		Shader* shader = new Shader("./shaders/default.vert", "./shaders/default.frag");
+		if (!shader->IsValid())
+		{
+			std::cin.ignore();
+			return -1;
+		}
+		engine->SetShader(*shader);
+
+		Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.frag", "./shaders/PointLight.geom");
+		if (!pointLightShader->IsValid())
+		{
+			std::cin.ignore();
+			return -1;
+		}
+
+		Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert", "./shaders/DirectionalLight.frag");
+		if (!directionalLightShader->IsValid())
+		{
+			std::cin.ignore();
+			return -1;
+		}
+
+		Shader* hudShader = new Shader("./shaders/Text.vert", "./shaders/Text.frag");
+		if (!hudShader->IsValid())
+		{
+			std::cin.ignore();
+			return -1;
+		}
+
+		engine->SetScene(*GetScene());
+
+		CameraPath* path = new CameraPath(*GetPath(), 20);
+		Camera* camera = new Camera(path);
+		//Camera* camera = new Camera();
+		engine->SetCamera(*camera);
+
+		SpotLight* flashLight = new SpotLight(glm::vec3(-10, 5, 10), MakeQuad(22.5f, 45, 0), glm::vec3(0.8f, 0.8f, 0.8f), *directionalLightShader, 60, 50, 1);
+		engine->AddLight(*flashLight);
+		DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, .5f), *directionalLightShader, 50, -10);
+		engine->AddLight(*mainLight);
+
+		PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
+		engine->AddLight(*greenLight);
+		PointLight* redLight = new PointLight(glm::vec3(5, 4, 3), glm::vec3(0.5f, 0, 0), *pointLightShader, 25);
+		engine->AddLight(*redLight);
+
+		Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
+		Hud* hud = new Hud(*font, *hudShader);
+		engine->SetHud(*hud);
+
+		engine->Start();
+
+		std::cin.ignore();
+		return 0;
+	}
+	catch (std::exception e)
 	{
+		std::cout << e.what() << std::endl;
 		std::cin.ignore();
 		return -1;
 	}
-	engine->SetShader(*shader);
-
-	Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.frag", "./shaders/PointLight.geom");
-	if (!pointLightShader->IsValid())
-	{
-		std::cin.ignore();
-		return -1;
-	}
-
-	Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert", "./shaders/DirectionalLight.frag");
-	if (!directionalLightShader->IsValid())
-	{
-		std::cin.ignore();
-		return -1;
-	}
-
-	Shader* hudLightShader = new Shader("./shaders/Text.vert", "./shaders/Text.frag");
-	if (!hudLightShader->IsValid())
-	{
-		std::cin.ignore();
-		return -1;
-	}
-
-	engine->SetScene(*GetScene());
-
-	CameraPath* path = new CameraPath(*GetPath(), 20);
-	Camera* camera = new Camera(path);
-	//Camera* camera = new Camera();
-	engine->SetCamera(*camera);
-
-	SpotLight* flashLight = new SpotLight(glm::vec3(-10, 5, 10), MakeQuad(22.5f, 45, 0), glm::vec3(0.8f, 0.8f, 0.8f), *directionalLightShader, 60, 50, 1);
-	engine->AddLight(*flashLight);
-	DirectionalLight* mainLight = new DirectionalLight(glm::vec3(10, 5, -10), glm::vec3(0, 0, .5f), *directionalLightShader, 50, -10);
-	engine->AddLight(*mainLight);
-
-	PointLight* greenLight = new PointLight(glm::vec3(-5, 5, -3), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
-	engine->AddLight(*greenLight);
-	PointLight* redLight = new PointLight(glm::vec3(5, 4, 3), glm::vec3(0.5f, 0, 0), *pointLightShader, 25);
-	engine->AddLight(*redLight);
-
-	Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 36));
-	Hud* hud = new Hud(*font, *hudLightShader);
-	engine->SetHud(*hud);
-
-	engine->Start();
-
-	return 0;
 }

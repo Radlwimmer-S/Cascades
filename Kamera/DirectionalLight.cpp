@@ -24,11 +24,11 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, gl
 	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	m_debugCube = new Model(m_position, glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 1)), 12, m_color);
@@ -56,7 +56,7 @@ void DirectionalLight::UpdateUniforms(Shader& shader, int lightIndex, int textur
 void DirectionalLight::PreRender() const
 {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	m_shadowShader.Use();
