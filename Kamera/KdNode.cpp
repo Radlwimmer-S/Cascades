@@ -131,11 +131,11 @@ void KdNode::RenderLeafs(Shader& shader, int depth) const
 
 void KdNode::RenderLeafs(Shader& shader, int desiredDepth, int depth) const
 {
-	if (desiredDepth == depth)
+	if (desiredDepth == depth || (left_ == nullptr || right_ == nullptr))
 	{
 		bbox_.Render(shader, depth);
 	}
-	else if(left_ != nullptr && right_ != nullptr)
+	else 
 	{
 		left_->RenderLeafs(shader, desiredDepth, depth + 1);
 		right_->RenderLeafs(shader, desiredDepth, depth + 1);

@@ -26,51 +26,40 @@ const BoundingBox& KdPrimitive::GetBoundingBox() const
 
 bool KdPrimitive::IsHit(HitResult& result, Ray& ray) const
 {
-	float u, v, w, distance;
+	glm::vec3 e1, e2, h, s, q;
+	float a, f, u, v, t;
+	e1 = vertices_[1] - vertices_[0];
+	e2 = vertices_[2] - vertices_[0];
 
-	glm::vec3 ab = vertices_[1] - vertices_[0];
-	glm::vec3 ac = vertices_[2] - vertices_[0];
-	glm::vec3 qp = -ray.GetDirection();
+	h = glm::cross(ray.GetDirection(), e2);
+	a = glm::dot(e1, h);
 
-	// Compute triangle normal. Can be precalculated or cached if
-	// intersecting multiple segments against the same triangle
-	glm::vec3 n = glm::cross(ab, ac);
+	if (a > -0.00001 && a < 0.00001)
+		return(false);
 
-	// Compute denominator d. If d <= 0, segment is parallel to or points
-	// away from triangle, so exit early
-	float d = glm::dot(qp, n);
-	if (d <= 0.0f)
-		return false;
+	f = 1 / a;
+	s = ray.GetOrigin() - vertices_[0];
+	u = f * (glm::dot(s, h));
 
-	// Compute intersection t value of pq with plane of triangle. A ray
-	// intersects iff 0 <= t. Segment intersects iff 0 <= t <= 1. Delay
-	// dividing by d until intersection has been found to pierce triangle
-	glm::vec3 ap = ray.GetOrigin() - vertices_[0];
-	distance = glm::dot(ap, n);
-	if (distance < 0.0f)
-		return false;
-	/*if (distance > d)
-		return false;*/
+	if (u < 0.0 || u > 1.0)
+		return(false);
 
-	// For segment; exclude this code line for a ray test
-	// Compute barycentric coordinate components and test if within bounds
-	glm::vec3 e = glm::cross(qp, ap);
-	v = glm::dot(ac, e);
-	if (v < 0.0f || v > d)
-		return false;
-	w = -glm::dot(ab, e);
-	if (w < 0.0f || v + w > d)
-		return false;
+	q= glm::cross(s, e1);
+	v = f * glm::dot(ray.GetDirection(), q);
 
-	// Segment/ray intersects triangle. Perform delayed division and
-	// compute the last barycentric coordinate component
-	float ood = 1.0f / d;
-	distance *= ood;
-	v *= ood;
-	w *= ood;
-	u = 1.0f - v - w;
+	if (v < 0.0 || u + v > 1.0)
+		return(false);
 
-	result.Distance = distance;
+	// at this stage we can compute t to find out where
+	// the intersection point is on the line
+	t = f * glm::dot(e2, q);
 
-	return true;
+	if (t > 0.00001) // ray intersection
+	{
+		result.Distance = t;
+		return(true);
+	}
+	else // this means that there is a line intersection
+		 // but not a ray intersection
+		return (false);
 }
