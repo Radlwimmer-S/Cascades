@@ -30,7 +30,7 @@ void CameraPath::Initialize(bool recalculateTimeSteps)
 	//if (recalculateTimeSteps)
 	CalculateTimeSteps();
 	CalculateApprox();
-	m_debugCube = new Model(glm::vec3(0), glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 0.1f)), 12, glm::vec3(1.0f, 0.1f, 0.0f));
+	m_debugCube = new Model(glm::vec3(0), glm::quat(), Box::GetTris(glm::vec3(0.1f, 0.1f, 0.1f)), 12, glm::vec3(1.0f, 0.1f, 0.0f));
 }
 
 void CameraPath::Update(GLfloat deltaTime)

@@ -1,39 +1,15 @@
 #include "Plane.h"
 
-Plane::Plane(Texture& texture) : SimpleObject(glm::vec3(0,0,0),GetVertices(1), 4*8, GetIndizes(), 6, texture)
+Triangle* Plane::GetTris(glm::vec2 size, glm::vec2 textureRepeat)
 {
-}
-
-Plane::~Plane()
-{
-}
-
-void Plane::Update(GLfloat deltaTime)
-{
-}
-
-void Plane::Render(Shader& shader) const
-{
-	SimpleObject::Render(shader);
-}
-
-GLfloat* Plane::GetVertices(GLfloat size)
-{
-	GLfloat* vertices = new GLfloat[4*8] {
-		// Positions          // Colors           // Texture Coords
-		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
-		0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left 
+	Triangle* tris = new Triangle[2]
+	{
+		Triangle(Vertex(glm::vec3(+0.5f * size.x, 0, -0.5f * size.y), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec2(0.0f * textureRepeat.x, 0.0f * textureRepeat.y)),
+				 Vertex(glm::vec3(-0.5f * size.x, 0, -0.5f * size.y), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec2(1.0f * textureRepeat.x, 0.0f * textureRepeat.y)),
+				 Vertex(glm::vec3(-0.5f * size.x, 0, +0.5f * size.y), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec2(1.0f * textureRepeat.x, 1.0f * textureRepeat.y))),
+		Triangle(Vertex(glm::vec3(-0.5f * size.x, 0, +0.5f * size.y), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec2(1.0f * textureRepeat.x, 1.0f * textureRepeat.y)),
+				 Vertex(glm::vec3(+0.5f * size.x, 0, +0.5f * size.y), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec2(0.0f * textureRepeat.x, 1.0f * textureRepeat.y)),
+				 Vertex(glm::vec3(+0.5f * size.x, 0, -0.5f * size.y), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec2(0.0f * textureRepeat.x, 0.0f * textureRepeat.y)))
 	};
-	return vertices;
-}
-
-GLuint* Plane::GetIndizes()
-{
-	GLuint* indices = new GLuint[6] {  // Note that we start from 0!
-		0, 1, 3, // First Triangle
-		1, 2, 3  // Second Triangle
-	};
-	return indices;
+	return tris;
 }

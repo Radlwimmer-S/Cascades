@@ -1,7 +1,6 @@
 #include "DirectionalLight.h"
 #include "Shader.h"
 #include <glm/gtc/type_ptr.hpp>
-#include "Enums.h"
 #include "Box.h"
 
 
@@ -31,7 +30,7 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, gl
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	m_debugCube = new Model(m_position, glm::quat(), Box::GetTrisP(glm::vec3(0.1f, 0.1f, 1)), 12, m_color);
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(0.1f, 0.1f, 1)), 12, m_color);
 }
 
 DirectionalLight::~DirectionalLight()

@@ -23,7 +23,8 @@ protected:
 	glm::vec3 m_color;
 	GLuint depthMap;
 	GLuint depthMapFBO;
-	const GLuint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
+	const GLuint SHADOW_RES = 2;
+	const GLuint SHADOW_WIDTH = 1024 * SHADOW_RES, SHADOW_HEIGHT = 1024 * SHADOW_RES;
 	Shader& m_shadowShader;
 	GLfloat m_farPlane;
 	GLfloat m_nearPlane;

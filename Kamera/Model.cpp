@@ -1,17 +1,26 @@
 #include "Model.h"
 #include "Texture.h"
-#include "Shader.h"
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "Shader.h"
+#include "Vertex.h"
+#include "Triangle.h"
 
-Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color) : BaseObject(position, orientaton), triCount(triCount), m_color(color), m_colorMode(ColorOnly)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color) : Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, nullptr)
+{}
+
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture) : Model(position, orientaton, tris, triCount, color, colorMode, texture, nullptr)
+{}
+
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, Texture* normalMap) : Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, normalMap)
+{}
+
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, Texture* normalMap) : BaseObject(position, orientaton), triCount(triCount), m_color(color), m_colorMode(colorMode), m_texture(texture), m_normalMap(normalMap)
 {
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
-
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, triCount * sizeof(Triangle), tris, GL_STATIC_DRAW);
-
 	Vertex::ConfigVertexArrayObject(m_vao);
 }
 
@@ -29,7 +38,7 @@ void Model::Update(GLfloat deltaTime)
 void Model::Render(Shader& shader) const
 {
 	GLint objectColorLoc = glGetUniformLocation(shader.Program, "objectColor");
-	glUniform3f(objectColorLoc, m_color.r, m_color.g, m_color.b);
+	glUniform3fv(objectColorLoc, 1, glm::value_ptr(m_color));
 	glCheckError();
 
 	GLint modelLoc = glGetUniformLocation(shader.Program, "model");
@@ -40,6 +49,24 @@ void Model::Render(Shader& shader) const
 	glUniform1i(colorModeLoc, m_colorMode);
 	glCheckError();
 
+	int textureLoc = glGetUniformLocation(shader.Program, "objectTexture");
+	if (m_texture != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_texture->GetId());
+		glUniform1i(textureLoc, 1);
+		glCheckError();
+	}
+
+	GLint normalLoc = glGetUniformLocation(shader.Program, "normalMap");
+	if (m_normalMap != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, m_normalMap->GetId());
+		glUniform1i(normalLoc, 2);
+		glCheckError();
+	}
+
 	glBindVertexArray(m_vao);
 	glCheckError();
 	glDrawArrays(GL_TRIANGLES, 0, triCount * 3);
@@ -47,5 +74,9 @@ void Model::Render(Shader& shader) const
 	glCheckError();
 
 	glBindVertexArray(0);
-}
 
+	glUniform1i(textureLoc, 0);
+	glCheckError();
+	glUniform1i(normalLoc, 0);
+	glCheckError();
+}

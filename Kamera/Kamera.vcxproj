@@ -151,16 +151,16 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BaseObject.cpp" />
-    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TexturedModel.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
@@ -178,15 +178,15 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="BaseObject.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="TexturedModel.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="UpdateInfo.h" />
     <ClInclude Include="Vertex.h" />

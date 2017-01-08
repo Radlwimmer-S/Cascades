@@ -1,5 +1,6 @@
 #include "Box.h"
-#include "Texture.h"
+#include "Vertex.h"
+#include "Triangle.h"
 
 Triangle* Box::GetTris(glm::vec3 size, glm::vec3 textureRepeat)
 {
@@ -47,55 +48,6 @@ Triangle* Box::GetTris(glm::vec3 size, glm::vec3 textureRepeat)
 		Triangle(Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, +0.5f * size.z), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec2( 1.0f * textureRepeat.x, 1.0f * textureRepeat.z)),
 				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, +0.5f * size.z), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec2( 0.0f * textureRepeat.x, 1.0f * textureRepeat.z)),
 				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec2( 0.0f * textureRepeat.x, 0.0f * textureRepeat.z)))
-	};
-	return tris;
-}
-
-Triangle* Box::GetTrisP(glm::vec3 size)
-{
-	Triangle* tris = new Triangle[12]
-	{
-		Triangle(Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, -0.5f * size.z))),
-		Triangle(Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, -0.5f * size.z))),
-															   					
-		Triangle(Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, +0.5f * size.z))),
-		Triangle(Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, +0.5f * size.z))),
-															   					
-		Triangle(Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, -0.5f * size.z))),
-		Triangle(Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, +0.5f * size.z))),
-																				
-		Triangle(Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, +0.5f * size.z))),
-		Triangle(Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z))),
-																				
-		Triangle(Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, +0.5f * size.z))),
-		Triangle(Vertex(glm::vec3(+0.5f * size.x, -0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, -0.5f * size.y, -0.5f * size.z))),
-																				
-		Triangle(Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, -0.5f * size.z)),
-				 Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, +0.5f * size.z))),
-		Triangle(Vertex(glm::vec3(-0.5f * size.x, +0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, +0.5f * size.z)),
-				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z)))
 	};
 	return tris;
 }

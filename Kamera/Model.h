@@ -1,17 +1,17 @@
 #pragma once
-#include <GL/glew.h>
-#include <glm/glm.hpp>
 #include "BaseObject.h"
 #include "Enums.h"
-#include "Triangle.h"
 
-class Shader;
 class Texture;
+struct Triangle;
 
 class Model : public BaseObject
 {
 public:
 	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, Texture* normalMap);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, Texture* normalMap);
 	virtual ~Model();
 
 	void Update(GLfloat deltaTime) override;
@@ -27,5 +27,7 @@ protected:
 	glm::vec3 m_color;
 	ColorBlendMode m_colorMode;
 	GLuint m_vao;
+	Texture* m_texture;
+	Texture* m_normalMap;
 };
 

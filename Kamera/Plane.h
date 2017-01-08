@@ -1,16 +1,10 @@
 #pragma once
-#include "SimpleObject.h"
-class Plane :
-	public SimpleObject
+#include <glm/detail/type_vec2.hpp>
+#include "Triangle.h"
+
+class Plane 
 {
 public:
-	Plane(Texture& texture);
-	~Plane();
-
-	void Update(GLfloat deltaTime) override;
-	void Render(Shader& shader) const override;
-private:
-	static GLfloat* GetVertices(GLfloat size);
-	static GLuint* GetIndizes();
+	static Triangle* GetTris(glm::vec2 size = glm::vec2(1), glm::vec2 textureRepeat = glm::vec2(1));
 };
 

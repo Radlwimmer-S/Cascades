@@ -3,9 +3,9 @@
 
 Triangle::Triangle(Vertex v0, Vertex v1, Vertex v2)
 {
-	Vertices[0] = v0;
-	Vertices[1] = v1;
-	Vertices[2] = v2;
+	vertices_[0] = v0;
+	vertices_[1] = v1;
+	vertices_[2] = v2;
 
 	glm::vec3 edge1 = v1.Position - v0.Position;
 	glm::vec3 edge2 = v2.Position - v0.Position;
@@ -22,9 +22,19 @@ Triangle::Triangle(Vertex v0, Vertex v1, Vertex v2)
 
 	for (int i = 0; i < 3; i++)
 	{
-		Vertices[i].Tangent = tangent;
+		vertices_[i].Tangent = tangent;
 	}
 }
 
 Triangle::Triangle(Vertex vertices[3]) : Triangle(vertices[0], vertices[1], vertices[2])
 {}
+
+Vertex Triangle::GetVertex(int index) const
+{
+	return vertices_[index];
+}
+
+glm::vec3 Triangle::GetCenter() const
+{
+	return (vertices_[0].Position + vertices_[1].Position + vertices_[2].Position) / 3.0f;
+}
