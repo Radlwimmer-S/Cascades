@@ -48,7 +48,6 @@ uniform sampler2D objectTexture;
 uniform int normalMode;
 uniform sampler2D normalMap;
 uniform float bumbiness = 2f;
-vec3 normal;
 
 uniform vec3 viewPos;
 
@@ -98,7 +97,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
-float CalculatePointShadow(in LightSource light)
+float CalculatePointShadow(in LightSource light, in vec3 normal)
 {
 	// Get vector between fragment position and light position
 	vec3 fragToLight = fs_in.FragPos - light.Pos;
@@ -138,7 +137,7 @@ float CalculatePointShadow(in LightSource light)
 	return shadow;
 }
 
-LightComponents CalculateLight(in LightSource light, in vec3 lightDir)
+LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lightDir)
 {
 	LightComponents lighting;
 
@@ -162,7 +161,7 @@ LightComponents CalculateLight(in LightSource light, in vec3 lightDir)
 	return lighting;
 }
 
-float CalculateDirShadow(in LightSource light, in float baseBias)
+float CalculateDirShadow(in LightSource light, in vec3 normal, in float baseBias)
 {
 	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
 
@@ -207,7 +206,7 @@ float CalculateDirShadow(in LightSource light, in float baseBias)
 	return shadow;
 }
 
-float CalculateCircularShadow(in LightSource light)
+float CalculateCircularShadow(in LightSource light, in vec3 normal)
 {
 	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
 
@@ -219,33 +218,33 @@ float CalculateCircularShadow(in LightSource light)
 	return clamp(distanceToCenter * distanceToCenter, 0, 1);
 }
 
-float CalculateDistanceShadow(in LightSource light)
+float CalculateDistanceShadow(in LightSource light, in vec3 normal)
 {
 	float distance = length(light.Pos - fs_in.FragPos);
 	return distance / light.far_plane;
 }
 
-vec3 CalculateDirLightSource(in LightSource light)
+vec3 CalculateDirLightSource(in LightSource light, in vec3 normal)
 {
-	LightComponents components = CalculateLight(light, normalize(light.Pos));
-	float shadow = CalculateDirShadow(light, 0.005);
+	LightComponents components = CalculateLight(light, normal, normalize(light.Pos));
+	float shadow = CalculateDirShadow(light, normal, 0.005);
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
-vec3 CalculateSpotLightSource(in LightSource light)
+vec3 CalculateSpotLightSource(in LightSource light, in vec3 normal)
 {
-	LightComponents components = CalculateLight(light, normalize(light.Pos - fs_in.FragPos));
-	float shadow = CalculateDirShadow(light, 0.001);
-	float circular = CalculateCircularShadow(light);
+	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
+	float shadow = CalculateDirShadow(light, normal, 0.002);
+	float circular = CalculateCircularShadow(light, normal);
 	shadow = clamp(shadow + circular, 0, 1);
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
-vec3 CalculatePointLightSource(in LightSource light)
+vec3 CalculatePointLightSource(in LightSource light, in vec3 normal)
 {
-	LightComponents components = CalculateLight(light, normalize(light.Pos - fs_in.FragPos));
-	float shadow = CalculatePointShadow(light);
-	float distance = CalculateDistanceShadow(light);
+	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
+	float shadow = CalculatePointShadow(light, normal);
+	float distance = CalculateDistanceShadow(light, normal);
 	shadow = clamp(shadow + distance, 0, 1);
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
@@ -255,7 +254,7 @@ void main()
 {
 	vec3 color = DetermineFragmentColor(colorMode);
 
-	normal = DetermineFragmentNormal(normalMode);
+	vec3 normal = DetermineFragmentNormal(normalMode);
 
 	if (!EnableLighting || normal == vec3(0.0f))
 	{
@@ -272,13 +271,13 @@ void main()
 		switch (Lights[i].Type)
 		{
 		case DIR_LIGHT:
-			lighting += CalculateDirLightSource(Lights[i]);
+			lighting += CalculateDirLightSource(Lights[i], normal);
 			break;
 		case SPOT_LIGHT:
-			lighting += CalculateSpotLightSource(Lights[i]);
+			lighting += CalculateSpotLightSource(Lights[i], normal);
 			break;
 		case POINT_LIGHT:
-			lighting += CalculatePointLightSource(Lights[i]);
+			lighting += CalculatePointLightSource(Lights[i], normal);
 			break;
 		}
 	}
