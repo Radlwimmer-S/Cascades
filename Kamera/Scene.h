@@ -3,13 +3,15 @@
 #include "Enums.h"
 #include "BaseObject.h"
 #include <vector>
+#include "KdNode.h"
+#include "Model.h"
 
 class Shader;
 
 class Scene
 {
 public:
-	Scene();
+	Scene(std::vector<Model*>& objects);
 	virtual ~Scene();
 
 	virtual void Init();
@@ -18,13 +20,17 @@ public:
 	virtual void Render(Shader& shader) const;
 	virtual void ProcessInput(GLfloat deltaTime);
 
-	void AddObject(BaseObject* object);
-
 	State GetState() const;
 	void SetState(State state);
 
+	KdNode* GetKdTree() const;
+
+	int TreeRenderDepth = 1;
+
 protected:
 	State m_state;
-	std::vector<BaseObject*> m_objects;
+	std::vector<Model*> m_objects;
+	std::vector<KdPrimitive*> m_kdObjects;
+	KdNode* m_kdTree;
 };
 

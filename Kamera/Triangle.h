@@ -9,7 +9,6 @@ struct Triangle
 
 	Vertex& GetVertex(int index);
 	const Vertex& GetVertex(int index) const;
-	glm::vec3 GetCenter() const;
 
 protected:
 	Vertex vertices_[3];

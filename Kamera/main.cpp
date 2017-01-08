@@ -12,7 +12,6 @@
 #include "Hud.h"
 #include <iomanip>
 #include "Plane.h"
-#include "shaders/ShaderEnums.h"
 
 std::vector<ControlPoint>* GetPath()
 {
@@ -31,27 +30,33 @@ std::vector<ControlPoint>* GetPath()
 
 Scene* GetScene()
 {
-	Scene* scene = new Scene();
+	std::vector<Model*>* models = new std::vector<Model*>();
 	Texture* floorTex = new Texture("textures/brickwall.jpg", "wall");
 	Texture* floorNormal = new Texture("textures/brickwall_normal.jpg", "wall_normal");
-	scene->AddObject(new Model(glm::vec3(0, -0.1f, 0), MakeQuad(0, 0, 0), Plane::GetTris(glm::vec2(20, 20), glm::vec2(10, 10)), 2, glm::vec3(0.3f, 0.3f, 0.3f), TextureOnly, floorTex, BumpMapOnly, floorNormal));
+	for (int x = 0; x < 10; ++x)
+		for (int z = 0; z < 10; ++z)
+		{
+			models->push_back(new Model(glm::vec3(-9 + 2 * x, 0, -9 + 2 * z), MakeQuad(0, 0, 0), Plane::GetTris(glm::vec2(2, 2), glm::vec2(1, 1)), 2, glm::vec3(0.3f, 0.3f, 0.3f), TextureOnly, floorTex, BumpMapOnly, floorNormal));
+		}
+
 	Texture* containerTex = new Texture("textures/container.jpg", "box");
 	Texture* containerNormal = new Texture("textures/container_normal.jpg", "box_normal");
-	scene->AddObject(new Model(glm::vec3(7, 0.5f, 6), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
-	scene->AddObject(new Model(glm::vec3(-4, 3, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
-	scene->AddObject(new Model(glm::vec3(-7, 1, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
-	scene->AddObject(new Model(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
-	scene->AddObject(new Model(glm::vec3(-2, 1, 4), MakeQuad(0, 50, 15), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
+	models->push_back(new Model(glm::vec3(7, 0.5f, 6), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
+	models->push_back(new Model(glm::vec3(-4, 3, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
+	models->push_back(new Model(glm::vec3(-7, 1, -3), MakeQuad(0, 20, 40), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
+	models->push_back(new Model(glm::vec3(0, 2, 0), MakeQuad(0, 0, 0), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
+	models->push_back(new Model(glm::vec3(-2, 1, 4), MakeQuad(0, 50, 15), Box::GetTris(), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerTex, BumpMapOnly, containerNormal));
+
 	Texture* containerSmallTex = new Texture("textures/container_small.jpg", "box");
 	Texture* containerSmallNormal = new Texture("textures/container_small_normal.jpg", "box_normal");
-	scene->AddObject(new Model(glm::vec3(6.25f, 0.25f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	scene->AddObject(new Model(glm::vec3(6.25f, 0.75f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	scene->AddObject(new Model(glm::vec3(5.75f, 0.25f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	scene->AddObject(new Model(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	scene->AddObject(new Model(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	scene->AddObject(new Model(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	scene->AddObject(new Model(glm::vec3(0, 2.75f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	return scene;
+	models->push_back(new Model(glm::vec3(6.25f, 0.25f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	models->push_back(new Model(glm::vec3(6.25f, 0.75f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	models->push_back(new Model(glm::vec3(5.75f, 0.25f, 5.25f), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	models->push_back(new Model(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	models->push_back(new Model(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	models->push_back(new Model(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	models->push_back(new Model(glm::vec3(0, 2.75f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
+	return new Scene(*models);
 }
 
 void TestCSAA()

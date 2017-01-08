@@ -65,6 +65,8 @@ protected:
 	Hud* m_hud;
 	std::vector<Light*> m_lights;
 
+	Model m_hits[2];
+
 	int m_activeObject;
 	GLuint m_framebuffer;
 

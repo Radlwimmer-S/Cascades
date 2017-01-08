@@ -87,5 +87,5 @@ glm::mat4 BaseObject::GetMatrix() const
 	translation = glm::translate(translation, m_position);
 	glm::mat4 rotation = glm::toMat4(glm::normalize(m_orientation));
 
-	return translation *  rotation;
+	return translation * rotation;
 }

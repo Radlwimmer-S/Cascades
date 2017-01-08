@@ -143,6 +143,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="CameraPath.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
@@ -150,11 +151,14 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Hud.cpp" />
+    <ClCompile Include="KdNode.cpp" />
+    <ClCompile Include="KdPrimitive.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BaseObject.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SpotLight.cpp" />
@@ -166,6 +170,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AntiAliasingInfo.h" />
+    <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="CameraPath.h" />
     <ClInclude Include="Character.h" />
@@ -176,10 +181,14 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="Font.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="BaseObject.h" />
+    <ClInclude Include="HitResult.h" />
     <ClInclude Include="Hud.h" />
+    <ClInclude Include="KdNode.h" />
+    <ClInclude Include="KdPrimitive.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />

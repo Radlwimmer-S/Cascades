@@ -1,7 +1,12 @@
 #include "Scene.h"
 
-Scene::Scene()
+Scene::Scene(std::vector<Model*>& objects) : m_state(Running), m_objects(objects)
 {
+	for (auto it = m_objects.begin(); it != m_objects.end(); ++it)
+	{
+		(*it)->GetKdPrimitives(m_kdObjects);
+	}
+	m_kdTree = new KdNode(m_kdObjects);
 }
 
 
@@ -18,7 +23,7 @@ void Scene::Update(GLfloat deltaTime)
 	if (m_state != Running)
 		return;
 
-	for (std::vector<BaseObject*>::iterator it = m_objects.begin(); it != m_objects.end(); ++it)
+	for (auto it = m_objects.begin(); it != m_objects.end(); ++it)
 	{
 		(*it)->Update(deltaTime);
 	}
@@ -29,19 +34,16 @@ void Scene::Render(Shader& shader) const
 	if (m_state != Running && m_state != Paused)
 		return;
 
-	for (std::vector<BaseObject*>::const_iterator it = m_objects.begin(); it != m_objects.end(); ++it)
+	for (auto it = m_objects.begin(); it != m_objects.end(); ++it)
 	{
 		(*it)->Render(shader);
 	}
+
+	m_kdTree->RenderLeafs(shader, TreeRenderDepth, 1);
 }
 
 void Scene::ProcessInput(GLfloat deltaTime)
 {
-}
-
-void Scene::AddObject(BaseObject* object)
-{
-	m_objects.push_back(object);
 }
 
 State Scene::GetState() const
@@ -52,4 +54,9 @@ State Scene::GetState() const
 void Scene::SetState(State state)
 {
 	m_state = state;
+}
+
+KdNode* Scene::GetKdTree() const
+{
+	return m_kdTree;
 }

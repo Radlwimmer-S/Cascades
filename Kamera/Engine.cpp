@@ -8,8 +8,13 @@
 #include <algorithm>
 #include "Hud.h"
 #include <iomanip>
+#include "Box.h"
+#include "Ray.h"
+#include "HitResult.h"
 
-Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
+Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1),
+m_hits{ Model(glm::vec3(0,0,0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(.1f,.1f,.1f)), 12, glm::vec3(1,0,0), NoNormals),
+		Model(glm::vec3(0,0,0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(.1f,.1f,.1f)), 12, glm::vec3(1,0,0), NoNormals) }
 {
 	glGenFramebuffers(1, &m_framebuffer);
 	m_aaInfo.Init();
@@ -165,6 +170,8 @@ void Engine::Loop()
 
 		m_camera->Update(deltaTime);
 		m_scene->Update(deltaTime);
+		m_hits[0].Update(deltaTime);
+		m_hits[1].Update(deltaTime);
 		m_hud->Update(fps, m_renderInfo, m_aaInfo);
 
 		RenderLights();
@@ -251,6 +258,9 @@ void Engine::RenderScene() const
 		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			(*it)->RenderDebug(*m_shader);
 
+	m_hits[0].Render(*m_shader);
+	m_hits[1].Render(*m_shader);
+
 	m_camera->Render(*m_shader);
 
 	// 2. Now blit multisampled buffer(s) to default framebuffers		
@@ -277,11 +287,6 @@ void Engine::RenderHud() const
 
 void Engine::PrintData(int fps) const
 {
-#ifdef _DEBUG
-	system("cls");
-
-	PrintCSAA();
-#endif
 }
 
 void Engine::SetAASettings()
@@ -394,6 +399,13 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			m_renderInfo.NormalMapFactor = std::fminf(2, m_renderInfo.NormalMapFactor + 0.1f);
 			break;
 
+		case GLFW_KEY_KP_2:
+			--m_scene->TreeRenderDepth;
+			break;
+		case GLFW_KEY_KP_8:
+			++m_scene->TreeRenderDepth;
+			break;
+
 		case GLFW_KEY_KP_3:
 			m_aaInfo.Samples = (m_aaInfo.Samples - 1 >= 0) ? m_aaInfo.Samples - 1 : m_aaInfo.MaxSamples;
 			SetAASettings();
@@ -426,12 +438,25 @@ void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int
 
 void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS)
+	if ((button == GLFW_MOUSE_BUTTON_2 || button == GLFW_MOUSE_BUTTON_1) && action == GLFW_PRESS)
 	{
-		glm::vec3 cameraPos = m_camera->GetPosition();
-		glm::vec3 cameraRot = glm::eulerAngles(m_camera->GetOrientation());
-		std::cout << "path->push_back(ControlPoint(glm::vec3(" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z
-			<< "), MakeQuad(" << glm::degrees(cameraRot.x) << ", " << glm::degrees(cameraRot.y) << ", " << glm::degrees(cameraRot.z) << ")));" << std::endl;
+		Ray ray(m_camera->GetPosition(), -(glm::vec3(0, 0, 1)* m_camera->GetOrientation()));
+
+		KdNode* tree = m_scene->GetKdTree();
+
+		HitResult result;
+		if (!tree->IsHit(result, ray))
+		{
+			std::cout << "Miss!" << std::endl;
+			return;
+		}
+
+		glm::vec3 hit = ray.GetOrigin() + ray.GetDirection() * result.Distance;
+
+		std::cout << "Hit @ ";
+		std::cout << hit.x << '/' << hit.y << '/' << hit.z << std::endl;
+
+		m_hits[button - GLFW_MOUSE_BUTTON_1].SetPosition(hit);
 	}
 }
 

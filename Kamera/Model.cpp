@@ -15,7 +15,7 @@ Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei t
 Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode, Texture* normalMap) : Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, normalMode, normalMap)
 {}
 
-Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap) : BaseObject(position, orientaton), triCount(triCount), m_color(color), m_colorMode(colorMode), m_normalMode(normalMode), m_texture(texture), m_normalMap(normalMap)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap) : BaseObject(position, orientaton), m_isVisible(true), m_tris(tris), m_triCount(triCount), m_color(color), m_colorMode(colorMode), m_normalMode(normalMode), m_texture(texture), m_normalMap(normalMap)
 {
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
@@ -37,6 +37,9 @@ void Model::Update(GLfloat deltaTime)
 
 void Model::Render(Shader& shader) const
 {
+	if (!IsVisible())
+		return;
+
 	GLint modelLoc = glGetUniformLocation(shader.Program, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(GetMatrix()));
 	glCheckError();
@@ -73,7 +76,7 @@ void Model::Render(Shader& shader) const
 
 	glBindVertexArray(m_vao);
 	glCheckError();
-	glDrawArrays(GL_TRIANGLES, 0, triCount * 3);
+	glDrawArrays(GL_TRIANGLES, 0, m_triCount * 3);
 
 	glCheckError();
 
@@ -83,4 +86,27 @@ void Model::Render(Shader& shader) const
 	glCheckError();
 	glUniform1i(normalLoc, 0);
 	glCheckError();
+}
+
+void Model::GetKdPrimitives(std::vector<KdPrimitive*>& primitives) const
+{
+	glm::mat4 modelMatrix = GetMatrix();
+	for (int i = 0; i < m_triCount; ++i)
+	{
+		Triangle& tri = m_tris[i];
+		glm::vec3 v0 = (tri.GetVertex(0).Position * GetOrientation()) + GetPosition();
+		glm::vec3 v1 = (tri.GetVertex(1).Position * GetOrientation()) + GetPosition();
+		glm::vec3 v2 = (tri.GetVertex(2).Position * GetOrientation()) + GetPosition();
+		primitives.push_back(new KdPrimitive(v0, v1, v2));
+	}
+}
+
+bool Model::IsVisible() const
+{
+	return m_isVisible;
+}
+
+void Model::IsVisible(bool visibility)
+{
+	m_isVisible = visibility;
 }

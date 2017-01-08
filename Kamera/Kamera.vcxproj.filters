@@ -40,6 +40,12 @@
     <Filter Include="Source Files\HUD">
       <UniqueIdentifier>{05ad07de-563f-417d-ac79-01fbff059f2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\kdTree">
+      <UniqueIdentifier>{6e30fc69-5435-443f-a170-f2afd7db9838}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\kdTree">
+      <UniqueIdentifier>{5fe467c7-dbf8-47fd-9ecf-3738703f5f5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -101,6 +107,18 @@
     </ClCompile>
     <ClCompile Include="Plane.cpp">
       <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="BoundingBox.cpp">
+      <Filter>Source Files\kdTree</Filter>
+    </ClCompile>
+    <ClCompile Include="KdNode.cpp">
+      <Filter>Source Files\kdTree</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Source Files\kdTree</Filter>
+    </ClCompile>
+    <ClCompile Include="KdPrimitive.cpp">
+      <Filter>Source Files\kdTree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +199,21 @@
     </ClInclude>
     <ClInclude Include="shaders\ShaderEnums.h">
       <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingBox.h">
+      <Filter>Header Files\kdTree</Filter>
+    </ClInclude>
+    <ClInclude Include="HitResult.h">
+      <Filter>Header Files\kdTree</Filter>
+    </ClInclude>
+    <ClInclude Include="KdNode.h">
+      <Filter>Header Files\kdTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Header Files\kdTree</Filter>
+    </ClInclude>
+    <ClInclude Include="KdPrimitive.h">
+      <Filter>Header Files\kdTree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

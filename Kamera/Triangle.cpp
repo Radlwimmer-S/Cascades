@@ -38,8 +38,3 @@ const Vertex& Triangle::GetVertex(int index) const
 {
 	return vertices_[index];
 }
-
-glm::vec3 Triangle::GetCenter() const
-{
-	return (vertices_[0].Position + vertices_[1].Position + vertices_[2].Position) / 3.0f;
-}

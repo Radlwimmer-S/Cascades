@@ -1,6 +1,8 @@
 #pragma once
 #include "BaseObject.h"
 #include "Enums.h"
+#include <vector>
+#include "KdPrimitive.h"
 
 class Texture;
 struct Triangle;
@@ -17,17 +19,25 @@ public:
 	void Update(GLfloat deltaTime) override;
 	void Render(Shader& shader) const override;
 
+	void GetKdPrimitives(std::vector<KdPrimitive*>& primitives) const;
+
 	GLuint GetVAO() const
 	{
 		return m_vao;
 	}
+
+	bool IsVisible() const;
+	void IsVisible(bool visibility);
+
 protected:
+	bool m_isVisible;
 	GLuint m_vbo;
-	GLsizei triCount;
+	GLuint m_vao;
+	Triangle* m_tris;
+	GLsizei m_triCount;
 	glm::vec3 m_color;
 	ColorBlendMode m_colorMode;
 	NormalBlendMode m_normalMode;
-	GLuint m_vao;
 	Texture* m_texture;
 	Texture* m_normalMap;
 };
