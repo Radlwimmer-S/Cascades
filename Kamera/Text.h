@@ -17,6 +17,8 @@ public:
 
 	void SetString(const std::string& string);
 
+	void SetPosition(glm::vec2 pos);
+	float GetScale() const;
 protected:
 	std::string string_;
 	Font& font_;

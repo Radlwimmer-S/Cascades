@@ -87,3 +87,13 @@ void Text::SetString(const std::string& string)
 {
 	string_ = string;
 }
+
+void Text::SetPosition(glm::vec2 pos)
+{
+	pos_ = pos;
+}
+
+float Text::GetScale() const
+{
+	return scale_;
+}

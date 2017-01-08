@@ -4,15 +4,11 @@
 
 struct AntiAliasingInfo
 {
-	GLsizei ColorSamples = 4;
-	GLsizei ActiveColorSamples = 4;
-	GLsizei MaxColorSamples;
-	GLsizei CoverageSamples = 8;
-	GLsizei ActiveCoverageSamples = 8;
-	GLsizei MaxCoverageSamples;
+	GLsizei Samples = 8;
+	GLsizei ActiveSamples = 8;
+	GLsizei MaxSamples;
 	GLuint ColorBuffer;
 	GLuint DepthBuffer;
-	GLuint Quality = GL_NICEST;
 
 	void Init()
 	{
@@ -29,41 +25,21 @@ struct AntiAliasingInfo
 				int* modes = new int[2 * maxModes];
 				glGetIntegerv(GL_MULTISAMPLE_COVERAGE_MODES_NV, modes);
 
-				MaxCoverageSamples = modes[2 * (maxModes - 1)];
-				MaxColorSamples = modes[2 * (maxModes - 1) + 1];
+				MaxSamples = modes[2 * (maxModes - 1)];
 				return;
 			}
 		}
 
-		MaxCoverageSamples = 16;
-		MaxColorSamples = 16;
+		MaxSamples = 16;
 	}
 
 	std::string ParseAAMode() const
 	{
-		if (CoverageSamples == 0)
+		if (Samples == 0)
 			return "Deaktiviert";
 
 		std::stringstream ss;
-
-		if ((ActiveCoverageSamples == 8 || ActiveCoverageSamples == 16) && (ActiveColorSamples == 4 || ActiveColorSamples == 8))
-		{
-			ss << ActiveCoverageSamples;
-			if (ActiveColorSamples == 8)
-				ss << "xQ (Quality) CSAA";
-			else
-				ss << "x CSAA";
-
-			return ss.str();
-		}
-
-		if (ActiveColorSamples == 0 || ActiveCoverageSamples >= ActiveColorSamples)
-		{
-			ss << ActiveCoverageSamples << "x MSAA";
-			return ss.str();
-		}
-
-		ss << "Custom CSAA";
+		ss << ActiveSamples << "x MSAA";
 		return ss.str();
 	}
 };

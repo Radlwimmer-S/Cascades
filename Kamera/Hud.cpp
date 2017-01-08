@@ -3,11 +3,18 @@
 #include "Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Font.h"
 
 Hud::Hud(Font& font, Shader& shader) : m_font(font), m_shader(shader),
 m_fpsText(Text("", m_font, glm::vec2(25, HEIGHT - 50), 1, glm::vec3(1, 1, 0))),
-m_aaText(Text("", m_font, glm::vec2(25, HEIGHT - 100), 1, glm::vec3(1, 1, 0)))
+m_aaText(Text("", m_font, glm::vec2(25, HEIGHT - 100), 1, glm::vec3(1, 1, 0))),
+m_crosshair(Text("+", m_font, glm::vec2(0, 0), 2, glm::vec3(1, 0, 0)))
 {
+	glm::vec2 charPos(WIDTH / 2, HEIGHT / 2);
+	Character plus = font.GetChar('+');
+	GLfloat xpos = charPos.x - (plus.Bearing.x + plus.Size.x / 2.f) * m_crosshair.GetScale();
+	GLfloat ypos = charPos.y - (plus.Bearing.y - plus.Size.y / 2.f) * m_crosshair.GetScale();
+	m_crosshair.SetPosition(glm::vec2(xpos, ypos));
 }
 
 Hud::~Hud()
@@ -23,10 +30,8 @@ void Hud::Update(int fps, const RenderInfo& renderInfo, const AntiAliasingInfo& 
 
 	ss.str("");
 
-	ss << "Color Samples: " << aaInfo.ActiveColorSamples << " (" << aaInfo.ColorSamples << ")" << std::endl;
-	ss << "Coverage Samples: " << aaInfo.ActiveCoverageSamples << " (" << aaInfo.CoverageSamples << ")" << std::endl;
-	ss << "Quality: " << ((aaInfo.Quality == GL_NICEST) ? "Nicest" : "Fastest") << std::endl;
-	ss << "AAMode: " << aaInfo.ParseAAMode();
+	ss << "Samples: " << aaInfo.ActiveSamples << " (" << aaInfo.Samples << ")" << std::endl;
+	ss << "Mode: " << aaInfo.ParseAAMode();
 	m_aaText.SetString(ss.str());
 }
 
@@ -41,4 +46,5 @@ void Hud::Render() const
 
 	m_fpsText.Render(m_shader);
 	m_aaText.Render(m_shader);
+	m_crosshair.Render(m_shader);
 }

@@ -19,5 +19,6 @@ protected:
 	Shader& m_shader;
 	Text m_fpsText;
 	Text m_aaText;
+	Text m_crosshair;
 };
 
