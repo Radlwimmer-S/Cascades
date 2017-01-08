@@ -13,7 +13,7 @@ public:
 
 protected:
 	DirectionalLight(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane = 0.1f);
-	int GetType() override;
+	LightType GetType() override;
 	virtual glm::mat4 GetProjection() const;
 	virtual glm::mat4 GetView() const;
 	glm::mat4 GetShadowMatrix() const;

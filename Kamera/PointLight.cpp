@@ -28,7 +28,7 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(0.1f, 0.1f, 0.1f)), 12, m_color);
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(0.1f, 0.1f, 0.1f)), 12, m_color, NoNormals);
 }
 
 PointLight::~PointLight()
@@ -77,9 +77,9 @@ void PointLight::RenderDebug(Shader& shader) const
 	m_debugCube->Render(shader);
 }
 
-int PointLight::GetType()
+LightType PointLight::GetType()
 {
-	return POINT_LIGHT;
+	return LightType::Point;
 }
 
 std::vector<glm::mat4> PointLight::GetShadowMatrices() const

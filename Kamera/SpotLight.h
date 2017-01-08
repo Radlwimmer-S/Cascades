@@ -8,7 +8,7 @@ public:
 	virtual ~SpotLight();
 
 protected:
-	int GetType() override;
+	LightType GetType() override;
 	glm::mat4 GetProjection() const override;
 	glm::mat4 GetView() const override;
 	float m_fovy;

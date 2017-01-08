@@ -183,6 +183,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="shaders\ShaderEnums.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />

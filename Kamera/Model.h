@@ -8,10 +8,10 @@ struct Triangle;
 class Model : public BaseObject
 {
 public:
-	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color);
-	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture);
-	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, Texture* normalMap);
-	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, Texture* normalMap);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode = NormalsOnly);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode = NormalsOnly);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode, Texture* normalMap);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap);
 	virtual ~Model();
 
 	void Update(GLfloat deltaTime) override;
@@ -26,6 +26,7 @@ protected:
 	GLsizei triCount;
 	glm::vec3 m_color;
 	ColorBlendMode m_colorMode;
+	NormalBlendMode m_normalMode;
 	GLuint m_vao;
 	Texture* m_texture;
 	Texture* m_normalMap;

@@ -1,6 +1,5 @@
 #pragma once
 #include <glm/gtx/norm.hpp>
-#include <GL/glew.h>
 #include "Vertex.h"
 
 struct Triangle
@@ -8,7 +7,8 @@ struct Triangle
 	Triangle(Vertex v0, Vertex v1, Vertex v2);
 	Triangle(Vertex vertices[3]);
 
-	Vertex GetVertex(int index)const;
+	Vertex& GetVertex(int index);
+	const Vertex& GetVertex(int index) const;
 	glm::vec3 GetCenter() const;
 
 protected:

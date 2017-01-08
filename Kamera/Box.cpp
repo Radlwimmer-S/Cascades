@@ -49,5 +49,6 @@ Triangle* Box::GetTris(glm::vec3 size, glm::vec3 textureRepeat)
 				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, +0.5f * size.z), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec2( 0.0f * textureRepeat.x, 1.0f * textureRepeat.z)),
 				 Vertex(glm::vec3(+0.5f * size.x, +0.5f * size.y, -0.5f * size.z), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec2( 0.0f * textureRepeat.x, 0.0f * textureRepeat.z)))
 	};
+
 	return tris;
 }

@@ -30,7 +30,7 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, gl
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(0.1f, 0.1f, 1)), 12, m_color);
+	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(0.1f, 0.1f, 1)), 12, m_color, NoNormals);
 }
 
 DirectionalLight::~DirectionalLight()
@@ -72,9 +72,9 @@ void DirectionalLight::RenderDebug(Shader& shader) const
 	m_debugCube->Render(shader);
 }
 
-int DirectionalLight::GetType()
+LightType DirectionalLight::GetType()
 {
-	return DIR_LIGHT;
+	return LightType::Directional;
 }
 
 glm::mat4 DirectionalLight::GetProjection() const

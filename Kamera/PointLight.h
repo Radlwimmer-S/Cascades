@@ -17,7 +17,7 @@ public:
 	void RenderDebug(Shader& shader) const override;
 		
 protected:
-	int GetType() override;
+	LightType GetType() override;
 	glm::mat4 GetProjection() const;
 	std::vector<glm::mat4> GetShadowMatrices() const;
 };

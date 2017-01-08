@@ -1,5 +1,7 @@
 #pragma once
 #include "BaseObject.h"
+#include "Enums.h"
+
 class Light : public BaseObject
 {
 public:
@@ -17,7 +19,7 @@ public:
 		return m_shadowShader;
 	}
 
-	virtual int GetType() = 0;
+	virtual LightType GetType() = 0;
 
 protected:
 	glm::vec3 m_color;

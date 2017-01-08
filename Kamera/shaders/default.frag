@@ -10,9 +10,6 @@ in VS_OUT
 	mat3 TBN;
 } fs_in;
 
-const int COLOR_ONLY_MODE = -1;
-const int TEXTURE_ONLY_MODE = 1;
-
 uniform bool SoftShadows = true;
 uniform bool EnableLighting = true;
 
@@ -24,9 +21,6 @@ struct LightComponents
 };
 
 const int LIGHT_COUNT = 10;
-const int DIR_LIGHT = 0;
-const int SPOT_LIGHT = 1;
-const int POINT_LIGHT = 2;
 
 struct LightSource
 {
@@ -47,30 +41,50 @@ struct LightSource
 
 uniform LightSource Lights[LIGHT_COUNT];
 
-uniform int mode;
+uniform int colorMode;
 uniform vec3 objectColor;
 uniform sampler2D objectTexture;
 
+uniform int normalMode;
 uniform sampler2D normalMap;
 uniform float bumbiness = 2f;
 vec3 normal;
 
 uniform vec3 viewPos;
 
-vec3 DetermineFragmentColor(in int mode)
+#pragma include "ShaderEnums.h"
+
+vec3 DetermineFragmentColor(in int colorMode)
 {
-	//Check for blending mode
-	if (mode == COLOR_ONLY_MODE)
+	//Check for blending colorMode
+	switch (colorMode)
 	{
-		return objectColor;
+		case COLOR_ONLY_MODE:
+			return objectColor;
+		case COLOR_MIX_MODE:
+			return texture(objectTexture, fs_in.UV).rgb * objectColor;
+		case TEXTURE_ONLY_MODE:
+			return texture(objectTexture, fs_in.UV).rgb;
 	}
-	else if (mode == TEXTURE_ONLY_MODE)
+}
+
+vec3 DetermineFragmentNormal(in int normalMode)
+{
+	switch (normalMode)
 	{
-		return texture(objectTexture, fs_in.UV).rgb;
-	}
-	else
-	{
-		return texture(objectTexture, fs_in.UV).rgb * objectColor;
+		case NORMALS_ONLY_MODE:
+			return fs_in.Normal;
+		case NO_NORMALS_MODE:
+			return vec3(0.0f);
+		case BUMP_MAP_ONLY_MODE:
+			// Obtain normal from normal map in range [0,1]
+			vec3 tmpNormal = texture(normalMap, fs_in.UV).rgb;
+			// Transform normal vector to range [-1,1]
+			tmpNormal = normalize(tmpNormal * 2.0 - 1.0);
+			// Apply "Bumpiness"
+			tmpNormal = normalize(tmpNormal * vec3(bumbiness, bumbiness, 1.0f));
+			// Convert to global
+			return normalize(fs_in.TBN * tmpNormal);
 	}
 }
 
@@ -82,7 +96,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
 	vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
-	);
+);
 
 float CalculatePointShadow(in LightSource light)
 {
@@ -239,34 +253,15 @@ vec3 CalculatePointLightSource(in LightSource light)
 
 void main()
 {
-	vec3 color = DetermineFragmentColor(mode);
+	vec3 color = DetermineFragmentColor(colorMode);
 
-	if (!EnableLighting)
+	normal = DetermineFragmentNormal(normalMode);
+
+	if (!EnableLighting || normal == vec3(0.0f))
 	{
 		FragColor = vec4(color, 1.0f);
 		return;
-	}
-
-	if (texture(normalMap, fs_in.UV).rgb != vec3(0.0f, 0.0f, 0.0f))
-	{
-		// Obtain normal from normal map in range [0,1]
-		normal = texture(normalMap, fs_in.UV).rgb;
-		// Transform normal vector to range [-1,1]
-		normal = normalize(normal * 2.0 - 1.0);
-		// Apply "Bumpiness"
-		normal = normalize(normal * vec3(bumbiness, bumbiness, 1.0f));
-		// Convert to global
-		normal = normalize(fs_in.TBN * normal);
-	}
-	else if (fs_in.Normal != vec3(0.0f, 0.0f, 0.0f))
-	{
-		normal = fs_in.Normal;
-	}
-	else
-	{
-		FragColor = vec4(color, 1.0f);
-		return;
-	}
+	}	
 
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < LIGHT_COUNT; i++)
@@ -292,11 +287,4 @@ void main()
 	lighting *= color;
 
 	FragColor = vec4(lighting, 1.0f);
-
-
-	//Point
-	//vec3 lightDir = normalize(light.Pos - fs_in.FragPos);
-
-	//Dir
-	//vec3 lightDir = normalize(light.Pos);
 }

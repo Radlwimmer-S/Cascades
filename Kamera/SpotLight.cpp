@@ -10,9 +10,9 @@ SpotLight::~SpotLight()
 {
 }
 
-int SpotLight::GetType()
+LightType SpotLight::GetType()
 {
-	return SPOT_LIGHT;
+	return LightType::Spot;
 }
 
 glm::mat4 SpotLight::GetProjection() const

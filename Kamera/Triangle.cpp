@@ -29,7 +29,12 @@ Triangle::Triangle(Vertex v0, Vertex v1, Vertex v2)
 Triangle::Triangle(Vertex vertices[3]) : Triangle(vertices[0], vertices[1], vertices[2])
 {}
 
-Vertex Triangle::GetVertex(int index) const
+Vertex& Triangle::GetVertex(int index)
+{
+	return vertices_[index];
+}
+
+const Vertex& Triangle::GetVertex(int index) const
 {
 	return vertices_[index];
 }

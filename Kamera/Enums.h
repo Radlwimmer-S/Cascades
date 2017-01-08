@@ -1,5 +1,21 @@
 #pragma once
 
+#include "shaders/ShaderEnums.h"
+
+enum NormalBlendMode
+{
+	NormalsOnly = NORMALS_ONLY_MODE,
+	NoNormals = NO_NORMALS_MODE,
+	BumpMapOnly = BUMP_MAP_ONLY_MODE,
+};
+
+enum ColorBlendMode
+{
+	ColorOnly = COLOR_ONLY_MODE,
+	Mix = COLOR_MIX_MODE,
+	TextureOnly = TEXTURE_ONLY_MODE,
+};
+
 enum State
 {
 	Loading,
@@ -8,16 +24,11 @@ enum State
 	Stopped,
 };
 
-enum ColorBlendMode
-{
-	ColorOnly = -1,
-	Mix = 0,
-	TextureOnly = 1,
-};
-
 enum LightType
 {
-	Directional, Point
+	Directional = DIR_LIGHT,
+	Spot = SPOT_LIGHT,
+	Point = POINT_LIGHT,
 };
 
 enum VertexFormat

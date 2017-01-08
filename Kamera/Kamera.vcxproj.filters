@@ -179,6 +179,9 @@
     <ClInclude Include="Plane.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\ShaderEnums.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
