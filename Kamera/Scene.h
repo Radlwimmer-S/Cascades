@@ -18,6 +18,7 @@ public:
 
 	virtual void Update(GLfloat deltaTime);
 	virtual void Render(Shader& shader) const;
+	virtual void RenderKdTree(Shader& shader) const;
 	virtual void ProcessInput(GLfloat deltaTime);
 
 	State GetState() const;
@@ -25,7 +26,7 @@ public:
 
 	KdNode* GetKdTree() const;
 
-	int TreeRenderDepth = 1;
+	int TreeRenderDepth = 0;
 
 protected:
 	State m_state;

@@ -7,4 +7,5 @@ struct RenderInfo
 	bool EnableLight = true;
 	bool EnableShadows = true;
 	bool DrawLightPosition = true;
+	bool RenderPath = false;
 };

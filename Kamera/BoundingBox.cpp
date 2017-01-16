@@ -99,7 +99,7 @@ glm::vec3 BoundingBox::GetSize() const
 	return (max_ - min_) / 2.0f;
 }
 
-bool BoundingBox::IsHit(HitResult& result, Ray& ray) const
+bool BoundingBox::IsHit(Ray& ray) const
 {
 	float tMin = (min_.x - ray.GetOrigin().x) / ray.GetDirection().x;
 	float tMax = (max_.x - ray.GetOrigin().x) / ray.GetDirection().x;
@@ -137,8 +137,7 @@ bool BoundingBox::IsHit(HitResult& result, Ray& ray) const
 	if (tzMax < tMax)
 		tMax = tzMax;
 
-	result.Distance = tMin;
-	return true;
+	return ((tMin < ray.GetMaxT()) && (tMax > ray.GetMinT()));
 }
 
 void BoundingBox::Render(Shader& shader, int depth) const
@@ -160,7 +159,8 @@ void BoundingBox::Render(Shader& shader, int depth) const
 	glCheckError();
 
 	glBindVertexArray(m_vao);
-	glCheckError();
+	glCheckError();    
+	glLineWidth(2);
 	glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_SHORT, 0);
 	glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_SHORT, (GLvoid*)(4 * sizeof(GLushort)));
 	glDrawElements(GL_LINES, 8, GL_UNSIGNED_SHORT, (GLvoid*)(8 * sizeof(GLushort)));

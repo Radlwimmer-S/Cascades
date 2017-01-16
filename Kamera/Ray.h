@@ -12,9 +12,12 @@ public:
 
 	glm::vec3 GetOrigin() const;
 	glm::vec3 GetDirection() const;
+	float GetMinT() const;
+	float GetMaxT() const;
 
 protected:
 	glm::vec3 origin_;
 	glm::vec3 dir_;
+	float minT_, maxT_;
 };
 

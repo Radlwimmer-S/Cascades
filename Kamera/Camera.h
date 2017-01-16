@@ -34,6 +34,9 @@ public:
 	glm::mat4 GetViewMatrix() const;
 	glm::mat4 GetProjectionMatrix() const;
 
+	void SetRenderPath(bool value);
+	bool GetRenderPath() const;
+
 	CameraMode GetMode() const
 	{
 		return m_mode;

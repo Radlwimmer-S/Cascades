@@ -55,7 +55,6 @@ Scene* GetScene()
 	models->push_back(new Model(glm::vec3(3, 2, -2), MakeQuad(0, 20, 70), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
 	models->push_back(new Model(glm::vec3(-5, 1, -2), MakeQuad(0, 20, 40), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
 	models->push_back(new Model(glm::vec3(-3, 1, -3), MakeQuad(0, 45, 20), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
-	models->push_back(new Model(glm::vec3(0, 2.75f, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(0.5f)), 12, glm::vec3(0.7f, 0.7f, 0.7f), TextureOnly, containerSmallTex, BumpMapOnly, containerSmallNormal));
 	return new Scene(*models);
 }
 

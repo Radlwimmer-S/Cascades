@@ -22,7 +22,7 @@ KdNode::KdNode(std::vector<KdPrimitive*>& tris) : left_(nullptr), right_(nullptr
 	bbox_ = BoundingBox(tris);
 
 	//Abbruchbedingung
-	if (tris.size() <= 12)
+	if (tris.size() <= 20)
 		return;
 
 	int longestAxis = bbox_.GetLongestAxis();
@@ -36,8 +36,6 @@ KdNode::KdNode(std::vector<KdPrimitive*>& tris) : left_(nullptr), right_(nullptr
 		if (leftTris.size() > 0 && rightTris.size() > 0)
 			break;
 
-		leftTris.clear();
-		rightTris.clear();
 	}
 
 	//SplitByAxis(tris, longestAxis, leftTris, rightTris);
@@ -55,6 +53,11 @@ KdNode::~KdNode()
 
 void KdNode::SplitByAxis(std::vector<KdPrimitive*>& tris, int axis, std::vector<KdPrimitive*>& leftTris, std::vector<KdPrimitive*>& rightTris)
 {
+	leftTris.clear();
+	leftTris.reserve(tris.size() / 2);
+	rightTris.clear();
+	rightTris.reserve(tris.size() / 2);
+
 	auto median = tris.begin() + tris.size() / 2;
 	//Calculate median
 	std::nth_element(tris.begin(), median, tris.end(), [&](const KdPrimitive* t1, const KdPrimitive* t2)
@@ -78,24 +81,13 @@ void KdNode::SplitByAxis(std::vector<KdPrimitive*>& tris, int axis, std::vector<
 
 bool KdNode::IsHit(HitResult& result, Ray& ray) const
 {
-	if (!bbox_.IsHit(result, ray))
+	if (!bbox_.IsHit(ray))
 		return false;
 
 	// Child nodes present
-	if (left_ != nullptr || right_ != nullptr)
+	if (!IsLeafNode())
 	{
-		HitResult leftResult, rightResult;
-		if (left_->IsHit(leftResult, ray) || right_->IsHit(rightResult, ray))
-		{
-			if (leftResult.Distance < rightResult.Distance)
-				result = leftResult;
-			else
-				result = rightResult;
-
-			return true;
-		}
-
-		return false;
+		return (left_->IsHit(result, ray) | right_->IsHit(result, ray));
 	}
 
 	// Leaf node --> check tris
@@ -103,6 +95,9 @@ bool KdNode::IsHit(HitResult& result, Ray& ray) const
 	bool isHit = false;
 	for (auto it = triangles_.begin(); it != triangles_.end(); ++it)
 	{
+		if (!(*it)->GetBoundingBox().IsHit(ray))
+			continue;
+
 		if (!(*it)->IsHit(tmpResult, ray))
 			continue;
 
@@ -140,4 +135,9 @@ void KdNode::RenderLeafs(Shader& shader, int desiredDepth, int depth) const
 		left_->RenderLeafs(shader, desiredDepth, depth + 1);
 		right_->RenderLeafs(shader, desiredDepth, depth + 1);
 	}
+}
+
+bool KdNode::IsLeafNode() const
+{
+	return left_ == nullptr || right_ == nullptr;
 }

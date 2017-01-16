@@ -54,12 +54,10 @@ bool KdPrimitive::IsHit(HitResult& result, Ray& ray) const
 	// the intersection point is on the line
 	t = f * glm::dot(e2, q);
 
-	if (t > 0.00001) // ray intersection
+	if (t > ray.GetMinT() && t < ray.GetMaxT())
 	{
-		result.Distance = t;
-		return(true);
+		result.Distance = std::abs(t);
+		return true;
 	}
-	else // this means that there is a line intersection
-		 // but not a ray intersection
-		return (false);
+	return false;
 }

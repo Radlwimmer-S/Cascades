@@ -12,9 +12,7 @@
 #include "Ray.h"
 #include "HitResult.h"
 
-Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1),
-m_hits{ Model(glm::vec3(0,0,0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(.1f,.1f,.1f)), 12, glm::vec3(1,0,0), NoNormals),
-		Model(glm::vec3(0,0,0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(.1f,.1f,.1f)), 12, glm::vec3(1,0,0), NoNormals) }
+Engine::Engine(char* windowTitle, bool fullscreen) : m_shader(nullptr), m_scene(nullptr), m_window(*InitWindow(windowTitle, fullscreen)), m_camera(nullptr), m_activeObject(-1)
 {
 	glGenFramebuffers(1, &m_framebuffer);
 	m_aaInfo.Init();
@@ -170,9 +168,8 @@ void Engine::Loop()
 
 		m_camera->Update(deltaTime);
 		m_scene->Update(deltaTime);
-		m_hits[0].Update(deltaTime);
-		m_hits[1].Update(deltaTime);
-		m_hud->Update(fps, m_renderInfo, m_aaInfo);
+		m_measures.Update(deltaTime);
+		m_hud->Update(fps, m_renderInfo, m_aaInfo, m_measures);
 
 		RenderLights();
 
@@ -253,13 +250,13 @@ void Engine::RenderScene() const
 	UpdateUniforms();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_scene->Render(*m_shader);
+	m_scene->RenderKdTree(*m_shader);
 
 	if (m_renderInfo.DrawLightPosition)
 		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			(*it)->RenderDebug(*m_shader);
 
-	m_hits[0].Render(*m_shader);
-	m_hits[1].Render(*m_shader);
+	m_measures.Render(*m_shader);
 
 	m_camera->Render(*m_shader);
 
@@ -381,6 +378,9 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 		case GLFW_KEY_F3:
 			m_camera->SetMode(Manual);
 			break;
+		case GLFW_KEY_F4:
+			m_camera->SetRenderPath(!m_camera->GetRenderPath());
+			break;
 
 		case GLFW_KEY_DELETE:
 		{
@@ -400,7 +400,7 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			break;
 
 		case GLFW_KEY_KP_2:
-			--m_scene->TreeRenderDepth;
+			m_scene->TreeRenderDepth = std::max(0, m_scene->TreeRenderDepth - 1);
 			break;
 		case GLFW_KEY_KP_8:
 			++m_scene->TreeRenderDepth;
@@ -438,7 +438,7 @@ void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int
 
 void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-	if ((button == GLFW_MOUSE_BUTTON_2 || button == GLFW_MOUSE_BUTTON_1) && action == GLFW_PRESS)
+	if ((button == GLFW_MOUSE_BUTTON_2 || button == GLFW_MOUSE_BUTTON_1) && (action == GLFW_PRESS || action == GLFW_REPEAT))
 	{
 		Ray ray(m_camera->GetPosition(), -(glm::vec3(0, 0, 1)* m_camera->GetOrientation()));
 
@@ -456,7 +456,7 @@ void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, i
 		std::cout << "Hit @ ";
 		std::cout << hit.x << '/' << hit.y << '/' << hit.z << std::endl;
 
-		m_hits[button - GLFW_MOUSE_BUTTON_1].SetPosition(hit);
+		m_measures.SetHit(button - GLFW_MOUSE_BUTTON_1, hit);
 	}
 }
 

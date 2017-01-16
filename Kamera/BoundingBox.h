@@ -25,7 +25,7 @@ public:
 	glm::vec3 GetCenter() const;
 	glm::vec3 GetSize() const;
 
-	bool IsHit(HitResult& result, Ray& ray) const;
+	bool IsHit(Ray& ray) const;
 
 	void Render(Shader& shader, int depth) const;
 

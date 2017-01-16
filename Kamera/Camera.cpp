@@ -76,6 +76,16 @@ glm::mat4 Camera::GetProjectionMatrix() const
 	return glm::perspective(45.0f, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 }
 
+void Camera::SetRenderPath(bool value)
+{
+	m_renderPath = value;
+}
+
+bool Camera::GetRenderPath() const
+{
+	return m_renderPath;
+}
+
 bool Camera::CursorPosCallback(float x, float y)
 {
 	if (m_mousePos == glm::vec2())

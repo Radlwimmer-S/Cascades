@@ -13,6 +13,7 @@ public:
 
 	void SplitByAxis(std::vector<KdPrimitive*>& tris, int longestAxis, std::vector<KdPrimitive*>& leftTris, std::vector<KdPrimitive*>& rightTris);
 	bool IsHit(HitResult& result, Ray& ray) const;
+	bool IsLeafNode() const;
 	
 	void RenderLeafs(Shader& shader, int depth) const;
 	void RenderLeafs(Shader& shader, int desiredDepth, int depth) const;

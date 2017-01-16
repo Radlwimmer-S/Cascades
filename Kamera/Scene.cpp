@@ -1,6 +1,6 @@
 #include "Scene.h"
 
-Scene::Scene(std::vector<Model*>& objects) : m_state(Running), m_objects(objects)
+Scene::Scene(std::vector<Model*>& objects) : m_state(Running), m_objects(objects), TreeRenderDepth(0)
 {
 	for (auto it = m_objects.begin(); it != m_objects.end(); ++it)
 	{
@@ -38,8 +38,12 @@ void Scene::Render(Shader& shader) const
 	{
 		(*it)->Render(shader);
 	}
+}
 
-	m_kdTree->RenderLeafs(shader, TreeRenderDepth, 1);
+void Scene::RenderKdTree(Shader& shader) const
+{
+	if (TreeRenderDepth > 0)
+		m_kdTree->RenderLeafs(shader, TreeRenderDepth, 1);
 }
 
 void Scene::ProcessInput(GLfloat deltaTime)

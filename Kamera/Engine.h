@@ -12,6 +12,7 @@
 #include "RenderInfo.h"
 #include "AntiAliasingInfo.h"
 #include "Font.h"
+#include "MeasuringTool.h"
 
 class Hud;
 class Camera;
@@ -65,7 +66,7 @@ protected:
 	Hud* m_hud;
 	std::vector<Light*> m_lights;
 
-	Model m_hits[2];
+	MeasuringTool m_measures;
 
 	int m_activeObject;
 	GLuint m_framebuffer;
