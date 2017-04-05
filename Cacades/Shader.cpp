@@ -14,7 +14,7 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLcha
 	m_sourceFiles[0] = vertexPath;
 	m_sourceFiles[1] = fragmentPath;
 	m_sourceFiles[2] = geometryPath;
-	//m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, m_delegate);
+	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, *m_delegate);
 	Load();
 }
 

@@ -67,20 +67,80 @@ class Delegate
 	};
 
 public:
-	Delegate(void);
-	Delegate(const Delegate& other);
-	Delegate& operator= (const Delegate& other);
-	~Delegate();
+	Delegate(void) : delegate_(nullptr)
+	{}
 
-	void Bind(void(*freeFunction)());
-	template <class C>
-	void Bind(void (C::*memberFunction)(), C* instance);
-	template <class C>
-	void Bind(void (C::*constMemberFunction)() const, const C* instance);
+	Delegate(const Delegate& other)
+	{
+		if (other.delegate_ == nullptr)
+		{
+			delegate_ = nullptr;
+		}
+		else
+		{
+			delegate_ = other.delegate_->Clone();
+		}
+	}
 
-	void Invoke() const;
+	Delegate& operator= (const Delegate& other)
+	{
+		if (this != &other)
+		{
+			delete delegate_;
+			if (other.delegate_ == nullptr)
+			{
+				delegate_ = nullptr;
+			}
+			else
+			{
+				delegate_ = other.delegate_->Clone();
+			}
+		}
+		return *this;
+	}
+
+	~Delegate()
+	{
+		delete delegate_;
+	}
+
+	void Bind(void(*freeFunction)())
+	{
+		delete delegate_;
+
+		if (freeFunction == nullptr)
+		{
+			delegate_ = nullptr;
+		}
+		else
+		{
+			delegate_ = new(data_) FreeFunctionDelegate(freeFunction);
+		}
+	}
+
+	template <class C>
+	void Bind(void (C::*memberFunction)(), C* instance)
+	{
+		delete delegate_;
+		delegate_ = new(data_) MemberFunctionDelegate<C>(memberFunction, instance);
+	}
+
+	template <class C>
+	void Bind(void (C::*constMemberFunction)() const, const C* instance)
+	{
+		delete delegate_;
+		delegate_ = new(data_) ConstMemberFunctionDelegate<C>(constMemberFunction, instance);
+	}
+
+	void Invoke() const
+	{
+		if (delegate_ == nullptr)
+			return;
+
+		return delegate_->Call();
+	}
 
 private:
 	DelegateBase* delegate_;
-	char data_[20];
+	char data_[256];
 };

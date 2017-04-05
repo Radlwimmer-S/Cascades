@@ -7,7 +7,7 @@ class FileWatcher
 {
 public:
 	//FileWatcher(const char* filePath, Delegate& delegate, long msCycle = 1000);
-	//FileWatcher(const char** filePath, int fileCount, Delegate& delegate, long msCycle = 1000);
+	FileWatcher(const char** filePath, int fileCount, Delegate& delegate, long msCycle = 1000);
 	~FileWatcher();
 protected:
 	void CheckFile() const;

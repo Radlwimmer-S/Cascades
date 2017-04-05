@@ -5,15 +5,18 @@
 //	m_watcherThread = std::thread(&FileWatcher::CheckFile, this);
 //}
 
-//FileWatcher::FileWatcher(const char** filePath, int fileCount, Delegate& delegate, long msCycle) : m_path(new std::experimental::filesystem::path[fileCount]), m_lastLoad(new std::chrono::system_clock::time_point[fileCount]), m_fileCount(fileCount), m_callBack(delegate), m_msCycle(msCycle), m_stop(false)
-//{
-//	for (int i = 0; i < m_fileCount; ++i)
-//	{
-//		m_path[i] = std::experimental::filesystem::path(filePath[i]);
-//		m_lastLoad[i] = std::experimental::filesystem::last_write_time(m_path[i]);
-//	}
-//	m_watcherThread = std::thread(&FileWatcher::CheckFile, this);
-//}
+FileWatcher::FileWatcher(const char** filePath, int fileCount, Delegate& delegate, long msCycle) : m_path(new std::experimental::filesystem::path[fileCount]), m_lastLoad(new std::chrono::system_clock::time_point[fileCount]), m_fileCount(fileCount), m_callBack(delegate), m_msCycle(msCycle), m_stop(false)
+{
+	for (int i = 0; i < m_fileCount; ++i)
+	{
+		if (filePath[i] == nullptr)
+			continue;
+
+		m_path[i] = std::experimental::filesystem::path(filePath[i]);
+		m_lastLoad[i] = std::experimental::filesystem::last_write_time(m_path[i]);
+	}
+	m_watcherThread = std::thread(&FileWatcher::CheckFile, this);
+}
 
 FileWatcher::~FileWatcher()
 {
@@ -29,6 +32,9 @@ void FileWatcher::CheckFile() const
 	{
 		for (int i = 0; i < m_fileCount; ++i)
 		{
+			if (m_path[i] == "")
+				continue;
+
 			std::chrono::system_clock::time_point modifyStamp = std::experimental::filesystem::last_write_time(m_path[i]);
 
 			if (modifyStamp > m_lastLoad[i])
