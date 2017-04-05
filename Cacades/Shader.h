@@ -1,9 +1,10 @@
 #pragma once
 
-#define NOMINMAX
-#include <Windows.h>
 #include <GL/glew.h>
-#include <vector>
+#include <chrono>
+#include "Delegate.h"
+#include "FileWatcher.h"
+typedef std::chrono::system_clock::time_point time_point;
 
 class Shader
 {
@@ -18,10 +19,11 @@ public:
 
 	bool IsDirty() const;
 	void IsDirty(bool dirty);
+	void SetDirty();
 
 	const GLchar*const* GetSourceFiles() const;
 
-	const FILETIME* GetLastBuildTime() const;
+	time_point GetLastBuildTime() const;
 
 private:
 	static void HandleIncludes(std::string& shaderCode, const GLchar* shaderPath);
@@ -29,7 +31,12 @@ private:
 	static GLuint LoadShader(const GLchar* shaderPath, GLenum shaderType, bool& isValid);
 	static GLchar* GetShaderName(GLenum shaderType);
 
-	const GLchar* m_sourceFiles[3];
+	static const int MAX_FILES = 3;
+
+	const GLchar* m_sourceFiles[MAX_FILES];
+	FileWatcher* m_watcher;
+	Delegate* m_delegate;
 	bool m_isValid, m_isDirty;
-	FILETIME m_lastBuild;
+	time_point m_lastBuild;
+
 };

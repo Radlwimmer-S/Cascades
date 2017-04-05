@@ -46,6 +46,12 @@
     <Filter Include="Source Files\kdTree">
       <UniqueIdentifier>{5fe467c7-dbf8-47fd-9ecf-3738703f5f5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utilities">
+      <UniqueIdentifier>{f51a836e-122d-4e51-9642-40025b716676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utilities">
+      <UniqueIdentifier>{6f7f8cd9-bb12-43ad-8eeb-f2af73008877}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -123,8 +129,11 @@
     <ClCompile Include="MeasuringTool.cpp">
       <Filter>Source Files\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Delegate.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="FileWatcher.cpp">
+      <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -224,8 +233,11 @@
     <ClInclude Include="MeasuringTool.h">
       <Filter>Header Files\kdTree</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Delegate.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="FileWatcher.h">
+      <Filter>Header Files\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

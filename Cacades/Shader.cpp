@@ -6,12 +6,15 @@
 #include "Shlwapi.h"
 #include "Pathcch.h"
 #include "Global.h"
+#include <chrono>
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : Program(0), m_isValid(false), m_isDirty(true)
+Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : Program(0), m_delegate(new Delegate()), m_isValid(false), m_isDirty(true)
 {
+	m_delegate->Bind(&Shader::SetDirty, this);
 	m_sourceFiles[0] = vertexPath;
 	m_sourceFiles[1] = fragmentPath;
 	m_sourceFiles[2] = geometryPath;
+	//m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, m_delegate);
 	Load();
 }
 
@@ -44,10 +47,7 @@ void Shader::Load()
 		if (success)
 		{
 			Program = program;
-			SYSTEMTIME sysTime;
-			//GetSystemTime();
-			GetLocalTime(&sysTime);
-			SystemTimeToFileTime(&sysTime, &m_lastBuild);
+			m_lastBuild = std::chrono::system_clock::now();
 		}
 		else
 		{
@@ -185,12 +185,17 @@ void Shader::IsDirty(bool dirty)
 	m_isDirty = dirty;
 }
 
+void Shader::SetDirty()
+{
+	m_isDirty = true;
+}
+
 const GLchar*const* Shader::GetSourceFiles() const
 {
 	return m_sourceFiles;
 }
 
-const FILETIME* Shader::GetLastBuildTime() const
+time_point Shader::GetLastBuildTime() const
 {
-	return &m_lastBuild;
+	return m_lastBuild;
 }

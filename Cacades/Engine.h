@@ -11,9 +11,7 @@
 #include "DirectionalLight.h"
 #include "RenderInfo.h"
 #include "AntiAliasingInfo.h"
-#include "Font.h"
 #include "MeasuringTool.h"
-#include "ShaderManager.h"
 
 class Hud;
 class Camera;
@@ -41,7 +39,6 @@ public:
 	void SetCamera(Camera& camera);
 	void AddLight(Light& light);
 	void SetHud(Hud& hud);
-	void SetShaderManager(ShaderManager& manager);
 	void Update(GLfloat deltaTime, int fps);
 	void Start();
 	void Resume();
@@ -62,7 +59,6 @@ protected:
 
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 
-	ShaderManager* m_shaderManager;
 	Shader* m_shader;
 	Scene* m_scene;
 	GLFWwindow& m_window;
