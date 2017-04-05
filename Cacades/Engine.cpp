@@ -140,6 +140,22 @@ void Engine::SetHud(Hud& hud)
 	m_hud = &hud;
 }
 
+void Engine::SetShaderManager(ShaderManager& manager)
+{
+	m_shaderManager = &manager;
+}
+
+void Engine::Update(GLfloat deltaTime, int fps)
+{
+	if (m_shaderManager != nullptr)
+		m_shaderManager->Update(deltaTime);
+
+	m_camera->Update(deltaTime);
+	m_scene->Update(deltaTime);
+	m_measures.Update(deltaTime);
+	m_hud->Update(fps, m_renderInfo, m_aaInfo, m_measures);
+}
+
 void Engine::Loop()
 {
 	// DeltaTime variables
@@ -166,10 +182,7 @@ void Engine::Loop()
 
 		MoveActiveObject();
 
-		m_camera->Update(deltaTime);
-		m_scene->Update(deltaTime);
-		m_measures.Update(deltaTime);
-		m_hud->Update(fps, m_renderInfo, m_aaInfo, m_measures);
+		Update(deltaTime, fps);
 
 		RenderLights();
 

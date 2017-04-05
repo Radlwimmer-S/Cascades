@@ -120,6 +120,12 @@
     <ClCompile Include="KdPrimitive.cpp">
       <Filter>Source Files\kdTree</Filter>
     </ClCompile>
+    <ClCompile Include="MeasuringTool.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -214,6 +220,12 @@
     </ClInclude>
     <ClInclude Include="KdPrimitive.h">
       <Filter>Header Files\kdTree</Filter>
+    </ClInclude>
+    <ClInclude Include="MeasuringTool.h">
+      <Filter>Header Files\kdTree</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

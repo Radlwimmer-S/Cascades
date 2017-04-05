@@ -154,6 +154,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="KdNode.cpp" />
     <ClCompile Include="KdPrimitive.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="MeasuringTool.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
@@ -161,6 +162,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -186,12 +188,14 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="KdNode.h" />
     <ClInclude Include="KdPrimitive.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="MeasuringTool.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="shaders\ShaderEnums.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Text.h" />

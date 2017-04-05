@@ -1,5 +1,6 @@
 
 #pragma once
+#define NOMINMAX
 #include "Shader.h"
 #include "Engine.h"
 #include "Camera.h"
@@ -100,6 +101,7 @@ int main(int argc, char** argv)
 #endif
 
 		Engine* engine = Engine::Instance();
+		ShaderManager* shaders = new ShaderManager();
 
 		Shader* shader = new Shader("./shaders/default.vert", "./shaders/default.frag");
 		if (!shader->IsValid())
@@ -107,6 +109,7 @@ int main(int argc, char** argv)
 			std::cin.ignore();
 			return -1;
 		}
+		shaders->RegisterShader(*shader);
 		engine->SetShader(*shader);
 
 		Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.frag", "./shaders/PointLight.geom");
@@ -115,6 +118,7 @@ int main(int argc, char** argv)
 			std::cin.ignore();
 			return -1;
 		}
+		shaders->RegisterShader(*pointLightShader);
 
 		Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert", "./shaders/DirectionalLight.frag");
 		if (!directionalLightShader->IsValid())
@@ -122,6 +126,7 @@ int main(int argc, char** argv)
 			std::cin.ignore();
 			return -1;
 		}
+		shaders->RegisterShader(*directionalLightShader);
 
 		Shader* hudShader = new Shader("./shaders/Text.vert", "./shaders/Text.frag");
 		if (!hudShader->IsValid())
@@ -129,6 +134,9 @@ int main(int argc, char** argv)
 			std::cin.ignore();
 			return -1;
 		}
+		shaders->RegisterShader(*hudShader);
+
+		engine->SetShaderManager(*shaders);
 
 		engine->SetScene(*GetScene());
 

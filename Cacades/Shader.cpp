@@ -5,42 +5,64 @@
 #include <iostream>
 #include "Shlwapi.h"
 #include "Pathcch.h"
+#include "Global.h"
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : m_isValid(true)
+Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : Program(0), m_isValid(false), m_isDirty(true)
 {
+	m_sourceFiles[0] = vertexPath;
+	m_sourceFiles[1] = fragmentPath;
+	m_sourceFiles[2] = geometryPath;
+	Load();
+}
+
+void Shader::Load()
+{
+	GLuint program = glCreateProgram();
 	GLuint vertex, fragment, geometry = 0;
 	GLint success;
 	GLchar infoLog[512];
 
-	// Shader Program
-	Program = glCreateProgram();
+	m_isValid = true;
+	m_isDirty = false;
 
-	vertex = LoadShader(vertexPath, GL_VERTEX_SHADER);
-	glAttachShader(Program, vertex);
+	vertex = LoadShader(m_sourceFiles[0], GL_VERTEX_SHADER, m_isValid);
+	glAttachShader(program, vertex);
 
-	fragment = LoadShader(fragmentPath, GL_FRAGMENT_SHADER);
-	glAttachShader(Program, fragment);
+	fragment = LoadShader(m_sourceFiles[1], GL_FRAGMENT_SHADER, m_isValid);
+	glAttachShader(program, fragment);
 
-	if (geometryPath != nullptr)
+	if (m_sourceFiles[2] != nullptr)
 	{
-		geometry = LoadShader(geometryPath, GL_GEOMETRY_SHADER);
-		glAttachShader(Program, geometry);
+		geometry = LoadShader(m_sourceFiles[2], GL_GEOMETRY_SHADER, m_isValid);
+		glAttachShader(program, geometry);
 	}
 
-	glLinkProgram(Program);
-	// Print linking errors if any
-	glGetProgramiv(Program, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(Program, 512, nullptr, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-		m_isValid = false;
+	if (m_isValid) {
+		glLinkProgram(program);
+		glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+		if (success)
+		{
+			Program = program;
+			SYSTEMTIME sysTime;
+			//GetSystemTime();
+			GetLocalTime(&sysTime);
+			SystemTimeToFileTime(&sysTime, &m_lastBuild);
+		}
+		else
+		{
+			// Print linking errors if any
+			glGetProgramInfoLog(Program, 512, nullptr, infoLog);
+			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+			m_isValid = false;
+		}
 	}
+
 	// Delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
-	if (geometryPath != nullptr)
-		glDeleteShader(geometry);
+	glDeleteShader(geometry);
+	glCheckError();
 }
 
 std::string Shader::ReadFile(const GLchar* shaderPath)
@@ -76,9 +98,9 @@ std::string Shader::ReadFile(const GLchar* shaderPath)
 	return shaderCode;
 }
 
-GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
+GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType, bool& isValid)
 {
-	std::string shaderCode = ReadFile(shaderPath);	
+	std::string shaderCode = ReadFile(shaderPath);
 	HandleIncludes(shaderCode, shaderPath);
 
 	const GLchar* vShaderCode = shaderCode.c_str();
@@ -95,8 +117,8 @@ GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType)
 	if (!success)
 	{
 		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cout << "ERROR::SHADER::" << GetShaderName(shaderType) << "COMPILATION_FAILED\n" << infoLog << std::endl;
-		m_isValid = false;
+		std::cout << "ERROR::SHADER::" << GetShaderName(shaderType) << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+		isValid = false;
 	}
 
 	return shader;
@@ -109,12 +131,12 @@ void Shader::HandleIncludes(std::string& shaderCode, const GLchar* shaderPath)
 
 	char includeText[] = "#pragma include \"";
 	int textLength = sizeof(includeText) - 1;
-		
+
 	for (size_t includeStart = shaderCode.find(includeText, 0); includeStart != std::string::npos; includeStart = shaderCode.find(includeText, 0))
 	{
 		size_t includeEnd = shaderCode.find("\"", includeStart + textLength);
 		std::string filePath(parentPath);
-		std::string fileName = shaderCode.substr(includeStart + textLength, (includeEnd)- (includeStart + textLength));
+		std::string fileName = shaderCode.substr(includeStart + textLength, (includeEnd)-(includeStart + textLength));
 
 		filePath.append(fileName);
 		std::string includeCode = ReadFile(filePath.c_str());
@@ -127,22 +149,48 @@ GLchar* Shader::GetShaderName(GLenum shaderType)
 	switch (shaderType)
 	{
 	case GL_VERTEX_SHADER:
-		return "VERTEX::";
+		return "VERTEX";
 	case GL_FRAGMENT_SHADER:
-		return "FRAGMENT::";
+		return "FRAGMENT";
 	case GL_GEOMETRY_SHADER:
-		return "GEOMETRY::";
+		return "GEOMETRY";
 	default:
 		return "UNKNOWN";
 	}
 }
 
-void Shader::Use() const
+void Shader::Use()
 {
+	if (m_isValid && m_isDirty)
+	{
+		std::cout << "INFO::SHADER::HOT_RELOAD" << std::endl;
+		Load();
+	}
+
 	glUseProgram(Program);
 }
 
 bool Shader::IsValid() const
 {
 	return  m_isValid;
+}
+
+bool Shader::IsDirty() const
+{
+	return m_isDirty;
+}
+
+void Shader::IsDirty(bool dirty)
+{
+	m_isDirty = dirty;
+}
+
+const GLchar*const* Shader::GetSourceFiles() const
+{
+	return m_sourceFiles;
+}
+
+const FILETIME* Shader::GetLastBuildTime() const
+{
+	return &m_lastBuild;
 }
