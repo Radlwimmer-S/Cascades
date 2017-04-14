@@ -8,60 +8,74 @@
 #include "Global.h"
 #include <chrono>
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath) : Program(0), m_delegate(new Delegate()), m_isValid(false), m_isDirty(true)
+Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_delegate(&Shader::SetDirty, this), m_isTempValid(false), m_isValid(false), m_isDirty(true)
 {
-	m_delegate->Bind(&Shader::SetDirty, this);
 	m_sourceFiles[0] = vertexPath;
-	m_sourceFiles[1] = fragmentPath;
-	m_sourceFiles[2] = geometryPath;
-	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, *m_delegate);
+	m_sourceFiles[1] = geometryPath;
+	m_sourceFiles[2] = fragmentPath;
+	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, m_delegate);
 	Load();
 }
 
 void Shader::Load()
 {
 	GLuint program = glCreateProgram();
-	GLuint vertex, fragment, geometry = 0;
+	GLuint vertex, fragment = 0, geometry = 0;
 	GLint success;
-	GLchar infoLog[512];
+	//GLchar infoLog[512];
 
-	m_isValid = true;
+	m_isTempValid = true;
 	m_isDirty = false;
 
-	vertex = LoadShader(m_sourceFiles[0], GL_VERTEX_SHADER, m_isValid);
+	vertex = LoadShader(m_sourceFiles[0], GL_VERTEX_SHADER, m_isTempValid);
 	glAttachShader(program, vertex);
 
-	fragment = LoadShader(m_sourceFiles[1], GL_FRAGMENT_SHADER, m_isValid);
-	glAttachShader(program, fragment);
-
-	if (m_sourceFiles[2] != nullptr)
+	if (m_sourceFiles[1] != nullptr)
 	{
-		geometry = LoadShader(m_sourceFiles[2], GL_GEOMETRY_SHADER, m_isValid);
+		geometry = LoadShader(m_sourceFiles[1], GL_GEOMETRY_SHADER, m_isTempValid);
 		glAttachShader(program, geometry);
 	}
 
-	if (m_isValid) {
-		glLinkProgram(program);
-		glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (m_sourceFiles[2] != nullptr)
+	{
+		fragment = LoadShader(m_sourceFiles[2], GL_FRAGMENT_SHADER, m_isTempValid);
+		glAttachShader(program, fragment);
+	}
 
+	glLinkProgram(program);
+	glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+	if (m_isTempValid)
+	{
 		if (success)
 		{
+			glDeleteProgram(Program);
 			Program = program;
-			m_lastBuild = std::chrono::system_clock::now();
+			m_isValid = true;
 		}
 		else
 		{
+			m_isTempValid = false;
 			// Print linking errors if any
-			glGetProgramInfoLog(Program, 512, nullptr, infoLog);
+			GLint errorLength;
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &errorLength);
+			glCheckError();
+			char* infoLog = new GLchar[errorLength];
+			glGetProgramInfoLog(program, errorLength, nullptr, infoLog);
+			glCheckError();
 			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-			m_isValid = false;
+			delete[] infoLog;
+			glDeleteProgram(program);
 		}
 	}
+	else
+		glDeleteProgram(program);
+
 
 	// Delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertex);
-	glDeleteShader(fragment);
 	glDeleteShader(geometry);
+	glDeleteShader(fragment);
 	glCheckError();
 }
 
@@ -107,17 +121,22 @@ GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType, bool& isV
 	// 2. Compile shader
 	GLuint shader;
 	GLint success;
-	GLchar infoLog[512];
 
 	shader = glCreateShader(shaderType);
 	glShaderSource(shader, 1, &vShaderCode, nullptr);
 	glCompileShader(shader);
 	// Print compile errors if any
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
 	if (!success)
 	{
-		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+		// Print linking errors if any
+		GLint errorLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &errorLength);
+		char* infoLog = new GLchar[errorLength];
+		glGetShaderInfoLog(shader, errorLength, nullptr, infoLog);
 		std::cout << "ERROR::SHADER::" << GetShaderName(shaderType) << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+		delete[] infoLog;
 		isValid = false;
 	}
 
@@ -161,10 +180,14 @@ GLchar* Shader::GetShaderName(GLenum shaderType)
 
 void Shader::Use()
 {
-	if (m_isValid && m_isDirty)
+	if (m_isDirty)
 	{
 		std::cout << "INFO::SHADER::HOT_RELOAD" << std::endl;
 		Load();
+		if (!m_isTempValid)
+		{
+			std::cout << "INFO::SHADER::HOT_RELOAD_ABORTED" << std::endl;
+		}
 	}
 
 	glUseProgram(Program);
@@ -193,9 +216,4 @@ void Shader::SetDirty()
 const GLchar*const* Shader::GetSourceFiles() const
 {
 	return m_sourceFiles;
-}
-
-time_point Shader::GetLastBuildTime() const
-{
-	return m_lastBuild;
 }

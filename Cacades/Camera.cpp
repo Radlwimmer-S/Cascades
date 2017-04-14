@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 
-Camera::Camera() : BaseObject(glm::vec3(0, 10, 10), MakeQuad(45, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
+Camera::Camera() : BaseObject(glm::vec3(0, 0, 0), MakeQuad(0, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
 {
 }
 
@@ -73,7 +73,7 @@ glm::mat4 Camera::GetViewMatrix() const
 
 glm::mat4 Camera::GetProjectionMatrix() const
 {
-	return glm::perspective(45.0f, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	return glm::perspective(45.0f, (float)WIDTH / (float)HEIGHT, -1.0f, 1.0f);
 }
 
 void Camera::SetRenderPath(bool value)

@@ -135,6 +135,15 @@
     <ClCompile Include="FileWatcher.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="ProcedualGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GpuLookupTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -143,13 +152,7 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CameraPath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BaseObject.h">
@@ -185,12 +188,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="RenderInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UpdateInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Text.h">
       <Filter>Header Files\HUD</Filter>
     </ClInclude>
@@ -199,9 +196,6 @@
     </ClInclude>
     <ClInclude Include="Character.h">
       <Filter>Header Files\HUD</Filter>
-    </ClInclude>
-    <ClInclude Include="AntiAliasingInfo.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Hud.h">
       <Filter>Header Files\HUD</Filter>
@@ -239,6 +233,30 @@
     <ClInclude Include="FileWatcher.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="AntiAliasingInfo.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderInfo.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="UpdateInfo.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcedualGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GpuLookupTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
@@ -266,6 +284,15 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\Text.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MarchingCubes.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MarchingCubes.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\MarchingCubes.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

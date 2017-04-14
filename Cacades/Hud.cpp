@@ -21,19 +21,12 @@ Hud::~Hud()
 {
 }
 
-void Hud::Update(int fps, const RenderInfo& renderInfo, const AntiAliasingInfo& aaInfo, const MeasuringTool& measures)
+void Hud::Update(int fps, const RenderInfo& renderInfo)
 {
 	std::stringstream ss;
 	ss.precision(2);
 
 	ss << "FPS: " << fps << std::endl << std::endl;
-	ss << "Samples: " << aaInfo.ActiveSamples << " (" << aaInfo.Samples << ")" << std::endl;
-	ss << "Mode: " << aaInfo.ParseAAMode() << std::endl << std::endl;
-	glm::vec3 hit1 = measures.GetHit(0);
-	glm::vec3 hit2 = measures.GetHit(1);
-	ss << "Hit 1: " << std::fixed << hit1.x << '/' << std::fixed << hit1.y << '/' << std::fixed << hit1.z << std::endl;
-	ss << "Hit 2: " << std::fixed << hit2.x << '/' << std::fixed << hit2.y << '/' << std::fixed << hit2.z << std::endl;
-	ss << "Distance: " << std::fixed << measures.GetDistance() << std::endl;
 	m_infoText.SetString(ss.str());
 }
 

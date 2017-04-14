@@ -12,7 +12,7 @@ public:
 	Hud(Font& font, Shader& shader);
 	~Hud();
 
-	void Update(int fps, const RenderInfo& renderInfo, const AntiAliasingInfo& aaInfo, const MeasuringTool& measures) ;
+	void Update(int fps, const RenderInfo& renderInfo) ;
 	void Render() const;
 
 protected:

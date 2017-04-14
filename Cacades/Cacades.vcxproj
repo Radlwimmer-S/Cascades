@@ -127,6 +127,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -152,6 +153,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FileWatcher.cpp" />
     <ClCompile Include="Font.cpp" />
+    <ClCompile Include="GpuLookupTable.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="KdNode.cpp" />
     <ClCompile Include="KdPrimitive.cpp" />
@@ -161,6 +163,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BaseObject.cpp" />
+    <ClCompile Include="ProcedualGenerator.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -168,6 +171,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
@@ -186,6 +190,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="Font.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="BaseObject.h" />
+    <ClInclude Include="GpuLookupTable.h" />
     <ClInclude Include="HitResult.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="KdNode.h" />
@@ -194,6 +199,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="MeasuringTool.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="ProcedualGenerator.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
@@ -203,6 +209,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="UpdateInfo.h" />
     <ClInclude Include="Vertex.h" />
@@ -215,6 +222,9 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     </None>
     <None Include="shaders\DirectionalLight.frag" />
     <None Include="shaders\DirectionalLight.vert" />
+    <None Include="shaders\MarchingCubes.frag" />
+    <None Include="shaders\MarchingCubes.geom" />
+    <None Include="shaders\MarchingCubes.vert" />
     <None Include="shaders\PointLight.frag" />
     <None Include="shaders\PointLight.geom" />
     <None Include="shaders\PointLight.vert" />

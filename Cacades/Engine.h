@@ -5,13 +5,9 @@
 
 // GLFW
 #include <GLFW/glfw3.h>
-#include "Scene.h"
 #include <stdexcept>
-#include <vector>
-#include "DirectionalLight.h"
-#include "RenderInfo.h"
-#include "AntiAliasingInfo.h"
-#include "MeasuringTool.h"
+#include "ProcedualGenerator.h"
+#include "GpuLookupTable.h"
 
 class Hud;
 class Camera;
@@ -34,50 +30,32 @@ public:
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	static void CursorPosCallback(GLFWwindow* window, double x, double y);
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	void SetShader(Shader& shader);
-	void SetScene(Scene& scene);
-	void SetCamera(Camera& camera);
-	void AddLight(Light& light);
-	void SetHud(Hud& hud);
 	void Update(GLfloat deltaTime, int fps);
-	void Start();
-	void Resume();
-	void Pause();
-	void Stop();
+	void Start(Camera* camera, Shader* mcShader, Hud* hud);
 protected:
+	void DrawActiveLayer() const;
+	void RenderMcMesh(Shader& shader);
 	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void m_CursorPosCallback(GLFWwindow* window, double x, double y);
 	void m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	void MoveActiveObject();
 	void Loop();
-	void UpdateUniforms() const;
-	void RenderLights() const;
-	void RenderScene() const;
-	void RenderHud() const;
-	void PrintData(int frames) const;
-	void SetAASettings();
 
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 
-	Shader* m_shader;
-	Scene* m_scene;
-	GLFWwindow& m_window;
-	Camera* m_camera;
 	Hud* m_hud;
-	std::vector<Light*> m_lights;
+	GpuLookupTable m_lookupTable;
+	GLFWwindow& m_window;
+	Shader* m_mcShader;
+	Camera* m_camera;
 
-	MeasuringTool m_measures;
+	ProcedualGenerator m_generator;
 
-	int m_activeObject;
-	GLuint m_framebuffer;
-
-	RenderInfo m_renderInfo;
-	AntiAliasingInfo m_aaInfo;	
-
+	int m_activeLayer;
+		
 	const GLuint MaxTexturesPerModel = 3;
 
 	static Engine* m_instance;
-	explicit Engine(char* windowTitle, bool fullscreen);
+	explicit Engine(GLFWwindow& window);
 	/* verhindert, dass ein Objekt von auﬂerhalb von Engine erzeugt wird. */
 	Engine(const Engine&);
 	/* verhindert, dass eine weitere Instanz via Kopie-Konstruktor erstellt werden kann */

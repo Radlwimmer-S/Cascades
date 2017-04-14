@@ -1,11 +1,10 @@
 #include "FileWatcher.h"
+#include <iostream>
 
-//FileWatcher::FileWatcher(const char* filePath, Delegate& delegate, long msCycle) : m_path(new std::experimental::filesystem::path(filePath)), m_lastLoad(new std::chrono::system_clock::time_point(std::experimental::filesystem::last_write_time(m_path))), m_fileCount(1), m_callBack(delegate), m_msCycle(msCycle), m_stop(false)
-//{
-//	m_watcherThread = std::thread(&FileWatcher::CheckFile, this);
-//}
+FileWatcher::FileWatcher(const char* filePath, Delegate& delegate, long msCycle) : FileWatcher(&filePath, 1, delegate, msCycle)
+{}
 
-FileWatcher::FileWatcher(const char** filePath, int fileCount, Delegate& delegate, long msCycle) : m_path(new std::experimental::filesystem::path[fileCount]), m_lastLoad(new std::chrono::system_clock::time_point[fileCount]), m_fileCount(fileCount), m_callBack(delegate), m_msCycle(msCycle), m_stop(false)
+FileWatcher::FileWatcher(const char** filePath, int fileCount, Delegate& delegate, long msCycle) : m_fileCount(fileCount), m_path(new std::experimental::filesystem::path[m_fileCount]), m_lastLoad(new std::chrono::system_clock::time_point[m_fileCount]), m_callBack(delegate), m_msCycle(msCycle), m_stop(false)
 {
 	for (int i = 0; i < m_fileCount; ++i)
 	{
@@ -35,7 +34,16 @@ void FileWatcher::CheckFile() const
 			if (m_path[i] == "")
 				continue;
 
-			std::chrono::system_clock::time_point modifyStamp = std::experimental::filesystem::last_write_time(m_path[i]);
+			std::chrono::system_clock::time_point modifyStamp;
+			try
+			{
+				modifyStamp = std::experimental::filesystem::last_write_time(m_path[i]);
+			}
+			catch (std::exception e)
+			{
+				std::cout << "ERROR::" << e.what() << std::endl;
+				modifyStamp = m_lastLoad[i];
+			}
 
 			if (modifyStamp > m_lastLoad[i])
 			{

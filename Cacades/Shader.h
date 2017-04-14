@@ -13,7 +13,7 @@ public:
 	GLuint Program;
 	void Load();
 	// Constructor generates the shader on the fly
-	Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath = nullptr);
+	Shader(const GLchar* vertexPath, const GLchar* geometryPath = nullptr, const GLchar* fragmentPath = nullptr);
 	void Use();
 	bool IsValid() const;
 
@@ -22,8 +22,6 @@ public:
 	void SetDirty();
 
 	const GLchar*const* GetSourceFiles() const;
-
-	time_point GetLastBuildTime() const;
 
 private:
 	static void HandleIncludes(std::string& shaderCode, const GLchar* shaderPath);
@@ -35,8 +33,7 @@ private:
 
 	const GLchar* m_sourceFiles[MAX_FILES];
 	FileWatcher* m_watcher;
-	Delegate* m_delegate;
-	bool m_isValid, m_isDirty;
-	time_point m_lastBuild;
+	Delegate m_delegate;
+	bool m_isTempValid, m_isValid, m_isDirty;
 
 };
