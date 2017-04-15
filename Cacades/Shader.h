@@ -14,6 +14,7 @@ public:
 	void Load();
 	// Constructor generates the shader on the fly
 	Shader(const GLchar* vertexPath, const GLchar* geometryPath = nullptr, const GLchar* fragmentPath = nullptr);
+	Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount);
 	void Use();
 	bool IsValid() const;
 
@@ -33,7 +34,8 @@ private:
 
 	const GLchar* m_sourceFiles[MAX_FILES];
 	FileWatcher* m_watcher;
-	Delegate m_delegate;
+	const GLchar** m_transformFeedbackVariables;
+	GLuint m_transformFeedbackVariablesCount;
 	bool m_isTempValid, m_isValid, m_isDirty;
 
 };

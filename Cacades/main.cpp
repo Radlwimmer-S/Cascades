@@ -60,7 +60,9 @@ int main(int argc, char** argv)
 
 		Engine* engine = Engine::Instance();
 
-		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
+		//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
+		const GLchar* feedbackVaryings[] = { "out_position" };
+		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag" , feedbackVaryings, 1);
 		TestShader(*marchingCubeShader, "MarchingCubes");
 
 		Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
@@ -77,12 +79,11 @@ int main(int argc, char** argv)
 	}
 	catch (std::exception e)
 	{
-		std::cout << "ERROR::" << e.what() << std::endl;
+		std::cout << "ERROR::" << e.what() << " | " << __FILE__ << " (" << __LINE__ << ")" << std::endl;
 		std::cin.ignore();
 		return -1;
 	}
 }
-
 
 //-Ein RenderPass um eine 3D Texture mit density Werten zu fuellen(in OGL eing GL_TEXTURE_3D generieren und mit den passenden Dimensionen erstellen)
 //- Jetzt kann man mit "Layered Rendering" in diese Texture malen(dazu mit glDrawArrayInstanced(TYPE, START, VERTEX_END, INSTANCE_COUNT) pro layer in der 3D Texture einmal ein Full - Screen Qaud zeichnen)

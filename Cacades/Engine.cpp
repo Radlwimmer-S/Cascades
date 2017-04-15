@@ -122,7 +122,6 @@ void Engine::DrawActiveLayer() const
 
 void Engine::RenderMcMesh(Shader& shader)
 {
-	//glEnable(GL_RASTERIZER_DISCARD);
 	shader.Use();
 
 	m_generator.SetUniforms(shader);
@@ -138,10 +137,40 @@ void Engine::RenderMcMesh(Shader& shader)
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
 
-	glBindVertexArray(m_generator.GetVaoId());
-	glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
-	glBindVertexArray(0);
-	glCheckError();
+	//// Create transform feedback buffer
+	//GLuint tbo;
+	//glGenBuffers(1, &tbo);
+	//glBindBuffer(GL_ARRAY_BUFFER, tbo);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_generator.GetVertexCount(), nullptr, GL_STATIC_READ);
+
+	//// Create query object to collect info
+	//GLuint query;
+	//glGenQueries(1, &query);
+
+	//// Perform feedback transform
+	////glEnable(GL_RASTERIZER_DISCARD);
+
+	//glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
+
+	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+	//	glBeginTransformFeedback(GL_TRIANGLES);
+			glBindVertexArray(m_generator.GetVaoId());
+			glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
+			glBindVertexArray(0);
+			glCheckError();
+	//	glEndTransformFeedback();	
+	//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	//glCheckError();
+	//
+	//glDisable(GL_RASTERIZER_DISCARD);
+
+	//glFlush();
+
+	//// Fetch and print results
+	//GLuint primitives;
+	//glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
+
+	//std::cout << "INOF::MC Generated " << primitives << " primitives." << std::endl;
 }
 
 void Engine::Update(GLfloat deltaTime, int fps)
@@ -171,7 +200,6 @@ void Engine::Loop()
 		glfwPollEvents();
 
 		glViewport(0, 0, WIDTH, HEIGHT);
-		//(-1, 1, -1, 1, -1, 1);
 		glClearColor(.5f, .5f, .5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCheckError();
@@ -229,6 +257,7 @@ void Engine::CursorPosCallback(GLFWwindow* window, double x, double y)
 
 void Engine::m_CursorPosCallback(GLFWwindow* window, double x, double y)
 {
+	m_camera->CursorPosCallback(x, y);
 }
 
 void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

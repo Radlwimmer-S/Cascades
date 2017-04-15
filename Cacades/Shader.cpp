@@ -6,20 +6,28 @@
 #include "Shlwapi.h"
 #include "Pathcch.h"
 #include "Global.h"
-#include <chrono>
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_delegate(&Shader::SetDirty, this), m_isTempValid(false), m_isValid(false), m_isDirty(true)
+Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_transformFeedbackVariables(nullptr), m_isTempValid(false), m_isValid(false), m_isDirty(true)
 {
 	m_sourceFiles[0] = vertexPath;
 	m_sourceFiles[1] = geometryPath;
 	m_sourceFiles[2] = fragmentPath;
-	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, m_delegate);
+	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, Delegate(&Shader::SetDirty, this));
+	Load();
+}
+
+Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount) : Program(0), m_transformFeedbackVariables(transformFeedbackVariables), m_transformFeedbackVariablesCount(variablesCount), m_isTempValid(false), m_isValid(false), m_isDirty(true)
+{
+	m_sourceFiles[0] = vertexPath;
+	m_sourceFiles[1] = geometryPath;
+	m_sourceFiles[2] = fragmentPath;
+	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, Delegate(&Shader::SetDirty, this));
 	Load();
 }
 
 void Shader::Load()
 {
-	GLuint program = glCreateProgram();
+	GLuint tempProgram = glCreateProgram();
 	GLuint vertex, fragment = 0, geometry = 0;
 	GLint success;
 	//GLchar infoLog[512];
@@ -28,29 +36,34 @@ void Shader::Load()
 	m_isDirty = false;
 
 	vertex = LoadShader(m_sourceFiles[0], GL_VERTEX_SHADER, m_isTempValid);
-	glAttachShader(program, vertex);
+	glAttachShader(tempProgram, vertex);
 
 	if (m_sourceFiles[1] != nullptr)
 	{
 		geometry = LoadShader(m_sourceFiles[1], GL_GEOMETRY_SHADER, m_isTempValid);
-		glAttachShader(program, geometry);
+		glAttachShader(tempProgram, geometry);
 	}
 
 	if (m_sourceFiles[2] != nullptr)
 	{
 		fragment = LoadShader(m_sourceFiles[2], GL_FRAGMENT_SHADER, m_isTempValid);
-		glAttachShader(program, fragment);
+		glAttachShader(tempProgram, fragment);
 	}
 
-	glLinkProgram(program);
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (m_transformFeedbackVariables != nullptr)
+	{
+		glTransformFeedbackVaryings(tempProgram, m_transformFeedbackVariablesCount, m_transformFeedbackVariables, GL_INTERLEAVED_ATTRIBS);
+	}
+
+	glLinkProgram(tempProgram);
+	glGetProgramiv(tempProgram, GL_LINK_STATUS, &success);
 
 	if (m_isTempValid)
 	{
 		if (success)
 		{
 			glDeleteProgram(Program);
-			Program = program;
+			Program = tempProgram;
 			m_isValid = true;
 		}
 		else
@@ -58,18 +71,18 @@ void Shader::Load()
 			m_isTempValid = false;
 			// Print linking errors if any
 			GLint errorLength;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &errorLength);
+			glGetProgramiv(tempProgram, GL_INFO_LOG_LENGTH, &errorLength);
 			glCheckError();
 			char* infoLog = new GLchar[errorLength];
-			glGetProgramInfoLog(program, errorLength, nullptr, infoLog);
+			glGetProgramInfoLog(tempProgram, errorLength, nullptr, infoLog);
 			glCheckError();
 			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 			delete[] infoLog;
-			glDeleteProgram(program);
+			glDeleteProgram(tempProgram);
 		}
 	}
 	else
-		glDeleteProgram(program);
+		glDeleteProgram(tempProgram);
 
 
 	// Delete the shaders as they're linked into our program now and no longer necessery

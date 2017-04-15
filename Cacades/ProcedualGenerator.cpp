@@ -189,7 +189,7 @@ float ProcedualGenerator::AddShelves(float cosLayer)
 void ProcedualGenerator::ApplyDataToTexture()
 {
 	glBindTexture(GL_TEXTURE_3D, m_textureId);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16, WIDTH, DEPTH, LAYERS, 0, GL_RED, GL_FLOAT, m_values);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, WIDTH, DEPTH, LAYERS, 0, GL_RED, GL_FLOAT, m_values);
 	glBindTexture(GL_TEXTURE_3D, 0);
 	glCheckError();
 }

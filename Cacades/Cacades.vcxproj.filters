@@ -295,5 +295,8 @@
     <None Include="shaders\MarchingCubes.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="CopyAssets.bat">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
