@@ -44,7 +44,7 @@ void ProcedualGenerator::Generate3dTexture()
 }
 
 void ProcedualGenerator::GenerateVBO(glm::vec3 cubesPerDimension)
-{
+{	
 	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vbo);
 	glCheckError();
@@ -75,21 +75,32 @@ void ProcedualGenerator::GenerateVBO(glm::vec3 cubesPerDimension)
 	}
 
 	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
+
 	glGenBuffers(1, &m_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, m_vertexCount * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
-	glBindVertexArray(m_vao);
 	glCheckError();
 	// Position attribute
-	glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
+	//glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+	glCheckError();
 	glEnableVertexAttribArray(VS_IN_POSITION);
-	glBindVertexArray(0);
+	glVertexAttribPointer(VS_IN_POSITION, 1, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+	glCheckError();
+	glEnableVertexAttribArray(VS_IN_POSITION);
+	glCheckError();
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glCheckError();
 }
 
 GLuint ProcedualGenerator::GetTextureId() const
 {
 	return m_textureId;
+}
+
+GLuint ProcedualGenerator::GetVboId() const
+{
+	return m_vbo;
 }
 
 GLuint ProcedualGenerator::GetVaoId() const

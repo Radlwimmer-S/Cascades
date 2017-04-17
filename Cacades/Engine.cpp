@@ -83,29 +83,39 @@ void Engine::Init(char* windowTitle, GLuint width, GLuint height)
 
 void Engine::Start(Camera* camera, Shader* mcShader, Hud* hud)
 {
+	glUseProgram(mcShader->Program);
+
+	m_generator.GenerateVBO(glm::vec3(m_generator.WIDTH, m_generator.DEPTH, m_generator.LAYERS));
+
+	// Create transform feedback buffer
+	glGenBuffers(1, &m_tbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_tbo);
+	glBufferData(GL_ARRAY_BUFFER, m_generator.GetVertexCount() * sizeof(glm::vec3) * 3, nullptr, GL_STATIC_READ);
+
 	m_mcShader = mcShader;
 	m_hud = hud;
 	m_camera = camera;
 
-#define TIME
-#ifdef TIME
-	Timer::TimeAndPrint("Generate Texture", Delegate(&ProcedualGenerator::Generate3dTexture, &m_generator, 0));
-	Timer::TimeAndPrint("Generate Texture", Delegate(&ProcedualGenerator::GenerateVBO, &m_generator, glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH)));
-#else
-	m_generator.Generate3dTexture(0);
-	m_generator.GenerateVBO(glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH));
-#endif
-
-	glCheckError();
-	m_lookupTable.WriteLookupTablesToGpu();
-	m_lookupTable.UpdateUniforms(*m_mcShader);
-
-	// Create transform feedback buffer
-	glGenBuffers(1, &tbo);
-	glBindBuffer(GL_ARRAY_BUFFER, tbo);
-	glBufferData(GL_ARRAY_BUFFER, 15 * sizeof(glm::vec3) * m_generator.GetVertexCount(), nullptr, GL_STATIC_READ);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glCheckError();
+	//#define TIME
+	//#ifdef TIME
+	//	Timer::TimeAndPrint("Generate Texture", Delegate(&ProcedualGenerator::Generate3dTexture, &m_generator, 0));
+	//	Timer::TimeAndPrint("Generate Texture", Delegate(&ProcedualGenerator::GenerateVBO, &m_generator, glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH)));
+	//#else
+	//	m_generator.Generate3dTexture(0);
+	//	m_generator.GenerateVBO(glm::vec3(m_generator.WIDTH, m_generator.DEPTH, m_generator.LAYERS));
+	//#endif
+	//
+	//	glCheckError();
+	//	m_lookupTable.WriteLookupTablesToGpu();
+	//	//m_lookupTable.UpdateUniforms(*m_mcShader);
+	//
+	//	// Create transform feedback buffer
+	//	glGenBuffers(1, &m_tbo);
+	//	glBindBuffer(GL_ARRAY_BUFFER, m_tbo);
+	//	//glBufferData(GL_ARRAY_BUFFER, 15 * sizeof(glm::vec3) * m_generator.GetVertexCount(), nullptr, GL_STATIC_READ);
+	//	glBufferData(GL_ARRAY_BUFFER, m_generator.GetVertexCount() * sizeof(float) * 3, nullptr, GL_STATIC_READ);
+	//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//	glCheckError();
 
 	Loop();
 }
@@ -131,12 +141,49 @@ void Engine::RenderMcMesh(Shader& shader)
 {
 	shader.Use();
 
-	m_generator.SetUniforms(shader);
+	// Create query object to collect info
+	GLuint query;
+	glGenQueries(1, &query);
+
+	// Perform feedback transform
+	glEnable(GL_RASTERIZER_DISCARD);
+
+	glBindVertexArray(m_generator.GetVaoId());
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tbo);
+
+	glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+	glBeginTransformFeedback(GL_TRIANGLES);
+	glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
+	glEndTransformFeedback();
+	glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+
+	glBindVertexArray(0);
+
+	glDisable(GL_RASTERIZER_DISCARD);
+
+	glFlush();
+
+	// Fetch and print results
+	GLuint primitives;
+	glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
+
+	GLfloat* feedback = new GLfloat[m_generator.GetVertexCount() * 3];
+	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_generator.GetVertexCount() * sizeof(float) * 3, feedback);
+
+	printf("%u primitives written!\n\n", primitives);
+
+	for (int i = 0; i < primitives * 3; i++) {
+		printf("%f\n", feedback[i]);
+	}
+
+	glDeleteQueries(1, &query);
+
+	/*m_generator.SetUniforms(shader);
 	glCheckError();
 
 	int numAttribs;
 	glGetProgramiv(shader.Program, GL_ACTIVE_ATTRIBUTES, &numAttribs);
-	
+
 	// Create query object to collect info
 	//GLuint query;
 	//glGenQueries(1, &query);
@@ -148,7 +195,7 @@ void Engine::RenderMcMesh(Shader& shader)
 
 	glBeginTransformFeedback(GL_TRIANGLES);
 		//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
-			glBindVertexArray(m_generator.GetVaoId());
+			glBindBuffer(GL_ARRAY_BUFFER, m_generator.GetVboId());
 			glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
 		//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 	glEndTransformFeedback();
@@ -166,7 +213,7 @@ void Engine::RenderMcMesh(Shader& shader)
 	//glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
 
 	//std::cout << "INOF::MC Generated " << primitives << " primitives." << std::endl;
-	glCheckError();
+	glCheckError();*/
 }
 
 void Engine::Update(GLfloat deltaTime, int fps)

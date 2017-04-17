@@ -19,6 +19,7 @@ public:
 	void SetUniforms(Shader& shader);
 
 	GLuint GetTextureId() const;
+	GLuint GetVboId() const;
 	GLuint GetVaoId() const;
 	GLuint GetVertexCount() const;
 	float GetValue(int layer, int y, int x) const;

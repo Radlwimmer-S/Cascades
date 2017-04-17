@@ -301,5 +301,11 @@
     <None Include="shaders\MarchingCubes.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\Test.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Test.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

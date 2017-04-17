@@ -20,7 +20,7 @@ Shader::Shader(const GLchar* computePath)
 Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_transformFeedbackVariables(nullptr), m_isTempValid(false), m_isValid(false), m_isDirty(true)
 {
 	if (vertexPath != nullptr)
-	m_sourceFiles.push_back(SourceFile{ vertexPath, GL_VERTEX_SHADER });
+		m_sourceFiles.push_back(SourceFile{ vertexPath, GL_VERTEX_SHADER });
 	if (geometryPath != nullptr)
 		m_sourceFiles.push_back(SourceFile{ geometryPath, GL_GEOMETRY_SHADER });
 	if (fragmentPath != nullptr)
@@ -32,10 +32,19 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLcha
 	Load();
 }
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount) : Shader(vertexPath, geometryPath, fragmentPath)
+Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount) : Program(0), m_transformFeedbackVariables(transformFeedbackVariables), m_transformFeedbackVariablesCount(variablesCount), m_isTempValid(false), m_isValid(false), m_isDirty(true)
 {
-	m_transformFeedbackVariables = transformFeedbackVariables;
-	m_transformFeedbackVariablesCount = variablesCount;
+	if (vertexPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ vertexPath, GL_VERTEX_SHADER });
+	if (geometryPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ geometryPath, GL_GEOMETRY_SHADER });
+	if (fragmentPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ fragmentPath, GL_FRAGMENT_SHADER });
+
+	const GLchar* sourceFiles[] = { vertexPath , geometryPath, fragmentPath };
+	m_watcher = new FileWatcher(sourceFiles, 3, Delegate(&Shader::SetDirty, this));
+	//delete[] sourceFiles;
+	Load();
 }
 
 void Shader::Load()

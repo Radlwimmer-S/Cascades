@@ -1,6 +1,6 @@
-#version 150 core
+#version 330 core
 
-in float inValue;
+layout(location = 0) in float inValue;
 out float geoValue;
 
 void main()

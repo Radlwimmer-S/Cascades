@@ -61,23 +61,20 @@ int main(int argc, char** argv)
 		glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &lala);
 		Engine* engine = Engine::Instance();
 
-		Shader* computeShader = new Shader("./shaders/MarchingCubes.glsl");
-		TestShader(*computeShader, "MarchingCubes-ComputeShader");
-
 		//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
-		const GLchar* feedbackVaryings[] = { "out_position" };
-		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 1);
+		const GLchar* feedbackVaryings[] = { "outValue" };
+		Shader* marchingCubeShader = new Shader("./shaders/Test.vert", "./shaders/Test.geom", nullptr, feedbackVaryings, 1);
 		TestShader(*marchingCubeShader, "MarchingCubes");
 
-		Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
-		TestShader(*hudShader, "Text/Hud");
+		//Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
+		//TestShader(*hudShader, "Text/Hud");
 
-		Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
-		Hud* hud = new Hud(*font, *hudShader);
+		//Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
+		//Hud* hud = new Hud(*font, *hudShader);
 
 		Camera* camera = new Camera();
 
-		engine->Start(camera, marchingCubeShader, hud);
+		engine->Start(camera, marchingCubeShader, nullptr);
 
 		return 0;
 	}

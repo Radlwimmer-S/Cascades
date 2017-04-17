@@ -239,6 +239,8 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\PointLight.geom" />
     <None Include="shaders\PointLight.vert" />
     <None Include="shaders\default.frag" />
+    <None Include="shaders\Test.geom" />
+    <None Include="shaders\Test.vert" />
     <None Include="shaders\Text.frag" />
     <None Include="shaders\Text.vert" />
   </ItemGroup>
