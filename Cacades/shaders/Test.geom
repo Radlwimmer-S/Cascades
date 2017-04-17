@@ -3,13 +3,13 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-in float[] geoValue;
-out float outValue;
+in vec3[] geoValue;
+out vec3 out_position;
 
 void main()
 {
 	for (int i = 0; i < 3; i++) {
-		outValue = geoValue[0] + i;
+		out_position = geoValue[0] + i;
 		EmitVertex();
 	}
 

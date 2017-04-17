@@ -3,11 +3,21 @@
 #include <glm/detail/type_vec2.hpp>
 #include <glm/detail/type_vec3.hpp>
 #include <random>
+#include "NoiseTexture.h"
+#include <glm/mat4x4.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 class Shader;
 
 class ProcedualGenerator
 {
+	struct Noise
+	{
+		Noise(const glm::quat& rot, const NoiseTexture& texture) : rotation(glm::toMat4(rot)), texture(texture) {}
+		glm::mat4 rotation;
+		NoiseTexture texture;
+	};
+
 public:
 	ProcedualGenerator(int seed);
 	~ProcedualGenerator();
@@ -44,12 +54,14 @@ protected:
 		glm::vec2(-0.4f, -0.25f),
 		glm::vec2(0.4f, -0.25f) };
 
-	GLuint m_textureId = 0;
+	GLuint m_densityId = 0;
 	GLuint m_vao = 0, m_vbo = 0;
 	GLuint m_vertexCount = 0;
 	glm::vec3 m_resolution;
+	Noise* m_noise;
 
 	std::default_random_engine m_random;
+	std::uniform_int_distribution<int> m_randomAngle;
 	int m_helixFrequence, m_shelveFrequence;
 	int m_helixOffset, m_shelveOffset;
 };

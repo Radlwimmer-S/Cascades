@@ -34,11 +34,15 @@ void GpuLookupTable::WriteLookupTablesToGpu()
 void GpuLookupTable::UpdateUniforms(Shader& shader) const
 {
 	GLuint block_index = glGetUniformBlockIndex(shader.Program, "MC_EdgeTable");
+	if (block_index == 4294967295)
+		return;
 	GLuint binding_point_index = 1;
 	glUniformBlockBinding(shader.Program, block_index, binding_point_index);
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point_index, m_edgeIndex);
 
 	block_index = glGetUniformBlockIndex(shader.Program, "MC_TrisTable");
+	if (block_index == 4294967295)
+		return;
 	binding_point_index = 2;
 	glUniformBlockBinding(shader.Program, block_index, binding_point_index);
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_point_index, m_trisIndex);

@@ -2,12 +2,19 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = 15) out;
 
-in struct Gridcell 
-{
+struct Gridcell {
    vec3 p[8];
    float val[8];
    int mc_case;
-} gs_in[];
+};
+
+in Gridcell gs_in[];
+out vec3 out_position;
+
+uniform int isoLevel = 0;
+uniform vec3 scale;
+uniform mat4 view;
+uniform mat4 projection;
 
 //out struct Vertex 
 //{
@@ -17,9 +24,6 @@ in struct Gridcell
 //	vec3 tangent;
 //} gs_out; 
 
-out vec3 out_position;
-
-uniform int isoLevel = 0;
 
 struct CellTriangles 
 {
@@ -113,21 +117,21 @@ void main()
 		vec3 pos3 = vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
 		vec3 normal = CalculateNormal(pos1, pos2, pos3);
-
-		gl_Position = vec4(pos1, 1.0f); 	 
+ 
 		out_position = pos1;
+		gl_Position = projection * view * vec4(scale * pos1, 1.0f);
 		//gs_out.position = pos1;
 		//gs_out.normal = normal;
 		EmitVertex();														
 
-		gl_Position = vec4(pos2, 1.0f);	
 		out_position = pos2;
+		gl_Position = projection * view * vec4(scale * pos2, 1.0f);
 		//gs_out.position = pos2;	 
 		//gs_out.normal = normal;
 		EmitVertex();											 			 
 
-		gl_Position = vec4(pos3, 1.0f);
 		out_position = pos3;	
+		gl_Position = projection * view * vec4(scale * pos3, 1.0f);
 		//gs_out.position = pos3; 
 		//gs_out.normal = normal;
 		EmitVertex();

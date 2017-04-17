@@ -5,13 +5,13 @@
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
+#include <string>
 
-
-ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed)
+ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle(0, 359)
 {
-	glGenTextures(1, &m_textureId);
+	glGenTextures(1, &m_densityId);
 
-	glBindTexture(GL_TEXTURE_3D, m_textureId);
+	glBindTexture(GL_TEXTURE_3D, m_densityId);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
@@ -20,10 +20,17 @@ ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed)
 	glBindTexture(GL_TEXTURE_3D, 0);
 	glCheckError();
 
-	m_shelveFrequence = 5 + m_random() % 16;
-	m_helixFrequence = 5 + m_random() % 16;
-	m_shelveOffset = m_random() % 360;
-	m_helixOffset = m_random() % 360;
+	m_shelveFrequence = 5 + m_randomAngle(m_random) / 4.0f;
+	m_helixFrequence = 5 + m_randomAngle(m_random) / 4.0f;
+	m_shelveOffset = m_randomAngle(m_random);
+	m_helixOffset = m_randomAngle(m_random);
+
+	m_noise = new Noise[4]{
+		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 1)),
+		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 2)),
+		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 3)),
+		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 4))
+	};
 }
 
 
@@ -44,7 +51,7 @@ void ProcedualGenerator::Generate3dTexture()
 }
 
 void ProcedualGenerator::GenerateVBO(glm::vec3 cubesPerDimension)
-{	
+{
 	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vbo);
 	glCheckError();
@@ -82,20 +89,15 @@ void ProcedualGenerator::GenerateVBO(glm::vec3 cubesPerDimension)
 	glBufferData(GL_ARRAY_BUFFER, m_vertexCount * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
 	glCheckError();
 	// Position attribute
-	//glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-	glCheckError();
 	glEnableVertexAttribArray(VS_IN_POSITION);
-	glVertexAttribPointer(VS_IN_POSITION, 1, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-	glCheckError();
-	glEnableVertexAttribArray(VS_IN_POSITION);
-	glCheckError();
+	glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glCheckError();
 }
 
 GLuint ProcedualGenerator::GetTextureId() const
 {
-	return m_textureId;
+	return m_densityId;
 }
 
 GLuint ProcedualGenerator::GetVboId() const
@@ -120,10 +122,25 @@ void ProcedualGenerator::SetUniforms(Shader& shader)
 	glUniform3fv(resolutioneLoc, 1, glm::value_ptr(resolution));
 	glCheckError();
 
-	glActiveTexture(GL_TEXTURE0);
-	GLuint textureId = m_textureId;
-	GLint textureLoc = glGetUniformLocation(shader.Program, "tex");
-	glUniform1i(textureLoc, 0);
+	for (int i = 0; i < 4; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		GLuint textureId = m_noise[i].texture.GetId();
+		GLint textureLoc = glGetUniformLocation(shader.Program, ("noise[" + std::to_string(i) + "].tex").c_str());
+		glUniform1i(textureLoc, i);
+		glBindTexture(GL_TEXTURE_3D, textureId);
+		glCheckError();
+		
+		glm::mat4 rot = m_noise[i].rotation;
+		GLuint rotLocation = glGetUniformLocation(shader.Program, ("noise[" + std::to_string(i) + "].rotation").c_str());
+		glUniformMatrix4fv(rotLocation, 1, GL_FALSE, glm::value_ptr(rot));
+		glCheckError();
+	}
+	
+	glActiveTexture(GL_TEXTURE4);
+	GLuint textureId = m_densityId;
+	GLint textureLoc = glGetUniformLocation(shader.Program, "densityTex");
+	glUniform1i(textureLoc, 4);
 	glBindTexture(GL_TEXTURE_3D, textureId);
 	glCheckError();
 
@@ -167,9 +184,9 @@ void ProcedualGenerator::UpdateValues(int startLayer)
 				f += 0.25f * AddPillar(ws, m_pillars[1]);
 				f += 0.25f * AddPillar(ws, m_pillars[2]);
 				f -= AddPillar(ws, glm::vec2());
-				f -= 3 * AddBounds(ws);
-				f += AddHelix(ws, sinHelix, cosHelix);
-				f += 0.75f * AddShelves(cosShelves);
+				f -= 10.0f * AddBounds(ws);
+				f += 3.0f * AddHelix(ws, sinHelix, cosHelix);
+				f += 0.5f * AddShelves(cosShelves);
 
 				m_values[layerIndex + laneIndex + x] = f;
 			}
@@ -199,7 +216,7 @@ float ProcedualGenerator::AddShelves(float cosLayer)
 
 void ProcedualGenerator::ApplyDataToTexture()
 {
-	glBindTexture(GL_TEXTURE_3D, m_textureId);
+	glBindTexture(GL_TEXTURE_3D, m_densityId);
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, WIDTH, DEPTH, LAYERS, 0, GL_RED, GL_FLOAT, m_values);
 	glBindTexture(GL_TEXTURE_3D, 0);
 	glCheckError();

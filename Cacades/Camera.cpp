@@ -73,7 +73,7 @@ glm::mat4 Camera::GetViewMatrix() const
 
 glm::mat4 Camera::GetProjectionMatrix() const
 {
-	return glm::perspective(45.0f, (float)WIDTH / (float)HEIGHT, -10.0f, 100.0f);
+	return glm::perspective(45.0f, (float)WIDTH / (float)HEIGHT, 0.01f, 100.0f);
 }
 
 void Camera::SetRenderPath(bool value)
