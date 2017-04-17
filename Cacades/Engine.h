@@ -54,6 +54,8 @@ protected:
 		
 	const GLuint MaxTexturesPerModel = 3;
 
+	GLuint tbo;
+
 	static Engine* m_instance;
 	explicit Engine(GLFWwindow& window);
 	/* verhindert, dass ein Objekt von auﬂerhalb von Engine erzeugt wird. */

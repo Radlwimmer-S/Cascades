@@ -7,47 +7,52 @@
 #include "Pathcch.h"
 #include "Global.h"
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_transformFeedbackVariables(nullptr), m_isTempValid(false), m_isValid(false), m_isDirty(true)
+
+Shader::Shader(const GLchar* computePath)
 {
-	m_sourceFiles[0] = vertexPath;
-	m_sourceFiles[1] = geometryPath;
-	m_sourceFiles[2] = fragmentPath;
-	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, Delegate(&Shader::SetDirty, this));
+	if (computePath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ computePath, GL_COMPUTE_SHADER });
+
+	m_watcher = new FileWatcher(computePath, Delegate(&Shader::SetDirty, this));
 	Load();
 }
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount) : Program(0), m_transformFeedbackVariables(transformFeedbackVariables), m_transformFeedbackVariablesCount(variablesCount), m_isTempValid(false), m_isValid(false), m_isDirty(true)
+Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_transformFeedbackVariables(nullptr), m_isTempValid(false), m_isValid(false), m_isDirty(true)
 {
-	m_sourceFiles[0] = vertexPath;
-	m_sourceFiles[1] = geometryPath;
-	m_sourceFiles[2] = fragmentPath;
-	m_watcher = new FileWatcher(m_sourceFiles, MAX_FILES, Delegate(&Shader::SetDirty, this));
+	if (vertexPath != nullptr)
+	m_sourceFiles.push_back(SourceFile{ vertexPath, GL_VERTEX_SHADER });
+	if (geometryPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ geometryPath, GL_GEOMETRY_SHADER });
+	if (fragmentPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ fragmentPath, GL_FRAGMENT_SHADER });
+
+	const GLchar* sourceFiles[] = { vertexPath , geometryPath, fragmentPath };
+	m_watcher = new FileWatcher(sourceFiles, 3, Delegate(&Shader::SetDirty, this));
+	//delete[] sourceFiles;
 	Load();
+}
+
+Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount) : Shader(vertexPath, geometryPath, fragmentPath)
+{
+	m_transformFeedbackVariables = transformFeedbackVariables;
+	m_transformFeedbackVariablesCount = variablesCount;
 }
 
 void Shader::Load()
 {
 	GLuint tempProgram = glCreateProgram();
-	GLuint vertex, fragment = 0, geometry = 0;
 	GLint success;
 	//GLchar infoLog[512];
 
 	m_isTempValid = true;
 	m_isDirty = false;
 
-	vertex = LoadShader(m_sourceFiles[0], GL_VERTEX_SHADER, m_isTempValid);
-	glAttachShader(tempProgram, vertex);
-
-	if (m_sourceFiles[1] != nullptr)
+	GLuint* shaders = new GLuint[m_sourceFiles.size()];
+	
+	for (int i = 0; i < m_sourceFiles.size(); ++i)
 	{
-		geometry = LoadShader(m_sourceFiles[1], GL_GEOMETRY_SHADER, m_isTempValid);
-		glAttachShader(tempProgram, geometry);
-	}
-
-	if (m_sourceFiles[2] != nullptr)
-	{
-		fragment = LoadShader(m_sourceFiles[2], GL_FRAGMENT_SHADER, m_isTempValid);
-		glAttachShader(tempProgram, fragment);
+		shaders[i] = LoadShader(m_sourceFiles[i].path, m_sourceFiles[i].type, m_isTempValid);
+		glAttachShader(tempProgram, shaders[i]);
 	}
 
 	if (m_transformFeedbackVariables != nullptr)
@@ -86,10 +91,12 @@ void Shader::Load()
 
 
 	// Delete the shaders as they're linked into our program now and no longer necessery
-	glDeleteShader(vertex);
-	glDeleteShader(geometry);
-	glDeleteShader(fragment);
+	for (int i=0; i < m_sourceFiles.size(); ++i)
+	{
+		glDeleteShader(shaders[i]);
+	}
 	glCheckError();
+	delete[] shaders;
 }
 
 std::string Shader::ReadFile(const GLchar* shaderPath)
@@ -224,9 +231,4 @@ void Shader::IsDirty(bool dirty)
 void Shader::SetDirty()
 {
 	m_isDirty = true;
-}
-
-const GLchar*const* Shader::GetSourceFiles() const
-{
-	return m_sourceFiles;
 }

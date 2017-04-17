@@ -16,7 +16,8 @@ const float MOUSE_SENSITIVITY = 0.005f;
 static GLuint WIDTH = 1920;
 static GLuint HEIGHT = 1080;
 
-#ifdef _DEBUG
+#define CHECK_GL_ERROR
+#ifdef CHECK_GL_ERROR
 #define glCheckError() glCheckError_(__FILE__, __LINE__) 
 #else
 #define glCheckError() 

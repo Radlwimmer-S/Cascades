@@ -57,12 +57,16 @@ int main(int argc, char** argv)
 #else
 		Engine::Init("Camera", 1900, 1000);
 #endif
-
+		GLint lala;
+		glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &lala);
 		Engine* engine = Engine::Instance();
+
+		Shader* computeShader = new Shader("./shaders/MarchingCubes.glsl");
+		TestShader(*computeShader, "MarchingCubes-ComputeShader");
 
 		//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
 		const GLchar* feedbackVaryings[] = { "out_position" };
-		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag" , feedbackVaryings, 1);
+		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 1);
 		TestShader(*marchingCubeShader, "MarchingCubes");
 
 		Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");

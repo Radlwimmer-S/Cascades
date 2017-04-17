@@ -100,6 +100,13 @@ void Engine::Start(Camera* camera, Shader* mcShader, Hud* hud)
 	m_lookupTable.WriteLookupTablesToGpu();
 	m_lookupTable.UpdateUniforms(*m_mcShader);
 
+	// Create transform feedback buffer
+	glGenBuffers(1, &tbo);
+	glBindBuffer(GL_ARRAY_BUFFER, tbo);
+	glBufferData(GL_ARRAY_BUFFER, 15 * sizeof(glm::vec3) * m_generator.GetVertexCount(), nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glCheckError();
+
 	Loop();
 }
 
@@ -127,50 +134,39 @@ void Engine::RenderMcMesh(Shader& shader)
 	m_generator.SetUniforms(shader);
 	glCheckError();
 
-	glm::mat4 view = m_camera->GetViewMatrix();
-	GLuint viewLocation = glGetUniformLocation(shader.Program, "view");
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-	glCheckError();
-
-	glm::mat4 proj = m_camera->GetProjectionMatrix();
-	GLuint projLocation = glGetUniformLocation(shader.Program, "projection");
-	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
-	glCheckError();
-
-	//// Create transform feedback buffer
-	//GLuint tbo;
-	//glGenBuffers(1, &tbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, tbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_generator.GetVertexCount(), nullptr, GL_STATIC_READ);
-
-	//// Create query object to collect info
+	int numAttribs;
+	glGetProgramiv(shader.Program, GL_ACTIVE_ATTRIBUTES, &numAttribs);
+	
+	// Create query object to collect info
 	//GLuint query;
 	//glGenQueries(1, &query);
 
-	//// Perform feedback transform
-	////glEnable(GL_RASTERIZER_DISCARD);
+	// Perform feedback transform
+	glEnable(GL_RASTERIZER_DISCARD);
 
-	//glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbo);
 
-	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
-	//	glBeginTransformFeedback(GL_TRIANGLES);
+	glBeginTransformFeedback(GL_TRIANGLES);
+		//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
 			glBindVertexArray(m_generator.GetVaoId());
 			glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
-			glBindVertexArray(0);
-			glCheckError();
-	//	glEndTransformFeedback();	
-	//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
-	//glCheckError();
-	//
-	//glDisable(GL_RASTERIZER_DISCARD);
+		//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	glEndTransformFeedback();
+	glBindVertexArray(0);
+	glCheckError();
 
-	//glFlush();
+	//glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
 
-	//// Fetch and print results
-	//GLuint primitives;
+	glDisable(GL_RASTERIZER_DISCARD);
+
+	glFlush();
+
+	// Fetch and print results
+	//GLuint primitives = 0;
 	//glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
 
 	//std::cout << "INOF::MC Generated " << primitives << " primitives." << std::endl;
+	glCheckError();
 }
 
 void Engine::Update(GLfloat deltaTime, int fps)
