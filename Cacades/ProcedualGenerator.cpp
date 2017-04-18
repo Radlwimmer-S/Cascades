@@ -148,6 +148,11 @@ void ProcedualGenerator::SetUniforms(Shader& shader)
 	GLint isoLevelLoc = glGetUniformLocation(shader.Program, "isoLevel");
 	glUniform1i(isoLevelLoc, isoLevel);
 	glCheckError();
+
+	glm::vec3 scale = glm::vec3(5, 10, 5);
+	GLuint scaleLocation = glGetUniformLocation(shader.Program, "scale");
+	glUniform3fv(scaleLocation, 1, glm::value_ptr(scale));
+	glCheckError();
 }
 
 float ProcedualGenerator::GetValue(int layer, int y, int x) const

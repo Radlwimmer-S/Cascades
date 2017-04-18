@@ -63,8 +63,8 @@ int main(int argc, char** argv)
 
 		//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
 		const GLchar* feedbackVaryings[] = { "out_position" };
-		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
-		//Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 1);
+		//Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
+		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 1);
 		//Shader* marchingCubeShader = new Shader("./shaders/Test.vert", "./shaders/Test.geom", nullptr, feedbackVaryings, 1);
 		TestShader(*marchingCubeShader, "MarchingCubes");
 

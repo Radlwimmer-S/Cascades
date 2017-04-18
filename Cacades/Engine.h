@@ -30,7 +30,7 @@ public:
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	static void CursorPosCallback(GLFWwindow* window, double x, double y);
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	void Update(GLfloat deltaTime, int fps);
+	void Update(GLfloat deltaTime);
 	void Start(Camera* camera, Shader* mcShader, Hud* hud);
 protected:
 	void DrawActiveLayer() const;
@@ -54,7 +54,8 @@ protected:
 		
 	const GLuint MaxTexturesPerModel = 3;
 
-	GLuint m_tbo;
+	GLuint m_tbo = 0, m_vao = 0, m_vbo = 0;
+	GLuint m_triCount;
 
 	static Engine* m_instance;
 	explicit Engine(GLFWwindow& window);
