@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include <string>
+#include "BoundingBox.h"
 
 ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle(0, 359)
 {
@@ -20,10 +21,16 @@ ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle
 	glBindTexture(GL_TEXTURE_3D, 0);
 	glCheckError();
 
-	m_shelveFrequence = 5 + m_randomAngle(m_random) / 4.0f;
-	m_helixFrequence = 5 + m_randomAngle(m_random) / 4.0f;
-	m_shelveOffset = m_randomAngle(m_random);
-	m_helixOffset = m_randomAngle(m_random);
+	m_pillars[0] = Pillar{ glm::vec2(0.0f,  0.5f), -1.2f, 0.25f };
+	m_pillars[1] = Pillar{ glm::vec2(-0.4f, -0.25f), 1, 0.25f };
+	m_pillars[2] = Pillar{ glm::vec2(0.4f, -0.25f), 1, 0.25f };
+	m_pillars[3] = Pillar{ glm::vec2(0.0f, 0.0f), 1, -1.0f };
+
+	m_bound = Bound{ -10.0f };
+
+	m_helix = Helix{ 1.0f * m_randomAngle(m_random), 5.0f + m_randomAngle(m_random) / 8.0f, 3.0f };
+
+	m_shelf = Shelf{ 1.0f * m_randomAngle(m_random), 5.0f + m_randomAngle(m_random) / 8.0f, 0.5f };
 
 	m_noise = new Noise[4]{
 		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 1)),
@@ -130,13 +137,13 @@ void ProcedualGenerator::SetUniforms(Shader& shader)
 		glUniform1i(textureLoc, i);
 		glBindTexture(GL_TEXTURE_3D, textureId);
 		glCheckError();
-		
+
 		glm::mat4 rot = m_noise[i].rotation;
 		GLuint rotLocation = glGetUniformLocation(shader.Program, ("noise[" + std::to_string(i) + "].rotation").c_str());
 		glUniformMatrix4fv(rotLocation, 1, GL_FALSE, glm::value_ptr(rot));
 		glCheckError();
 	}
-	
+
 	glActiveTexture(GL_TEXTURE4);
 	GLuint textureId = m_densityId;
 	GLint textureLoc = glGetUniformLocation(shader.Program, "densityTex");
@@ -166,12 +173,17 @@ void ProcedualGenerator::UpdateValues(int startLayer)
 	for (int layer = startLayer; layer < LAYERS + startLayer; ++layer)
 	{
 		float ws_l = NormalizeCoord(layer, LAYERS);
-		float helixAngle = m_helixOffset + m_helixFrequence * glm::pi<float>() * ws_l;
+		float helixAngle = m_helix.offset + m_helix.frequence * glm::pi<float>() * ws_l;
 		float sinHelix = sin(helixAngle);
 		float cosHelix = cos(helixAngle);
 
-		float shelvesAngle = m_shelveOffset + m_shelveFrequence * glm::pi<float>() * ws_l;
+		float shelvesAngle = m_shelf.offset + m_shelf.frequence * glm::pi<float>() * ws_l;
 		float cosShelves = cos(shelvesAngle);
+
+		glm::vec2 pillar0Position = glm::rotate(m_pillars[0].position, m_pillars[0].frequence * glm::pi<float>() * ws_l);
+		glm::vec2 pillar1Position = glm::rotate(m_pillars[1].position, m_pillars[1].frequence * glm::pi<float>() * ws_l);
+		glm::vec2 pillar2Position = glm::rotate(m_pillars[2].position, m_pillars[2].frequence * glm::pi<float>() * ws_l);
+		glm::vec2 pillar3Position = glm::rotate(m_pillars[3].position, m_pillars[3].frequence * glm::pi<float>() * ws_l);
 
 		int layerIndex = layer * LAYER;
 		for (int y = 0; y < DEPTH; ++y)
@@ -185,13 +197,13 @@ void ProcedualGenerator::UpdateValues(int startLayer)
 				glm::vec2 ws(ws_x, ws_y);
 
 				float f = 0;
-				f += 0.25f * AddPillar(ws, m_pillars[0]);
-				f += 0.25f * AddPillar(ws, m_pillars[1]);
-				f += 0.25f * AddPillar(ws, m_pillars[2]);
-				f -= AddPillar(ws, glm::vec2());
-				f -= 10.0f * AddBounds(ws);
-				f += 3.0f * AddHelix(ws, sinHelix, cosHelix);
-				f += 0.5f * AddShelves(cosShelves);
+				f += AddPillar(ws, m_pillars[0], pillar0Position);
+				f += AddPillar(ws, m_pillars[1], pillar1Position);
+				f += AddPillar(ws, m_pillars[2], pillar2Position);
+				f += AddPillar(ws, m_pillars[3], pillar3Position);
+				f += AddBounds(ws, m_bound);
+				f += AddHelix(ws, m_helix, sinHelix, cosHelix);
+				f += AddShelves(ws, m_shelf, cosShelves);
 
 				m_values[layerIndex + laneIndex + x] = f;
 			}
@@ -199,24 +211,24 @@ void ProcedualGenerator::UpdateValues(int startLayer)
 	}
 }
 
-float ProcedualGenerator::AddPillar(glm::vec2 pos, glm::vec2 pillar)
+float ProcedualGenerator::AddPillar(glm::vec2 pos, const Pillar& pillar, glm::vec2 rotatetPos)
 {
-	return 1.0f / glm::length(pos - pillar) - 1.0f;
+	return pillar.weight * (1.0f / glm::length(pos - rotatetPos) - 1.0f);
 }
 
-float ProcedualGenerator::AddBounds(glm::vec2 pos)
+float ProcedualGenerator::AddBounds(glm::vec2 pos, const Bound& bound)
 {
-	return glm::pow3(glm::length(pos));
+	return bound.weight * glm::pow3(glm::length(pos));
 }
 
-float ProcedualGenerator::AddHelix(glm::vec2 pos, float sinLayer, float cosLayer)
+float ProcedualGenerator::AddHelix(glm::vec2 pos, const Helix& helix, float sinLayer, float cosLayer)
 {
-	return glm::dot(glm::vec2(cosLayer, sinLayer), pos);
+	return helix.weight * glm::dot(glm::vec2(cosLayer, sinLayer), pos);
 }
 
-float ProcedualGenerator::AddShelves(float cosLayer)
+float ProcedualGenerator::AddShelves(glm::vec2 pos, const Shelf& shelf, float cosLayer)
 {
-	return cosLayer;
+	return shelf.weight * cosLayer;
 }
 
 void ProcedualGenerator::ApplyDataToTexture()

@@ -304,10 +304,13 @@
     <None Include="CopyAssets.bat">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\Test.geom">
+    <None Include="shaders\Density.geom">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\Test.vert">
+    <None Include="shaders\Density.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Density.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

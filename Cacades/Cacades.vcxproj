@@ -231,6 +231,9 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
       </ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
+    <None Include="shaders\Density.frag" />
+    <None Include="shaders\Density.geom" />
+    <None Include="shaders\Density.vert" />
     <None Include="shaders\DirectionalLight.frag" />
     <None Include="shaders\DirectionalLight.vert" />
     <None Include="shaders\MarchingCubes.frag" />
@@ -240,8 +243,6 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\PointLight.geom" />
     <None Include="shaders\PointLight.vert" />
     <None Include="shaders\default.frag" />
-    <None Include="shaders\Test.geom" />
-    <None Include="shaders\Test.vert" />
     <None Include="shaders\Text.frag" />
     <None Include="shaders\Text.vert" />
   </ItemGroup>

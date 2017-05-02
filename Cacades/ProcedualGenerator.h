@@ -6,8 +6,47 @@
 #include "NoiseTexture.h"
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "BoundingBox.h"
+#include "BoundingBox.h"
 
 class Shader;
+
+struct Pillar
+{
+	glm::vec2 position;
+	float frequence;
+	float weight;
+};
+
+struct Bound
+{
+	float weight;
+};
+
+struct Helix
+{
+	float offset;
+	float frequence;
+	float weight;
+};
+
+struct Shelf
+{
+	float offset;
+	float frequence;
+	float weight;
+};
+
+namespace glm
+{
+	inline vec2 rotate(vec2 v, float a)
+	{
+		float s = sin(a);
+		float c = cos(a);
+		mat2 m = mat2(c, -s, s, c);
+		return m * v;
+	}
+}
 
 class ProcedualGenerator
 {
@@ -38,10 +77,10 @@ public:
 
 protected:
 	void UpdateValues(int startLayer);
-	static float AddPillar(glm::vec2 pos, glm::vec2 pillar);
-	static float AddBounds(glm::vec2 pos);
-	static float AddHelix(glm::vec2 pos, float sinLayer, float cosLayer);
-	static float AddShelves(float cosLayer);
+	static float AddPillar(glm::vec2 pos, const Pillar& pillar, glm::vec2 rotatetPos);
+	static float AddBounds(glm::vec2 pos, const Bound& bound);
+	static float AddHelix(glm::vec2 pos, const Helix& helix, float sinLayer, float cosLayer);
+	static float AddShelves(glm::vec2 pos, const Shelf& shelf, float cosLayer);
 	void ApplyDataToTexture();
 
 	static float NormalizeCoord(int coord, int dim);
@@ -49,10 +88,10 @@ protected:
 	static const int LANE = WIDTH, LAYER = WIDTH * DEPTH;
 	GLfloat m_values[LAYERS * DEPTH * WIDTH];
 
-	glm::vec2 m_pillars[3]{
-		glm::vec2(0.0f, 0.5f),
-		glm::vec2(-0.4f, -0.25f),
-		glm::vec2(0.4f, -0.25f) };
+	Pillar m_pillars[4];
+	Bound m_bound;
+	Helix m_helix;
+	Shelf m_shelf;
 
 	GLuint m_densityId = 0;
 	GLuint m_vao = 0, m_vbo = 0;
@@ -62,7 +101,5 @@ protected:
 
 	std::default_random_engine m_random;
 	std::uniform_int_distribution<int> m_randomAngle;
-	int m_helixFrequence, m_shelveFrequence;
-	int m_helixOffset, m_shelveOffset;
 };
 
