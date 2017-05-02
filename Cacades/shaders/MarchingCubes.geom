@@ -2,28 +2,25 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = 15) out;
 
-struct Gridcell {
+in Gridcell {
    vec3 p[8];
    float val[8];
    int mc_case;
-};
-
-in Gridcell gs_in[];
-out vec3 out_position;
+} gs_in[];
 
 uniform int isoLevel = 0;
 uniform vec3 scale;
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-//out struct Vertex 
-//{
-//	vec3 position;
-//	vec3 normal;
-//	vec2 uv;
-//	vec3 tangent;
-//} gs_out; 
-
+out Vertex 
+{
+	vec3 position;
+	vec3 normal;
+	vec2 uv;
+	vec3 tangent;
+} gs_out; 
 
 struct CellTriangles 
 {
@@ -73,7 +70,7 @@ vec3 CalculateNormal(vec3 p1, vec3 p2, vec3 p3)
 	normal.y = (u.z * v.x) - (u.x * v.z);
 	normal.z = (u.x * v.y) - (u.y * v.x);
 
-	return normal;
+	return normalize(normal);
 }
 
 void main()
@@ -111,29 +108,25 @@ void main()
 	/* Create the triangle */
 	for (int i = 0; triTable[gs_in[0].mc_case].tris[i] != -1; i += 3) 
 	{
-		//test = vec3(i);
-		vec3 pos1 = vertlist[triTable[gs_in[0].mc_case].tris[i  ]];
-		vec3 pos2 = vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
-		vec3 pos3 = vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
+		vec3 pos1 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i  ]];
+		vec3 pos2 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
+		vec3 pos3 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
 		vec3 normal = CalculateNormal(pos1, pos2, pos3);
  
-		out_position = pos1;
-		gl_Position = projection * view * vec4(scale * pos1, 1.0f);
-		//gs_out.position = pos1;
-		//gs_out.normal = normal;
+		gl_Position	= projection * view * model * vec4(pos1, 1.0f);
+		gs_out.position = pos1;
+		gs_out.normal = normal;
 		EmitVertex();														
 
-		out_position = pos2;
-		gl_Position = projection * view * vec4(scale * pos2, 1.0f);
-		//gs_out.position = pos2;	 
-		//gs_out.normal = normal;
+		gl_Position	= projection * view * model *vec4(pos2, 1.0f);
+		gs_out.position = pos2;	 
+		gs_out.normal = normal;
 		EmitVertex();											 			 
 
-		out_position = pos3;	
-		gl_Position = projection * view * vec4(scale * pos3, 1.0f);
-		//gs_out.position = pos3; 
-		//gs_out.normal = normal;
+		gl_Position	= projection * view * model *vec4(pos3, 1.0f);
+		gs_out.position = pos3; 
+		gs_out.normal = normal;
 		EmitVertex();
 
 		EndPrimitive();	 

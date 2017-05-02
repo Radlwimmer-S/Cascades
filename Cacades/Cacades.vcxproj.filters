@@ -304,9 +304,6 @@
     <None Include="CopyAssets.bat">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\MarchingCubes.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="shaders\Test.geom">
       <Filter>Shaders</Filter>
     </None>

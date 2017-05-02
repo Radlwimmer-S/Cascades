@@ -61,8 +61,9 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	//glEnable(GL_CULL_FACE);
 	/*glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
-
+	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
 
@@ -137,6 +138,18 @@ void Engine::RenderMcMesh(Shader& shader)
 	shader.Use();
 	m_generator.SetUniforms(shader);
 
+	glm::vec3 viewPos = m_camera->GetPosition();
+	GLuint viewPosLocation = glGetUniformLocation(shader.Program, "viewPos");
+	glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
+	glCheckError();
+
+	glm::vec3 geomPos(0, 0, 0);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, geomPos);
+	GLuint modelLocation = glGetUniformLocation(shader.Program, "model");
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+	glCheckError();
+
 	glm::mat4 view = m_camera->GetViewMatrix();
 	GLuint viewLocation = glGetUniformLocation(shader.Program, "view");
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
@@ -152,7 +165,7 @@ void Engine::RenderMcMesh(Shader& shader)
 	glGenQueries(1, &queryTF);
 
 	// Perform feedback transform
-	glEnable(GL_RASTERIZER_DISCARD);
+	//glEnable(GL_RASTERIZER_DISCARD);
 
 	glBindVertexArray(m_generator.GetVaoId());
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tbo);
@@ -165,9 +178,9 @@ void Engine::RenderMcMesh(Shader& shader)
 
 	glBindVertexArray(0);
 
-	glDisable(GL_RASTERIZER_DISCARD);
+	//glDisable(GL_RASTERIZER_DISCARD);
 
-	glFlush();
+	//glFlush();
 
 	//// Fetch and print results
 	//glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &m_triCount);

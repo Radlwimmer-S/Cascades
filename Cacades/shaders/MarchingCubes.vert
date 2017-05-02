@@ -13,13 +13,11 @@ uniform sampler3D densityTex;
 uniform Noise noise[4];
 uniform float noiseScale = 2;
 
-struct Gridcell {
+out Gridcell {
    vec3 p[8];
    float val[8];
    int mc_case;
-};
-
-out Gridcell vs_out;
+} vs_out;
 
 vec3 ws_to_UVW(vec3 ws)
 {
