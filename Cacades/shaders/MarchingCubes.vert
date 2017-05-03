@@ -40,6 +40,7 @@ float GetNoise(vec3 texCoord)
 void main()
 {
 	float layer = -1 + (resolution.y * (gl_InstanceID + 0.5f));
+	float layerCorrection = -resolution.y * startLayer;
 	vec3 ws = vec3(position.x, layer, position.y);
 
 	//TODO: Check this
@@ -56,7 +57,8 @@ void main()
 	for (int i = 0; i < 8; ++i)
 	{
 		vec3 texCoord = ws_to_UVW(vs_out.p[i]);
-		vs_out.val[i] = texture(densityTex, texCoord).r; //+ noiseScale * GetNoise(texCoord * 4.0f);
+		vec3 noiseCoord = ws_to_UVW(vs_out.p[i] - vec3(0, layerCorrection, 0));
+		vs_out.val[i] = texture(densityTex, texCoord).r + noiseScale * GetNoise(noiseCoord * 4.0f);
 	}
 
 	/*
