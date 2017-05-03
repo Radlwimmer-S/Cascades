@@ -13,8 +13,8 @@ const int KEY_COUNT = 512;
 const float KEY_SENSITIVITY = 0.05f;
 const float MOUSE_SENSITIVITY = 0.005f;
 
-static GLuint WIDTH = 1920;
-static GLuint HEIGHT = 1080;
+static GLuint SCREEN_WIDTH = 1920;
+static GLuint SCREEN_HEIGHT = 1080;
 
 #define CHECK_GL_ERROR
 #ifdef CHECK_GL_ERROR
@@ -95,4 +95,3 @@ inline glm::vec3 ClampAngles(const glm::vec3& v)
 {
 	return glm::vec3(ClampAngles(v.x), ClampAngles(v.y), ClampAngles(v.z));
 }
-

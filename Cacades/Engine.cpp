@@ -17,6 +17,8 @@ Engine::~Engine()
 	glfwSetWindowShouldClose(&m_window, GL_TRUE);
 }
 
+void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+
 GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 {
 	// Init GLFW
@@ -27,18 +29,19 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
 	GLFWmonitor* monitor = nullptr;
 	if (fullscreen)
 	{
 		monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode * mode = glfwGetVideoMode(monitor);
-		WIDTH = mode->width;
-		HEIGHT = mode->height;
+		SCREEN_WIDTH = mode->width;
+		SCREEN_HEIGHT = mode->height;
 	}
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, windowTitle, monitor, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle, monitor, nullptr);
 	glfwMakeContextCurrent(window);
 	if (fullscreen)
 		glfwMaximizeWindow(window);
@@ -56,8 +59,10 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 
 	glGetError(); // Call it once to catch glewInit()
 
+	glDebugMessageCallback(DebugCallback, NULL);
+
 	// OpenGL configuration
-	glViewport(0, 0, WIDTH, HEIGHT);
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	//glEnable(GL_CULL_FACE);
 	/*glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
@@ -66,6 +71,8 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 
 	return window;
 }
@@ -77,8 +84,8 @@ void Engine::Init(char* windowTitle)
 
 void Engine::Init(char* windowTitle, GLuint width, GLuint height)
 {
-	WIDTH = width;
-	HEIGHT = height;
+	SCREEN_WIDTH = width;
+	SCREEN_HEIGHT = height;
 	m_instance = new Engine(*InitWindow(windowTitle, false));
 }
 
@@ -92,36 +99,16 @@ void Engine::Start(Camera* camera, Shader* mcShader, Hud* hud)
 
 #define TIME
 #ifdef TIME
-	Timer::TimeAndPrint("Generate Texture", Delegate(&ProcedualGenerator::Generate3dTexture, &m_generator, 0));
 	Timer::TimeAndPrint("Generate Texture", Delegate(&ProcedualGenerator::GenerateVBO, &m_generator, glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH)));
 #else
-	m_generator.Generate3dTexture(0);
 	m_generator.GenerateVBO(glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH));
 #endif
 
 	glCheckError();
 	m_lookupTable.WriteLookupTablesToGpu();
 	m_lookupTable.UpdateUniforms(*m_mcShader);
-	//RenderMcMesh(*m_mcShader);
 
 	Loop();
-}
-
-void Engine::DrawActiveLayer() const
-{
-	system("cls");
-	std::stringstream ss;
-	for (int y = 0; y < m_generator.DEPTH; ++y)
-	{
-		ss << '|';
-		for (int x = 0; x < m_generator.WIDTH; ++x)
-		{
-			ss << (m_generator.GetValue(m_activeLayer, y, x) >= 0 ? 'X' : ' ');
-		}
-		ss << '|' << std::endl;
-	}
-	ss << "==================================================================================================" << std::endl;
-	std::cout << ss.str();
 }
 
 void Engine::RenderMcMesh(Shader& shader)
@@ -136,7 +123,7 @@ void Engine::RenderMcMesh(Shader& shader)
 	glCheckError();
 
 	shader.Use();
-	m_generator.SetUniforms(shader);
+	m_generator.SetUniformsMC(shader);
 
 	glm::vec3 viewPos = m_camera->GetPosition();
 	GLuint viewPosLocation = glGetUniformLocation(shader.Program, "viewPos");
@@ -234,15 +221,16 @@ void Engine::Loop()
 		lastFrame = currentFrame;
 		glfwPollEvents();
 
-		glViewport(0, 0, WIDTH, HEIGHT);
+		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glClearColor(.5f, .5f, .5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCheckError();
 
 		Update(deltaTime);
 
+		m_generator.Generate3dTexture(m_activeLayer);
 		RenderMcMesh(*m_mcShader);
-		
+
 		glfwSwapBuffers(&m_window);
 		glCheckError();
 
@@ -274,12 +262,10 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 		switch (key)
 		{
 		case GLFW_KEY_KP_1:
-			m_activeLayer = std::max(0, m_activeLayer - 1);
-			DrawActiveLayer();
+			m_activeLayer -= 5;
 			break;
 		case GLFW_KEY_KP_7:
-			m_activeLayer = std::min(m_generator.LAYERS - 1, m_activeLayer + 1);
-			DrawActiveLayer();
+			m_activeLayer += 5;
 			break;
 		}
 }
@@ -305,3 +291,40 @@ void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, i
 }
 
 Engine* Engine::m_instance = nullptr;
+
+void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	char* sourceString = "", *typeString = "", *severityString = "";
+
+	switch (source)
+	{
+	case GL_DEBUG_SOURCE_API:			sourceString = "API"; break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM: sourceString = "WINDOW_SYSTEM"; break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:	sourceString = "THIRD_PARTY"; break;
+	case GL_DEBUG_SOURCE_APPLICATION:	sourceString = "APPLICATION"; break;
+	case GL_DEBUG_SOURCE_OTHER:			sourceString = "OTHER"; break;
+	}
+
+	switch (type)
+	{
+	case GL_DEBUG_TYPE_ERROR:				typeString = "ERROR"; break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:	typeString = "DEPRECATED_BEHAVIOR"; break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:	typeString = "UNDEFINED_BEHAVIOR"; break;
+	case GL_DEBUG_TYPE_PORTABILITY:			typeString = "PORTABILITY"; break;
+	case GL_DEBUG_TYPE_PERFORMANCE:			typeString = "PERFORMANCE"; break;
+	case GL_DEBUG_TYPE_MARKER:				typeString = "MARKER"; break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:			typeString = "PUSH_GROUP"; break;
+	case GL_DEBUG_TYPE_POP_GROUP:			typeString = "POP_GROUP"; break;
+	case GL_DEBUG_TYPE_OTHER:				typeString = "OTHER"; break;
+	}
+
+	switch (severity)
+	{
+	case GL_DEBUG_SEVERITY_HIGH:			severityString = "HIGH"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM:			severityString = "MEDIUM"; break;
+	case GL_DEBUG_SEVERITY_LOW:				severityString = "LOW"; break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:	severityString = "NOTIFICATION"; break;
+	}
+
+	printf("%s::%s[%s](%d): %s\n", sourceString, typeString, severityString, id, message);
+}

@@ -313,5 +313,11 @@
     <None Include="shaders\Density.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\Debug3D.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Debug3D.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

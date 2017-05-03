@@ -226,6 +226,8 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
   </ItemGroup>
   <ItemGroup>
     <None Include="CopyAssets.bat" />
+    <None Include="shaders\Debug3D.frag" />
+    <None Include="shaders\Debug3D.vert" />
     <None Include="shaders\default.vert">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

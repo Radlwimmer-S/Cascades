@@ -52,7 +52,7 @@ void main()
 	for (int i = 0; i < 8; ++i)
 	{
 		vec3 texCoord = ws_to_UVW(vs_out.p[i]);
-		vs_out.val[i] = texture(densityTex, texCoord).r + noiseScale * GetNoise(texCoord * 4.0f);
+		vs_out.val[i] = texture(densityTex, texCoord).r; //+ noiseScale * GetNoise(texCoord * 4.0f);
 	}
 
 	/*

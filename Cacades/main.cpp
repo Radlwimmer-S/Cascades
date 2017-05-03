@@ -30,16 +30,6 @@ void TestCSAA()
 	std::cin.ignore();
 }
 
-void TestShader(Shader& shader, char* description)
-{
-	while (!shader.IsValid())
-	{
-		std::cout << "ERROR::SHADER " << description << " invalid! Press Enter to reload: ";
-		std::cin.ignore();
-		shader.Use();
-	}
-}
-
 int main(int argc, char** argv)
 {
 	for (int i = 1; i < argc; i++)
@@ -60,22 +50,19 @@ int main(int argc, char** argv)
 
 		Engine* engine = Engine::Instance();
 
-		Shader* densityShader = new Shader("./shaders/Density.vert", "./shaders/Density.geom", "./shaders/Density.frag");
-		TestShader(*densityShader, "Density");
-
 		//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
 		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
-		TestShader(*marchingCubeShader, "MarchingCubes");
+		marchingCubeShader->Test("MarchingCubes");
 
-		//Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
-		//TestShader(*hudShader, "Text/Hud");
+		Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
+		hudShader->Test( "Text/Hud");
 
-		//Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
-		//Hud* hud = new Hud(*font, *hudShader);
+		Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
+		Hud* hud = new Hud(*font, *hudShader);
 
 		Camera* camera = new Camera();
 
-		engine->Start(camera, marchingCubeShader, nullptr);
+		engine->Start(camera, marchingCubeShader, hud);
 
 		return 0;
 	}

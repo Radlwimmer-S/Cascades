@@ -27,6 +27,8 @@ public:
 	void IsDirty(bool dirty);
 	void SetDirty();
 
+	void Test(const char* debugMessage);
+
 private:
 	static void HandleIncludes(std::string& shaderCode, const GLchar* shaderPath);
 	static std::string ReadFile(const GLchar* shaderPath);

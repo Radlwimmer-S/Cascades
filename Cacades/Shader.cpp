@@ -241,3 +241,13 @@ void Shader::SetDirty()
 {
 	m_isDirty = true;
 }
+
+void Shader::Test(const char* debugMessage)
+{
+		while (!IsValid())
+		{
+			std::cout << "ERROR::SHADER " << debugMessage << " invalid! Press Enter to reload: ";
+			std::cin.ignore();
+			Use();
+		}
+}

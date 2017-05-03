@@ -1,7 +1,12 @@
 #version 430 core
 #define M_PI 3.1415926535897932384626433832795
 
-out float fs_out;
+layout(location = 0) out float density;
+
+in GS_OUT
+{
+	vec3 ws;
+} fs_in;
 
 struct Pillar
 {
@@ -31,7 +36,6 @@ struct Shelf
 
 const int PILLAR_COUNT = 4;
 
-uniform vec3 resolution;
 uniform Pillar pillars[PILLAR_COUNT];
 uniform Bound bound;
 uniform Helix helix;
@@ -74,14 +78,12 @@ float AddShelf(vec3 ws, Shelf shelf)
 
 void main()
 {
-	vec3 ws = vec3(gl_FragCoord.x, gl_Layer / resolution.y, gl_FragCoord.y);
-
-	fs_out = 0;
+	density = 0;
 	for (int p = 0; p < PILLAR_COUNT; ++p)
 	{
-		fs_out += AddPillar(ws, pillars[p]);
+		density += AddPillar(fs_in.ws, pillars[p]);
 	}
-	fs_out += AddBounds(ws, bound);
-	fs_out += AddHelix(ws, helix);
-	fs_out += AddShelf(ws, shelf);
+	density += AddBounds(fs_in.ws, bound);
+	density += AddHelix(fs_in.ws, helix);
+	density += AddShelf(fs_in.ws, shelf);
 }

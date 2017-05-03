@@ -45,7 +45,7 @@ LightComponents CalculateLight(in vec3 normal, in vec3 lightDir)
 
 void main()
 {
-	LightComponents light0 = CalculateLight(fs_in.normal, normalize(vec3(0, 0, 0) - fs_in.position));
+	LightComponents light0 = CalculateLight(fs_in.normal, normalize(vec3(10, 10, -10) - fs_in.position));
 
 	float l = light0.Ambient + light0.Diffuse + light0.Specular;
 	vec3 lighting = vec3(l);

@@ -13,7 +13,6 @@ class Hud;
 class Camera;
 class Shader;
 
-
 class Engine
 {
 public:
@@ -33,7 +32,6 @@ public:
 	void Update(GLfloat deltaTime);
 	void Start(Camera* camera, Shader* mcShader, Hud* hud);
 protected:
-	void DrawActiveLayer() const;
 	void RenderMcMesh(Shader& shader);
 	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void m_CursorPosCallback(GLFWwindow* window, double x, double y);

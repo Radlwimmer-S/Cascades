@@ -7,7 +7,6 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "BoundingBox.h"
-#include "BoundingBox.h"
 
 class Shader;
 
@@ -65,7 +64,10 @@ public:
 
 	void GenerateVBO(glm::vec3 cubesPerDimension);
 
-	void SetUniforms(Shader& shader);
+	void SetUniformsMC(Shader& shader);
+	void SetUniformsD(Shader& shader, int startLayer);
+
+	void RenderDebugQuad(int layer) const;
 
 	GLuint GetTextureId() const;
 	GLuint GetVboId() const;
@@ -76,11 +78,13 @@ public:
 	static const int WIDTH = 96, DEPTH = 96, LAYERS = 256;
 
 protected:
+	void SetupMC();
+	void SetupDensity();
 	void UpdateValues(int startLayer);
-	static float AddPillar(glm::vec2 pos, const Pillar& pillar, glm::vec2 rotatetPos);
-	static float AddBounds(glm::vec2 pos, const Bound& bound);
-	static float AddHelix(glm::vec2 pos, const Helix& helix, float sinLayer, float cosLayer);
-	static float AddShelves(glm::vec2 pos, const Shelf& shelf, float cosLayer);
+	static float AddPillar(glm::vec2 ws, const Pillar& pillar, glm::vec2 rotatetPos);
+	static float AddBounds(glm::vec2 ws, const Bound& bound);
+	static float AddHelix(glm::vec2 ws, const Helix& helix, float sinLayer, float cosLayer);
+	static float AddShelves(glm::vec2 ws, const Shelf& shelf, float cosLayer);
 	void ApplyDataToTexture();
 
 	static float NormalizeCoord(int coord, int dim);
@@ -94,12 +98,15 @@ protected:
 	Shelf m_shelf;
 
 	GLuint m_densityId = 0;
-	GLuint m_vao = 0, m_vbo = 0;
+	GLuint m_vaoMC = 0, m_vboMC = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0;
 	GLuint m_vertexCount = 0;
-	glm::vec3 m_resolution;
+	glm::vec3 m_mcResolution;
 	Noise* m_noise;
+
+	Shader* m_marchingCubeShader, *m_densityShader, *m_debugShader;
 
 	std::default_random_engine m_random;
 	std::uniform_int_distribution<int> m_randomAngle;
+	std::uniform_real_distribution<float> m_randomRand;
 };
 
