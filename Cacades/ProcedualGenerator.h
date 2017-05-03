@@ -45,7 +45,7 @@ public:
 
 	void GenerateVBO(glm::vec3 cubesPerDimension);
 
-	void SetUniformsMC(Shader& shader);
+	void SetUniformsMC(Shader& shader, int startLayer);
 	void SetUniformsD(Shader& shader, int startLayer);
 
 	GLuint GetTextureId() const;

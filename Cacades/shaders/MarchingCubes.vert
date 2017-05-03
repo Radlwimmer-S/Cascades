@@ -1,12 +1,13 @@
 #version 330 core
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec2 position;
 
 struct Noise
 {
-	mat4 rotation; 
+	mat4 rotation;
 	sampler3D tex;
 };
 
+uniform int startLayer;
 uniform vec3 resolution;
 uniform int isoLevel = 0;
 uniform sampler3D densityTex;
@@ -38,15 +39,18 @@ float GetNoise(vec3 texCoord)
 
 void main()
 {
+	float layer = -1 + (resolution.y * (gl_InstanceID + 0.5f));
+	vec3 ws = vec3(position.x, layer, position.y);
+
 	//TODO: Check this
-	vs_out.p[0] = position + (resolution * vec3(-0.5f, -0.5f, -0.5f));
-	vs_out.p[1] = position + (resolution * vec3(+0.5f, -0.5f, -0.5f));
-	vs_out.p[2] = position + (resolution * vec3(+0.5f, -0.5f, +0.5f));
-	vs_out.p[3] = position + (resolution * vec3(-0.5f, -0.5f, +0.5f));
-	vs_out.p[4] = position + (resolution * vec3(-0.5f, +0.5f, -0.5f));
-	vs_out.p[5] = position + (resolution * vec3(+0.5f, +0.5f, -0.5f));
-	vs_out.p[6] = position + (resolution * vec3(+0.5f, +0.5f, +0.5f));
-	vs_out.p[7] = position + (resolution * vec3(-0.5f, +0.5f, +0.5f));
+	vs_out.p[0] = ws + (resolution * vec3(-0.5f, -0.5f, -0.5f));
+	vs_out.p[1] = ws + (resolution * vec3(+0.5f, -0.5f, -0.5f));
+	vs_out.p[2] = ws + (resolution * vec3(+0.5f, -0.5f, +0.5f));
+	vs_out.p[3] = ws + (resolution * vec3(-0.5f, -0.5f, +0.5f));
+	vs_out.p[4] = ws + (resolution * vec3(-0.5f, +0.5f, -0.5f));
+	vs_out.p[5] = ws + (resolution * vec3(+0.5f, +0.5f, -0.5f));
+	vs_out.p[6] = ws + (resolution * vec3(+0.5f, +0.5f, +0.5f));
+	vs_out.p[7] = ws + (resolution * vec3(-0.5f, +0.5f, +0.5f));
 
 
 	for (int i = 0; i < 8; ++i)

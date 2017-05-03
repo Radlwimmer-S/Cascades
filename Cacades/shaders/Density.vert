@@ -13,5 +13,5 @@ uniform int startLayer;
 void main()
 {
 	vs_out.layer = gl_InstanceID;
-	vs_out.ws = vec3(position.x, 2.0f * ((gl_InstanceID + startLayer) / resolution.y - 0.5f), position.y);;
+	vs_out.ws = vec3(position.x, 2.0f * ((gl_InstanceID + startLayer) / resolution.y - 0.5f), position.y);
 }

@@ -125,7 +125,7 @@ void Engine::RenderMcMesh(Shader& shader)
 	glCheckError();
 
 	shader.Use();
-	m_generator.SetUniformsMC(shader);
+	m_generator.SetUniformsMC(shader, m_activeLayer);
 
 	glm::vec3 viewPos = m_camera->GetPosition();
 	GLuint viewPosLocation = glGetUniformLocation(shader.Program, "viewPos");
@@ -161,7 +161,8 @@ void Engine::RenderMcMesh(Shader& shader)
 
 	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
 	//glBeginTransformFeedback(GL_TRIANGLES);
-	glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
+	glDrawArraysInstanced(GL_POINTS, 0, m_generator.GetVertexCount(), m_generator.LAYERS);
+	//glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
 	//glEndTransformFeedback();
 	//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 

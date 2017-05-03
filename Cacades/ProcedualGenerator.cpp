@@ -1,13 +1,11 @@
 #include "ProcedualGenerator.h"
 #include <GL/glew.h>
-#include <glm/detail/func_geometric.hpp>
 #include <glm/gtx/optimum_pow.hpp>
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include <string>
 #include "BoundingBox.h"
-#include <GLFW/glfw3.h>
 
 ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle(0, 359), m_randomRand(-glm::pi<float>(), glm::pi<float>()), m_randomFloat(0.0f, 1000.0f)
 {
@@ -73,7 +71,7 @@ void ProcedualGenerator::SetupDensity()
 		{ -1,  1 },
 		{ -1, -1 },
 		{  1, -1 },
-		
+
 		{ -1,  1 },
 		{  1, -1 },
 		{  1,  1 }
@@ -144,26 +142,22 @@ void ProcedualGenerator::GenerateVBO(glm::vec3 cubesPerDimension)
 	m_mcResolution = 2.0f / cubesPerDimension;
 	glm::vec3 vertexPerDimension = cubesPerDimension - glm::vec3(1, 0, 1);
 
-	m_vertexCount = vertexPerDimension.x * vertexPerDimension.y * vertexPerDimension.z;
-	glm::vec3* vertices = new glm::vec3[m_vertexCount];
+	m_vertexCount = vertexPerDimension.x * vertexPerDimension.z;
+	glm::vec2* vertices = new glm::vec2[m_vertexCount];
+	glm::vec2 tmpResolution(m_mcResolution.x, m_mcResolution.z);
 
-	glm::vec3 pos = glm::vec3(-1) + m_mcResolution / 2.0f;
+	glm::vec2 pos = glm::vec2(-1) + tmpResolution / 2.0f;
 	int index = 0;
-	for (int layer = 0; layer < vertexPerDimension.y; ++layer)
+	for (int x = 0; x < vertexPerDimension.x; ++x)
 	{
-		pos.x = -1.0f + m_mcResolution.x / 2.0f;
-		for (int x = 0; x < vertexPerDimension.x; ++x)
+		pos.y = -1.0f + m_mcResolution.z / 2.0f;
+		for (int z = 0; z < vertexPerDimension.z; ++z)
 		{
-			pos.z = -1.0f + m_mcResolution.z / 2.0f;
-			for (int z = 0; z < vertexPerDimension.z; ++z)
-			{
-				vertices[index] = pos;
-				++index;
-				pos.z += m_mcResolution.z;
-			}
-			pos.x += m_mcResolution.x;
+			vertices[index] = pos;
+			++index;
+			pos.y += m_mcResolution.z;
 		}
-		pos.y += m_mcResolution.y;
+		pos.x += m_mcResolution.x;
 	}
 
 	glGenVertexArrays(1, &m_vaoMC);
@@ -171,11 +165,11 @@ void ProcedualGenerator::GenerateVBO(glm::vec3 cubesPerDimension)
 
 	glGenBuffers(1, &m_vboMC);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vboMC);
-	glBufferData(GL_ARRAY_BUFFER, m_vertexCount * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_vertexCount * sizeof(glm::vec2), vertices, GL_STATIC_DRAW);
 	glCheckError();
 	// Position attribute
 	glEnableVertexAttribArray(VS_IN_POSITION);
-	glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+	glVertexAttribPointer(VS_IN_POSITION, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glCheckError();
 }
@@ -200,11 +194,15 @@ GLuint ProcedualGenerator::GetVertexCount() const
 	return m_vertexCount;
 }
 
-void ProcedualGenerator::SetUniformsMC(Shader& shader)
+void ProcedualGenerator::SetUniformsMC(Shader& shader, int startLayer)
 {
 	glm::vec3 resolution = m_mcResolution;
 	GLint resolutioneLoc = glGetUniformLocation(shader.Program, "resolution");
 	glUniform3fv(resolutioneLoc, 1, glm::value_ptr(resolution));
+	glCheckError();
+
+	GLuint layerLocation = glGetUniformLocation(shader.Program, "startLayer");
+	glUniform1i(layerLocation, startLayer);
 	glCheckError();
 
 	for (int i = 0; i < 4; ++i)
