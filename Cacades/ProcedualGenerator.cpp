@@ -9,7 +9,7 @@
 #include "BoundingBox.h"
 #include <GLFW/glfw3.h>
 
-ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle(0, 359), m_randomRand(-glm::pi<float>(), glm::pi<float>())
+ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle(0, 359), m_randomRand(-glm::pi<float>(), glm::pi<float>()), m_randomFloat(0.0f, 1000.0f)
 {
 	SetupDensity();
 	SetupMC();
@@ -27,6 +27,7 @@ void ProcedualGenerator::SetupMC()
 		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 3)),
 		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 4))
 	};
+	//return random() & 1 ? 1 : -1
 }
 
 void ProcedualGenerator::SetupDensity()
@@ -34,16 +35,14 @@ void ProcedualGenerator::SetupDensity()
 	m_densityShader = new  Shader("./shaders/Density.vert", "./shaders/Density.geom", "./shaders/Density.frag");
 	m_densityShader->Test("Density");
 
-	m_pillars[0] = Pillar{ glm::vec2(0.0f,  0.5f), -2.2f, 0.25f };
-	m_pillars[1] = Pillar{ glm::vec2(-0.4f, -0.25f), 1.8f, 0.25f };
-	m_pillars[2] = Pillar{ glm::vec2(0.4f, -0.25f), 1.2f, 0.25f };
-	m_pillars[3] = Pillar{ glm::vec2(0.0f, 0.0f), 1, -1.0f };
+	m_pillars[0] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_pillars[1] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_pillars[2] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_pillars[3] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
 
-	m_bound = Bound{ -10.0f };
+	m_helix = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
 
-	m_helix = Helix{ m_randomRand(m_random), 2.0f + fmodf(m_random(), 509.0f), 3.0f };
-
-	m_shelf = Shelf{ m_randomRand(m_random), 2.0f + fmodf(m_random(), 50.0f), 0.5f };
+	m_shelf = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
 
 	glGenTextures(1, &m_densityId);
 	glBindTexture(GL_TEXTURE_3D, m_densityId);
@@ -253,136 +252,54 @@ void ProcedualGenerator::SetUniformsD(Shader& shader, int startLayer)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		GLuint posLocation = glGetUniformLocation(shader.Program, ("pillars[" + std::to_string(i) + "].position").c_str());
-		glUniform2fv(posLocation, 1, glm::value_ptr(m_pillars[i].position));
+		GLuint posLocation = glGetUniformLocation(shader.Program, ("pillars[" + std::to_string(i) + "].offset").c_str());
+		glUniform1f(posLocation, m_pillars[i].offset);
 		glCheckError();
 
 		GLuint freqLocation = glGetUniformLocation(shader.Program, ("pillars[" + std::to_string(i) + "].frequence").c_str());
 		glUniform1f(freqLocation, m_pillars[i].frequence);
 		glCheckError();
 
-		GLuint weightLocation = glGetUniformLocation(shader.Program, ("pillars[" + std::to_string(i) + "].weight").c_str());
-		glUniform1f(weightLocation, m_pillars[i].weight);
-		glCheckError();
-	}
-
-	{
-		GLuint weightLocation = glGetUniformLocation(shader.Program, "bound.weight");
-		glUniform1f(weightLocation, m_bound.weight);
+		GLuint signLocation = glGetUniformLocation(shader.Program, ("pillars[" + std::to_string(i) + "].frequenceSign").c_str());
+		glUniform1i(signLocation, m_pillars[i].frequenceSign);
 		glCheckError();
 	}
 
 	{
 		GLuint offsetLocation = glGetUniformLocation(shader.Program, "helix.offset");
-		glUniform1f(offsetLocation, m_helix.weight);
+		glUniform1f(offsetLocation, m_helix.offset);
 		glCheckError();
 
 		GLuint freqLocation = glGetUniformLocation(shader.Program, "helix.frequence");
-		glUniform1f(freqLocation, m_helix.weight);
+		glUniform1f(freqLocation, m_helix.frequence);
 		glCheckError();
 
-		GLuint weightLocation = glGetUniformLocation(shader.Program, "helix.weight");
-		glUniform1f(weightLocation, m_helix.weight);
+		GLuint signLocation = glGetUniformLocation(shader.Program, "helix.frequenceSign");
+		glUniform1i(signLocation, m_helix.frequenceSign);
 		glCheckError();
 	}
 
 	{
 		GLuint offsetLocation = glGetUniformLocation(shader.Program, "shelf.offset");
-		glUniform1f(offsetLocation, m_shelf.weight);
+		glUniform1f(offsetLocation, m_shelf.offset);
 		glCheckError();
 
 		GLuint freqLocation = glGetUniformLocation(shader.Program, "shelf.frequence");
-		glUniform1f(freqLocation, m_shelf.weight);
+		glUniform1f(freqLocation, m_shelf.frequence);
 		glCheckError();
 
-		GLuint weightLocation = glGetUniformLocation(shader.Program, "shelf.weight");
-		glUniform1f(weightLocation, m_shelf.weight);
+		GLuint signLocation = glGetUniformLocation(shader.Program, "shelf.frequenceSign");
+		glUniform1i(signLocation, m_shelf.frequenceSign);
 		glCheckError();
 	}
-}
-
-void ProcedualGenerator::RenderDebugQuad(int layer) const
-{
-}
-
-float ProcedualGenerator::GetValue(int layer, int y, int x) const
-{
-	return m_values[layer * LAYER + y * LANE + x];
-}
-
-void ProcedualGenerator::UpdateValues(int startLayer)
-{
-#pragma omp parallel for
-	for (int layer = startLayer; layer < LAYERS + startLayer; ++layer)
-	{
-		float ws_l = NormalizeCoord(layer, LAYERS);
-		float helixAngle = m_helix.offset + m_helix.frequence * glm::pi<float>() * ws_l;
-		float sinHelix = sin(helixAngle);
-		float cosHelix = cos(helixAngle);
-
-		float shelvesAngle = m_shelf.offset + m_shelf.frequence * glm::pi<float>() * ws_l;
-		float cosShelves = cos(shelvesAngle);
-
-		glm::vec2 pillar0Position = glm::rotate(m_pillars[0].position, m_pillars[0].frequence * glm::pi<float>() * ws_l);
-		glm::vec2 pillar1Position = glm::rotate(m_pillars[1].position, m_pillars[1].frequence * glm::pi<float>() * ws_l);
-		glm::vec2 pillar2Position = glm::rotate(m_pillars[2].position, m_pillars[2].frequence * glm::pi<float>() * ws_l);
-		glm::vec2 pillar3Position = glm::rotate(m_pillars[3].position, m_pillars[3].frequence * glm::pi<float>() * ws_l);
-
-		int layerIndex = layer * LAYER;
-		for (int y = 0; y < DEPTH; ++y)
-		{
-			float ws_y = NormalizeCoord(y, DEPTH);
-			int laneIndex = y * LANE;
-
-			for (int x = 0; x < WIDTH; ++x)
-			{
-				float ws_x = NormalizeCoord(x, WIDTH);
-				glm::vec2 ws(ws_x, ws_y);
-
-				float f = 0;
-				f += AddPillar(ws, m_pillars[0], pillar0Position);
-				f += AddPillar(ws, m_pillars[1], pillar1Position);
-				f += AddPillar(ws, m_pillars[2], pillar2Position);
-				f += AddPillar(ws, m_pillars[3], pillar3Position);
-				f += AddBounds(ws, m_bound);
-				f += AddHelix(ws, m_helix, sinHelix, cosHelix);
-				f += AddShelves(ws, m_shelf, cosShelves);
-
-				m_values[layerIndex + laneIndex + x] = f;
-			}
-		}
-	}
-}
-
-float ProcedualGenerator::AddPillar(glm::vec2 pos, const Pillar& pillar, glm::vec2 rotatetPos)
-{
-	return pillar.weight * (1.0f / glm::length(pos - rotatetPos) - 1.0f);
-}
-
-float ProcedualGenerator::AddBounds(glm::vec2 pos, const Bound& bound)
-{
-	return bound.weight * glm::pow3(glm::length(pos));
-}
-
-float ProcedualGenerator::AddHelix(glm::vec2 pos, const Helix& helix, float sinLayer, float cosLayer)
-{
-	return helix.weight * glm::dot(glm::vec2(cosLayer, sinLayer), pos);
-}
-
-float ProcedualGenerator::AddShelves(glm::vec2 pos, const Shelf& shelf, float cosLayer)
-{
-	return shelf.weight * cosLayer;
-}
-
-void ProcedualGenerator::ApplyDataToTexture()
-{
-	glBindTexture(GL_TEXTURE_3D, m_densityId);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, WIDTH, DEPTH, LAYERS, 0, GL_RED, GL_FLOAT, m_values);
-	glBindTexture(GL_TEXTURE_3D, 0);
-	glCheckError();
 }
 
 float ProcedualGenerator::NormalizeCoord(int coord, int dim)
 {
 	return 2.0f * (coord * 1.0f / dim - 0.5f);
+}
+
+int ProcedualGenerator::ToSignBit(int random)
+{
+	return random & 1 ? 1 : -1;
 }

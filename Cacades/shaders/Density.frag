@@ -8,40 +8,18 @@ in GS_OUT
 	vec3 ws;
 } fs_in;
 
-struct Pillar
-{
-	vec2 position;
-	float frequence;
-	float weight;
-};
-
-struct Bound
-{
-	float weight;
-};
-
-struct Helix
+struct Randoms
 {
 	float offset;
+	int frequenceSign;
 	float frequence;
-	float weight;
 };
 
-struct Shelf
-{
-	float offset;
-	float frequence;
-	float weight;
-};
+uniform Randoms pillars[4];
+uniform Randoms helix;
+uniform Randoms shelf;
 
-const int PILLAR_COUNT = 4;
-
-uniform Pillar pillars[PILLAR_COUNT];
-uniform Bound bound;
-uniform Helix helix;
-uniform Shelf shelf;
-
-vec2 rotate(vec2 v, float a) 
+vec2 rotate(vec2 v, float a)
 {
 	float s = sin(a);
 	float c = cos(a);
@@ -49,41 +27,47 @@ vec2 rotate(vec2 v, float a)
 	return m * v;
 }
 
-float AddPillar(vec3 ws, Pillar pillar)
+float AddPillar(vec3 ws, vec2 position, Randoms randoms, float weight)
 {
-	float pillarAngle = pillar.frequence * ws.y * M_PI;
-	vec2 position = rotate(pillar.position, pillarAngle);
-	return pillar.weight * (1.0f / length(ws.xz - position) - 1.0f);
+	float frequence = randoms.frequenceSign * (1.0f + mod(randoms.frequence, 4.0f));
+	float angle = /*randoms.offset +*/ frequence * ws.y * M_PI;
+
+	position = rotate(position, angle);
+	return weight * (1.0f / length(ws.xz - position) - 1.0f);
 }
 
-float AddBounds(vec3 ws, Bound bound)
+float AddBounds(vec3 ws, float weight)
 {
-	return bound.weight * pow(length(ws.xz), 3);
+	return weight * pow(length(ws.xz), 3);
 }
 
-float AddHelix(vec3 ws, Helix helix)
+float AddHelix(vec3 ws, Randoms randoms, float weight)
 {
-	float helixAngle = helix.offset + helix.frequence * ws.y * M_PI;
-	float sinLayer = sin(helixAngle);
-	float cosLayer = cos(helixAngle);
-	return helix.weight * dot(vec2(cosLayer, sinLayer), ws.xz);
+	float frequence = randoms.frequenceSign * (8.0f + mod(randoms.frequence, 5.0f));
+	float angle = randoms.offset + frequence * ws.y * M_PI;
+
+	float sinLayer = sin(angle);
+	float cosLayer = cos(angle);
+	return weight * dot(vec2(cosLayer, sinLayer), ws.xz);
 }
 
-float AddShelf(vec3 ws, Shelf shelf)
+float AddShelf(vec3 ws, Randoms randoms, float weight)
 {
-	float shelfAngle = shelf.offset + shelf.frequence * ws.y * M_PI;
-	float cosLayer = cos(shelfAngle);
-	return shelf.weight * cosLayer;
+	float frequence = randoms.frequenceSign * (8.0f + mod(randoms.frequence, 5.0f));
+	float angle = randoms.offset + frequence * ws.y * M_PI;
+
+	float cosLayer = cos(angle);
+	return weight * cosLayer;
 }
 
 void main()
 {
 	density = 0;
-	for (int p = 0; p < PILLAR_COUNT; ++p)
-	{
-		density += AddPillar(fs_in.ws, pillars[p]);
-	}
-	density += AddBounds(fs_in.ws, bound);
-	density += AddHelix(fs_in.ws, helix);
-	density += AddShelf(fs_in.ws, shelf);
+	density += AddPillar(fs_in.ws, vec2( 0.0f,  0.50f), pillars[0], 0.25f);
+	density += AddPillar(fs_in.ws, vec2(-0.4f, -0.25f), pillars[1], 0.25f);
+	density += AddPillar(fs_in.ws, vec2( 0.4f, -0.25f), pillars[2], 0.25f);
+	density += AddPillar(fs_in.ws, vec2( 0.0f,  0.00f), pillars[3], -1.0f);
+	density += AddBounds(fs_in.ws, -10);
+	density += AddHelix(fs_in.ws, helix, 3.0f);
+	density += AddShelf(fs_in.ws, shelf, 1.5f);
 }

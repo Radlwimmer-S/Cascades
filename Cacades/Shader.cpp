@@ -122,7 +122,7 @@ std::string Shader::ReadFile(const GLchar* shaderPath)
 		if (!shaderFile.good())
 		{
 			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ\n" << shaderPath << std::endl;
-			std::cin.ignore();
+			return "COULD NOT READ";
 		}
 
 		std::stringstream shaderStream;

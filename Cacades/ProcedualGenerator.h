@@ -10,30 +10,11 @@
 
 class Shader;
 
-struct Pillar
-{
-	glm::vec2 position;
-	float frequence;
-	float weight;
-};
-
-struct Bound
-{
-	float weight;
-};
-
-struct Helix
+struct Randoms
 {
 	float offset;
+	int frequenceSign;
 	float frequence;
-	float weight;
-};
-
-struct Shelf
-{
-	float offset;
-	float frequence;
-	float weight;
 };
 
 namespace glm
@@ -67,35 +48,26 @@ public:
 	void SetUniformsMC(Shader& shader);
 	void SetUniformsD(Shader& shader, int startLayer);
 
-	void RenderDebugQuad(int layer) const;
-
 	GLuint GetTextureId() const;
 	GLuint GetVboId() const;
 	GLuint GetVaoId() const;
 	GLuint GetVertexCount() const;
-	float GetValue(int layer, int y, int x) const;
 
 	static const int WIDTH = 96, DEPTH = 96, LAYERS = 256;
 
 protected:
 	void SetupMC();
 	void SetupDensity();
-	void UpdateValues(int startLayer);
-	static float AddPillar(glm::vec2 ws, const Pillar& pillar, glm::vec2 rotatetPos);
-	static float AddBounds(glm::vec2 ws, const Bound& bound);
-	static float AddHelix(glm::vec2 ws, const Helix& helix, float sinLayer, float cosLayer);
-	static float AddShelves(glm::vec2 ws, const Shelf& shelf, float cosLayer);
-	void ApplyDataToTexture();
 
 	static float NormalizeCoord(int coord, int dim);
+	static int ToSignBit(int random);
 
 	static const int LANE = WIDTH, LAYER = WIDTH * DEPTH;
 	GLfloat m_values[LAYERS * DEPTH * WIDTH];
 
-	Pillar m_pillars[4];
-	Bound m_bound;
-	Helix m_helix;
-	Shelf m_shelf;
+	Randoms m_pillars[4];
+	Randoms m_helix;
+	Randoms m_shelf;
 
 	GLuint m_densityId = 0;
 	GLuint m_vaoMC = 0, m_vboMC = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0;
@@ -108,5 +80,6 @@ protected:
 	std::default_random_engine m_random;
 	std::uniform_int_distribution<int> m_randomAngle;
 	std::uniform_real_distribution<float> m_randomRand;
+	std::uniform_real_distribution<float> m_randomFloat;
 };
 

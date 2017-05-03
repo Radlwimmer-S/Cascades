@@ -17,7 +17,7 @@ Engine::~Engine()
 	glfwSetWindowShouldClose(&m_window, GL_TRUE);
 }
 
-void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 {
@@ -51,6 +51,7 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, CursorPosCallback);
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
+	glfwSetWindowSizeCallback(window, ResizeCallback);
 
 	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
@@ -72,6 +73,7 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 
 	return window;
@@ -285,15 +287,31 @@ void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int
 	Instance()->m_MouseButtonCallback(window, button, action, mods);
 }
 
+void Engine::ResizeCallback(GLFWwindow* window, int width, int height)
+{
+	Instance()->m_ResizeCallback(window, width, height);
+}
+
 void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
 
 }
 
+void Engine::m_ResizeCallback(GLFWwindow* window, int width, int height)
+{
+	SCREEN_WIDTH = width;
+	SCREEN_HEIGHT = height;
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+}
+
 Engine* Engine::m_instance = nullptr;
 
-void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
+	// ignore non-significant error/warning codes
+	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+	std::cout << "---------------" << std::endl;
 	char* sourceString = "", *typeString = "", *severityString = "";
 
 	switch (source)
