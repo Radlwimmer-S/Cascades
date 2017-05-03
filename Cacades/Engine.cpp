@@ -3,12 +3,11 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Global.h"
-#include <algorithm>
 #include <sstream>
 #include "Timer.h"
 #include <glm/gtc/type_ptr.hpp>
 
-Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator(1), m_activeLayer(0)
+Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator(1), m_activeLayer(0), m_noiseScale(1)
 {
 }
 
@@ -126,6 +125,10 @@ void Engine::RenderMcMesh(Shader& shader)
 
 	shader.Use();
 	m_generator.SetUniformsMC(shader, m_activeLayer);
+
+	GLuint noiseScaleLocation = glGetUniformLocation(shader.Program, "noiseScale");
+	glUniform1f(noiseScaleLocation, m_noiseScale);
+	glCheckError();
 
 	glm::vec3 viewPos = m_camera->GetPosition();
 	GLuint viewPosLocation = glGetUniformLocation(shader.Program, "viewPos");
@@ -269,6 +272,12 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			break;
 		case GLFW_KEY_KP_7:
 			m_activeLayer += 5;
+			break;
+		case GLFW_KEY_KP_2:
+			m_noiseScale = std::max(0.2f, m_noiseScale - 0.2f);
+			break;
+		case GLFW_KEY_KP_8:
+			m_noiseScale = std::min(4.0f, m_noiseScale + 0.2f);
 			break;
 		}
 }

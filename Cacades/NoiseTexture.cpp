@@ -4,14 +4,16 @@
 
 NoiseTexture::NoiseTexture(GLuint width, GLuint height, GLuint depth, GLuint octave)
 {
+	--octave;
+
 	m_data = new GLfloat[width * height * depth];
 
 	float xFactor = 1.0f / (width - 1);
 	float yFactor = 1.0f / (height - 1);
 	float zFactor = 1.0f / (depth - 1);
 
-	float freq = a * glm::pow(2.0f, octave);
-	float scale = glm::pow(b, octave);
+	float freq = a * (1 << octave);//  glm::pow(2.0f, octave);
+	float scale = 4 / std::powf(b, octave);
 
 	for (int dep = 0; dep < depth; dep++)
 	{
@@ -26,7 +28,7 @@ NoiseTexture::NoiseTexture(GLuint width, GLuint height, GLuint depth, GLuint oct
 				glm::vec3 p(x * freq, y * freq, z * freq);
 
 				// Store in texture buffer
-				m_data[(dep * width * height + row * width + col)] = glm::perlin(p, glm::vec3(freq)) / scale;;
+				m_data[(dep * width * height + row * width + col)] = glm::perlin(p, glm::vec3(freq)) * scale;;
 			}
 		}
 	}

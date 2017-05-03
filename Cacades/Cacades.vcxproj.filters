@@ -145,7 +145,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NoiseTexture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="TriplanarMesh.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -261,7 +264,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NoiseTexture.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="TriplanarMesh.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

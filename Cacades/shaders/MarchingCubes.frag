@@ -1,12 +1,10 @@
 #version 330 core
 
-in Vertex 
+in Vertex
 {
 	vec3 position;
 	vec3 normal;
-	vec2 uv;
-	vec3 tangent;
-} fs_in; 
+} fs_in;
 
 out vec4 FragColor;
 
@@ -27,7 +25,7 @@ LightComponents CalculateLight(in vec3 normal, in vec3 lightDir)
 	float ambientStrength = 0.1f;
 	lighting.Ambient = ambientStrength;
 
-	// Diffuse 
+	// Diffuse
 	float diffuseStrength = 1.0f;
 	vec3 norm = normalize(normal);
 	float diff = max(dot(norm, lightDir), 0.0);

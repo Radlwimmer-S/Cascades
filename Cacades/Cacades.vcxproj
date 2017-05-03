@@ -167,6 +167,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="KdPrimitive.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="MeasuringTool.cpp" />
+    <ClCompile Include="TriplanarMesh.cpp" />
     <ClCompile Include="NoiseTexture.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PointLight.cpp" />
@@ -206,6 +207,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="KdPrimitive.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="MeasuringTool.h" />
+    <ClInclude Include="TriplanarMesh.h" />
     <ClInclude Include="NoiseTexture.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />

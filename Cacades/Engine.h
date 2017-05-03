@@ -51,6 +51,7 @@ protected:
 	ProcedualGenerator m_generator;
 
 	int m_activeLayer;
+	float m_noiseScale;
 		
 	const GLuint MaxTexturesPerModel = 3;
 

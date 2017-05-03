@@ -12,7 +12,7 @@ uniform vec3 resolution;
 uniform int isoLevel = 0;
 uniform sampler3D densityTex;
 uniform Noise noise[4];
-uniform float noiseScale = 2;
+uniform float noiseScale = 1;
 
 out Gridcell {
    vec3 p[8];
@@ -32,7 +32,7 @@ float GetNoise(vec3 texCoord)
 	float value = 0;
 	for (int i = 0; i < 4; ++i)
 	{
-		value += texture(noise[i].tex, (noise[i].rotation * vec4(texCoord, 1.0f)).xyz).r;
+		value += texture(noise[i].tex, (noise[i].rotation * vec4(texCoord.zxy, 1.0f)).xyz).r;
 	}
 	return value;
 }

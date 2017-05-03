@@ -14,18 +14,16 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-out Vertex 
+out Vertex
 {
 	vec3 position;
 	vec3 normal;
-	vec2 uv;
-	vec3 tangent;
-} gs_out; 
+} gs_out;
 
-struct CellTriangles 
+struct CellTriangles
 {
 	int tris[16];
-}; 
+};
 
 layout (shared, std140) uniform MC_EdgeTable
 {
@@ -40,7 +38,7 @@ layout (shared, std140) uniform MC_TrisTable
    Linearly interpolate the position where an isosurface cuts
    an edge between two vertices, each with their own scalar value
 */
-vec3 VertexInterp(float isoLevel, vec3 p1, vec3 p2, float valp1, float valp2) 
+vec3 VertexInterp(float isoLevel, vec3 p1, vec3 p2, float valp1, float valp2)
 {
 	float mu;
 	vec3 p;
@@ -76,7 +74,7 @@ vec3 CalculateNormal(vec3 p1, vec3 p2, vec3 p3)
 void main()
 {
 	vec3 vertlist[12] = vec3[] (
-	vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), 
+	vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f),
 	vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
 
 	/* Find the vertices where the surface intersects the cube */
@@ -106,29 +104,29 @@ void main()
 	    vertlist[11] = VertexInterp(isoLevel, gs_in[0].p[3], gs_in[0].p[7], gs_in[0].val[3], gs_in[0].val[7]);
 
 	/* Create the triangle */
-	for (int i = 0; triTable[gs_in[0].mc_case].tris[i] != -1; i += 3) 
+	for (int i = 0; triTable[gs_in[0].mc_case].tris[i] != -1; i += 3)
 	{
 		vec3 pos1 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i  ]];
 		vec3 pos2 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
 		vec3 pos3 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
 		vec3 normal = CalculateNormal(pos1, pos2, pos3);
- 
+
 		gl_Position	= projection * view * model * vec4(pos1, 1.0f);
 		gs_out.position = pos1;
 		gs_out.normal = normal;
-		EmitVertex();														
+		EmitVertex();
 
 		gl_Position	= projection * view * model *vec4(pos2, 1.0f);
-		gs_out.position = pos2;	 
-		gs_out.normal = normal;
-		EmitVertex();											 			 
-
-		gl_Position	= projection * view * model *vec4(pos3, 1.0f);
-		gs_out.position = pos3; 
+		gs_out.position = pos2;
 		gs_out.normal = normal;
 		EmitVertex();
 
-		EndPrimitive();	 
+		gl_Position	= projection * view * model *vec4(pos3, 1.0f);
+		gs_out.position = pos3;
+		gs_out.normal = normal;
+		EmitVertex();
+
+		EndPrimitive();
 	}
 }
