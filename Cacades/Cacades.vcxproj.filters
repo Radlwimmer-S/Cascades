@@ -304,9 +304,6 @@
     <None Include="shaders\MarchingCubes.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\MarchingCubes.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="CopyAssets.bat">
       <Filter>Resource Files</Filter>
     </None>
@@ -323,6 +320,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\Debug3D.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Simple.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Simple.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -9,7 +9,8 @@
 
 ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle(0, 359), m_randomRand(-glm::pi<float>(), glm::pi<float>()), m_randomFloat(0.0f, 1000.0f)
 {
-	SetupDensity();
+	SetupDensity(); 
+	SetRandomSeed(seed);
 	SetupMC();
 }
 
@@ -32,16 +33,7 @@ void ProcedualGenerator::SetupMC()
 void ProcedualGenerator::SetupDensity()
 {
 	m_densityShader = new  Shader("./shaders/Density.vert", "./shaders/Density.geom", "./shaders/Density.frag");
-	m_densityShader->Test("Density");
-
-	m_pillars[0] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
-	m_pillars[1] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
-	m_pillars[2] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
-	m_pillars[3] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
-
-	m_helix = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
-
-	m_shelf = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_densityShader->Test("Density"); 
 
 	glGenTextures(1, &m_densityId);
 	glBindTexture(GL_TEXTURE_3D, m_densityId);
@@ -193,6 +185,20 @@ GLuint ProcedualGenerator::GetVaoId() const
 GLuint ProcedualGenerator::GetVertexCount() const
 {
 	return m_vertexCount;
+}
+
+void ProcedualGenerator::SetRandomSeed(int seed)
+{
+	m_random.seed(seed);
+
+	m_pillars[0] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_pillars[1] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_pillars[2] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+	m_pillars[3] = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+
+	m_helix = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
+
+	m_shelf = Randoms{ m_randomRand(m_random), ToSignBit(m_random()), m_randomFloat(m_random) };
 }
 
 void ProcedualGenerator::SetUniformsMC(Shader& shader, int startLayer)

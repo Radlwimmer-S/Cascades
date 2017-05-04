@@ -53,6 +53,8 @@ public:
 	GLuint GetVaoId() const;
 	GLuint GetVertexCount() const;
 
+	void SetRandomSeed(int seed);
+
 	static const int WIDTH = 96, DEPTH = 96, LAYERS = 256;
 
 protected:

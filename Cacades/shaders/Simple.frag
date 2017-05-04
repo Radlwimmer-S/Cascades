@@ -1,12 +1,10 @@
 #version 330 core
 
-struct Vertex
+in Vertex
 {
 	vec3 position;
 	vec3 normal;
-};
-
-in Vertex fs_in;
+} fs_in;
 
 out vec4 FragColor;
 
@@ -45,12 +43,13 @@ LightComponents CalculateLight(in vec3 normal, in vec3 lightDir)
 
 void main()
 {
-	LightComponents light0 = CalculateLight(fs_in.normal, normalize(vec3(10, 10, -10) - fs_in.position));
+	LightComponents light0 = CalculateLight(fs_in.normal, normalize(fs_in.position - vec3(0, 0, 10)));
 
 	float l = light0.Ambient + light0.Diffuse + light0.Specular;
 	vec3 lighting = vec3(l);
 
 	lighting = clamp(lighting, 0, 1);
+  lighting = lighting * fs_in.normal;
 
 	FragColor = vec4(lighting, 1.0f);
 }

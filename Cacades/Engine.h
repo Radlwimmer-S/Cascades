@@ -31,7 +31,7 @@ public:
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	static void ResizeCallback(GLFWwindow* window, int width, int height);
 	void Update(GLfloat deltaTime);
-	void Start(Camera* camera, Shader* mcShader, Hud* hud);
+	void Start();
 protected:
 	void RenderMcMesh(Shader& shader);
 	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -46,12 +46,14 @@ protected:
 	GpuLookupTable m_lookupTable;
 	GLFWwindow& m_window;
 	Shader* m_mcShader;
+	Shader* m_shader;
 	Camera* m_camera;
 
 	ProcedualGenerator m_generator;
 
 	int m_activeLayer;
 	float m_noiseScale;
+	int m_seed;
 		
 	const GLuint MaxTexturesPerModel = 3;
 

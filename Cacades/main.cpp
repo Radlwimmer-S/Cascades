@@ -50,20 +50,7 @@ int main(int argc, char** argv)
 
 		Engine* engine = Engine::Instance();
 
-		const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
-		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag", feedbackVaryings, 2);
-		//Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 2);
-		marchingCubeShader->Test("MarchingCubes");
-
-		Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
-		hudShader->Test( "Text/Hud");
-
-		Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
-		Hud* hud = new Hud(*font, *hudShader);
-
-		Camera* camera = new Camera();
-
-		engine->Start(camera, marchingCubeShader, hud);
+		engine->Start();
 
 		return 0;
 	}
@@ -74,8 +61,3 @@ int main(int argc, char** argv)
 		return -1;
 	}
 }
-
-//-Ein RenderPass um eine 3D Texture mit density Werten zu fuellen(in OGL eing GL_TEXTURE_3D generieren und mit den passenden Dimensionen erstellen)
-//- Jetzt kann man mit "Layered Rendering" in diese Texture malen(dazu mit glDrawArrayInstanced(TYPE, START, VERTEX_END, INSTANCE_COUNT) pro layer in der 3D Texture einmal ein Full - Screen Qaud zeichnen)
-//- Wenn man mit glDrawArraysInstanced zeichnet bekommt der VS den Wert "gl_InstanceID" gesetzt(bei mir von 0 - 255) und im GS kann man gl_Layer setzten
-//- Ist gl_Layer vorm FS gesetzt, dann werden alle pixel ausm FS in diese Layer gezeichnet

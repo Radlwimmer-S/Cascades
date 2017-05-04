@@ -10,9 +10,6 @@ in Gridcell {
 
 uniform int isoLevel = 0;
 uniform vec3 scale;
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 struct Vertex
 {
@@ -114,17 +111,14 @@ void main()
 
 		vec3 normal = CalculateNormal(pos1, pos2, pos3);
 
-		gl_Position	= projection * view * model * vec4(pos1, 1.0f);
 		gs_out.position = pos1;
 		gs_out.normal = normal;
 		EmitVertex();
 
-		gl_Position	= projection * view * model *vec4(pos2, 1.0f);
 		gs_out.position = pos2;
 		gs_out.normal = normal;
 		EmitVertex();
 
-		gl_Position	= projection * view * model *vec4(pos3, 1.0f);
 		gs_out.position = pos3;
 		gs_out.normal = normal;
 		EmitVertex();
