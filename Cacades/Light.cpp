@@ -1,7 +1,7 @@
 #include "Light.h"
 #include "Shader.h"
 
-Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), m_color(color), m_shadowShader(shadowShader), m_farPlane(farPlane), m_nearPlane(nearPlane)
+Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), m_color(color), depthMap(0), depthMapFBO(0), m_shadowShader(shadowShader), m_farPlane(farPlane), m_nearPlane(nearPlane), m_castShadow(false), m_debugCube(nullptr)
 {
 }
 
@@ -25,6 +25,10 @@ void Light::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex)
 
 	GLint enabledPos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].IsEnabled").c_str());
 	glUniform1i(enabledPos, m_isEnabled);
+	glCheckError();
+
+	GLint castChadowPos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].CastShadow").c_str());
+	glUniform1i(castChadowPos, m_castShadow);
 	glCheckError();
 
 	GLint nearPlaneLoc = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].near_plane").c_str());

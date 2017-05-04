@@ -30,6 +30,8 @@ Text::~Text()
 
 void Text::Render(Shader& shader) const
 {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUniform3f(glGetUniformLocation(shader.Program, "textColor"), color_.x, color_.y, color_.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(vao_);
@@ -81,6 +83,7 @@ void Text::Render(Shader& shader) const
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_BLEND);
 }
 
 void Text::SetString(const std::string& string)

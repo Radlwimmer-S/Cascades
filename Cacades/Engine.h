@@ -7,7 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 #include "ProcedualGenerator.h"
-#include "GpuLookupTable.h"
+#include "RenderInfo.h"
+#include "UpdateInfo.h"
 
 class Hud;
 class Camera;
@@ -31,6 +32,7 @@ public:
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	static void ResizeCallback(GLFWwindow* window, int width, int height);
 	void Update(GLfloat deltaTime);
+	void RenderMesh();
 	void Start();
 protected:
 	void RenderMcMesh(Shader& shader);
@@ -43,7 +45,6 @@ protected:
 	static GLFWwindow* InitWindow(const char* windowTitle, bool fullscreen);
 
 	Hud* m_hud;
-	GpuLookupTable m_lookupTable;
 	GLFWwindow& m_window;
 	Shader* m_mcShader;
 	Shader* m_shader;
@@ -51,14 +52,12 @@ protected:
 
 	ProcedualGenerator m_generator;
 
-	int m_activeLayer;
-	float m_noiseScale;
-	int m_seed;
+	TriplanarMesh* m_mesh;
 		
 	const GLuint MaxTexturesPerModel = 3;
 
-	GLuint m_tbo = 0, m_vao = 0, m_vbo = 0;
-	GLuint m_triCount;
+	RenderInfo m_renderInfo;
+	UpdateInfo m_updateInfo;
 
 	static Engine* m_instance;
 	explicit Engine(GLFWwindow& window);

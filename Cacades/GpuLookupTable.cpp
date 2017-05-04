@@ -10,6 +10,8 @@ GpuLookupTable::GpuLookupTable(): m_edgeIndex(0), m_trisIndex(0)
 
 GpuLookupTable::~GpuLookupTable()
 {
+	glDeleteBuffers(1, &m_edgeIndex);
+	glDeleteBuffers(1, &m_trisIndex);
 }
 
 void GpuLookupTable::WriteLookupTablesToGpu()

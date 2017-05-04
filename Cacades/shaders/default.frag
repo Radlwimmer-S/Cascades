@@ -29,6 +29,7 @@ struct LightSource
 
 	int Type;
 	bool IsEnabled;
+	bool CastShadow;
 
 	mat4 lightSpaceMatrix;
 
@@ -227,25 +228,35 @@ float CalculateDistanceShadow(in LightSource light, in vec3 normal)
 vec3 CalculateDirLightSource(in LightSource light, in vec3 normal)
 {
 	LightComponents components = CalculateLight(light, normal, normalize(light.Pos));
-	float shadow = CalculateDirShadow(light, normal, 0.005);
+	float shadow = 0;
+	if (light.CastShadow)
+		shadow = CalculateDirShadow(light, normal, 0.005);
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
 vec3 CalculateSpotLightSource(in LightSource light, in vec3 normal)
 {
 	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
-	float shadow = CalculateDirShadow(light, normal, 0.002);
-	float circular = CalculateCircularShadow(light, normal);
-	shadow = clamp(shadow + circular, 0, 1);
+	float shadow = 0;
+	if (light.CastShadow)
+	{
+		shadow = CalculateDirShadow(light, normal, 0.002);
+		float circular = CalculateCircularShadow(light, normal);
+		shadow = clamp(shadow + circular, 0, 1);
+	}
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
 vec3 CalculatePointLightSource(in LightSource light, in vec3 normal)
 {
 	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
-	float shadow = CalculatePointShadow(light, normal);
-	float distance = CalculateDistanceShadow(light, normal);
-	shadow = clamp(shadow + distance, 0, 1);
+	float shadow = 0;
+	if (light.CastShadow)
+	{
+		shadow = CalculatePointShadow(light, normal);
+		float distance = CalculateDistanceShadow(light, normal);
+		shadow = clamp(shadow + distance, 0, 1);
+	}
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 

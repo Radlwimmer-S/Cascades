@@ -9,11 +9,8 @@
 #include "Font.h"
 #include "Hud.h"
 
-Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator(1), m_activeLayer(0), m_noiseScale(1), m_seed(0), m_triCount(0)
+Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator()
 {
-	const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal" };
-	m_mcShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 2);
-	m_mcShader->Test("MarchingCubes");
 
 	m_shader = new  Shader("./shaders/Simple.vert", nullptr, "./shaders/Simple.frag");
 	m_shader->Test("SimpleLight");
@@ -107,91 +104,66 @@ void Engine::Init(char* windowTitle, GLuint width, GLuint height)
 
 void Engine::Start()
 {
-	glCheckError();
-	m_lookupTable.WriteLookupTablesToGpu();
-	m_lookupTable.UpdateUniforms(*m_mcShader);
+	m_renderInfo.Seed = 0;
+	m_renderInfo.Resolution = glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH);
+	m_renderInfo.StartLayer = 0;
+	m_renderInfo.NoiseScale = 0.6f;
 
-	m_generator.GenerateVBO(glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH));
-	m_generator.Generate3dTexture(m_activeLayer);
-	RenderMcMesh(*m_mcShader);
+	m_generator.SetRandomSeed(m_renderInfo.Seed);
+	m_generator.SetResolution(m_renderInfo.Resolution);
+	m_generator.SetStartLayer(m_renderInfo.StartLayer);
+	m_generator.SetNoiseScale(m_renderInfo.NoiseScale);
+
+	m_generator.GenerateMcVbo();
+	m_generator.Generate3dTexture();
+	m_mesh = m_generator.GenerateMesh();
 
 	Loop();
 }
 
 void Engine::RenderMcMesh(Shader& shader)
 {
-	glDeleteBuffers(1, &m_tbo);
-
-	// Create transform feedback buffer
-	glGenBuffers(1, &m_tbo);
-	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_tbo);
-	glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, m_generator.LAYERS * m_generator.GetVertexCount() * 5 * 3 * sizeof(glm::vec3) * 2, nullptr, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
-	glCheckError();
-
-	shader.Use();
-	m_generator.SetUniformsMC(shader, m_activeLayer);
-
-	GLuint noiseScaleLocation = glGetUniformLocation(shader.Program, "noiseScale");
-	glUniform1f(noiseScaleLocation, m_noiseScale);
-	glCheckError();
-
-	// Create query object to collect info
-	GLuint queryTF;
-	glGenQueries(1, &queryTF);
-
-	// Perform feedback transform
-	glEnable(GL_RASTERIZER_DISCARD);
-
-	glBindVertexArray(m_generator.GetVaoId());
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tbo);
-
-	glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
-		glBeginTransformFeedback(GL_TRIANGLES);
-			glDrawArraysInstanced(GL_POINTS, 0, m_generator.GetVertexCount(), m_generator.LAYERS);
-			//glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
-		glEndTransformFeedback();
-	glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
-
-	glBindVertexArray(0);
-
-	glDisable(GL_RASTERIZER_DISCARD);
-
-	glFlush();
-
-	// Fetch and print results
-	glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &m_triCount);
-	printf("%u primitives generated!\n\n", m_triCount);
-
-	glDeleteQueries(1, &queryTF);
-
-	glDeleteVertexArrays(1, &m_vao);
-	glDeleteBuffers(1, &m_vbo);
-
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
-
-	glGenBuffers(1, &m_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, m_triCount * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_DRAW);
-	glCopyBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_ARRAY_BUFFER, 0, 0, m_triCount * 3 * sizeof(glm::vec3) * 2);
-	glCheckError();
-	// Position attribute
-	glEnableVertexAttribArray(VS_IN_POSITION);
-	glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)0);
-	glEnableVertexAttribArray(VS_IN_NORMAL);
-	glVertexAttribPointer(VS_IN_NORMAL,   3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)sizeof(glm::vec3));
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glCheckError();
-	glBindVertexArray(0);
-
-	glFlush();
 }
 
 void Engine::Update(GLfloat deltaTime)
 {
 	m_camera->ProcessInput(m_window);
 	m_camera->Update(deltaTime);
+
+	m_hud->Update(m_updateInfo.FPS, m_renderInfo);
+}
+
+void Engine::RenderMesh()
+{
+	m_shader->Use();
+
+	glm::vec3 viewPos = m_camera->GetPosition();
+	GLuint viewPosLocation = glGetUniformLocation(m_shader->Program, "viewPos");
+	glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
+	glCheckError();
+
+	glm::vec3 geomPos(0, 0, 0);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, geomPos);
+	GLuint modelLocation = glGetUniformLocation(m_shader->Program, "model");
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+	glCheckError();
+
+	glm::mat4 view = m_camera->GetViewMatrix();
+	GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+	glCheckError();
+
+	glm::mat4 proj = m_camera->GetProjectionMatrix();
+	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
+	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+	glCheckError();
+
+	glBindVertexArray(m_mesh->GetVAO());
+	glCheckError();
+	glDrawArrays(GL_TRIANGLES, 0, m_mesh->GetTriCount() * 3);
+	glCheckError();
+	glBindVertexArray(0);
 }
 
 void Engine::Loop()
@@ -201,7 +173,6 @@ void Engine::Loop()
 	GLfloat lastFrame = 0.0f;
 	GLfloat second = 0.0f;
 	int frame = 0;
-	int fps = 0;
 
 	// Game loop
 	while (!glfwWindowShouldClose(&m_window))
@@ -216,43 +187,15 @@ void Engine::Loop()
 		lastFrame = currentFrame;
 		glfwPollEvents();
 
+		Update(deltaTime);	
+
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glClearColor(.5f, .5f, .5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glCheckError();
+		glCheckError();	
 
-		Update(deltaTime);		
-
-		m_shader->Use();
-
-		glm::vec3 viewPos = m_camera->GetPosition();
-		GLuint viewPosLocation = glGetUniformLocation(m_shader->Program, "viewPos");
-		glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
-		glCheckError();
-
-		glm::vec3 geomPos(0, 0, 0);
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, geomPos);
-		GLuint modelLocation = glGetUniformLocation(m_shader->Program, "model");
-		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
-		glCheckError();
-
-		glm::mat4 view = m_camera->GetViewMatrix();
-		GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
-		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-		glCheckError();
-
-		glm::mat4 proj = m_camera->GetProjectionMatrix();
-		GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
-		glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
-		glCheckError();
-
-
-		glBindVertexArray(m_vao);
-		glCheckError();
-		glDrawArrays(GL_TRIANGLES, 0, m_triCount * 3);
-		glCheckError();
-		glBindVertexArray(0);
+		RenderMesh();
+		m_hud->Render();
 
 		glfwSwapBuffers(&m_window);
 		glCheckError();
@@ -261,7 +204,7 @@ void Engine::Loop()
 
 		if (second > 1)
 		{
-			fps = frame;
+			m_updateInfo.FPS = frame;
 			frame = 0;
 			second -= 1;
 		}
@@ -285,36 +228,40 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 		switch (key)
 		{
 		case GLFW_KEY_KP_1:
-			m_activeLayer -= 5;
-			m_generator.Generate3dTexture(m_activeLayer);
-			RenderMcMesh(*m_mcShader);
+			m_renderInfo.StartLayer -= 5;
+			m_generator.SetStartLayer(m_renderInfo.StartLayer);
+			m_generator.Generate3dTexture();
+			m_mesh = m_generator.GenerateMesh();
 			break;
 		case GLFW_KEY_KP_7:
-			m_activeLayer += 5;
-			m_generator.Generate3dTexture(m_activeLayer);
-			RenderMcMesh(*m_mcShader);
+			m_renderInfo.StartLayer += 5;
+			m_generator.SetStartLayer(m_renderInfo.StartLayer);
+			m_generator.Generate3dTexture();
+			m_mesh = m_generator.GenerateMesh();
 			break;
 
 		case GLFW_KEY_KP_2:
-			m_noiseScale = std::max(0.2f, m_noiseScale - 0.2f);
-			RenderMcMesh(*m_mcShader);
+			m_renderInfo.NoiseScale = std::max(0.2f, m_renderInfo.NoiseScale - 0.2f);
+			m_generator.SetNoiseScale(m_renderInfo.NoiseScale);
+			m_mesh = m_generator.GenerateMesh();
 			break;
 		case GLFW_KEY_KP_8:
-			m_noiseScale = std::min(4.0f, m_noiseScale + 0.2f);
-			RenderMcMesh(*m_mcShader);
+			m_renderInfo.NoiseScale = std::min(4.0f, m_renderInfo.NoiseScale + 0.2f);
+			m_generator.SetNoiseScale(m_renderInfo.NoiseScale);
+			m_mesh = m_generator.GenerateMesh();
 			break;
 
 		case GLFW_KEY_KP_3:
-			--m_seed;
-			m_generator.SetRandomSeed(m_seed);
-			m_generator.Generate3dTexture(m_activeLayer);
-			RenderMcMesh(*m_mcShader);
+			--m_renderInfo.Seed;
+			m_generator.SetRandomSeed(m_renderInfo.Seed);
+			m_generator.Generate3dTexture();
+			m_mesh = m_generator.GenerateMesh();
 			break;
 		case GLFW_KEY_KP_9:
-			++m_seed;
-			m_generator.SetRandomSeed(m_seed);
-			m_generator.Generate3dTexture(m_activeLayer);
-			RenderMcMesh(*m_mcShader);
+			++m_renderInfo.Seed;
+			m_generator.SetRandomSeed(m_renderInfo.Seed);
+			m_generator.Generate3dTexture();
+			m_mesh = m_generator.GenerateMesh();
 			break;
 		}
 }

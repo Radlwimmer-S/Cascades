@@ -7,6 +7,8 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "BoundingBox.h"
+#include "TriplanarMesh.h"
+#include "GpuLookupTable.h"
 
 class Shader;
 
@@ -38,22 +40,20 @@ class ProcedualGenerator
 	};
 
 public:
-	ProcedualGenerator(int seed);
+	ProcedualGenerator();
 	~ProcedualGenerator();
-	void Generate3dTexture(int startLayer);
 	void Generate3dTexture();
 
-	void GenerateVBO(glm::vec3 cubesPerDimension);
+	void GenerateMcVbo();
+	TriplanarMesh* GenerateMesh();
 
-	void SetUniformsMC(Shader& shader, int startLayer);
-	void SetUniformsD(Shader& shader, int startLayer);
-
-	GLuint GetTextureId() const;
-	GLuint GetVboId() const;
-	GLuint GetVaoId() const;
-	GLuint GetVertexCount() const;
+	GLuint GetVertexCountMc() const;
+	GLuint GetVertexCountTf() const;
 
 	void SetRandomSeed(int seed);
+	void SetStartLayer(int layer);
+	void SetResolution(glm::ivec3 cubesPerDimension);
+	void SetNoiseScale(float scale);
 
 	static const int WIDTH = 96, DEPTH = 96, LAYERS = 256;
 
@@ -61,23 +61,32 @@ protected:
 	void SetupMC();
 	void SetupDensity();
 
+	void UpdateUniformsMc();
+	void UpdateUniformsD();
+
 	static float NormalizeCoord(int coord, int dim);
 	static int ToSignBit(int random);
-
-	static const int LANE = WIDTH, LAYER = WIDTH * DEPTH;
-	GLfloat m_values[LAYERS * DEPTH * WIDTH];
 
 	Randoms m_pillars[4];
 	Randoms m_helix;
 	Randoms m_shelf;
 
-	GLuint m_densityId = 0;
-	GLuint m_vaoMC = 0, m_vboMC = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0;
-	GLuint m_vertexCount = 0;
-	glm::vec3 m_mcResolution;
 	Noise* m_noise;
 
-	Shader* m_marchingCubeShader, *m_densityShader, *m_debugShader;
+	GLuint m_densityId = 0;
+	GLuint m_vaoMc = 0, m_vboMc = 0, m_tboMc = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0;
+
+	GLuint m_vertexCount = 0;
+
+	glm::vec3 m_mcResolution;
+	glm::ivec3 m_cubesPerDimension;
+	int m_startLayer;
+	float m_noiseScale;
+
+	Shader* m_marchingCubeShader, *m_densityShader;
+	GpuLookupTable m_lookupTable;
+
+	TriplanarMesh m_mcMesh;
 
 	std::default_random_engine m_random;
 	std::uniform_int_distribution<int> m_randomAngle;

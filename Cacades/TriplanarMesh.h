@@ -10,6 +10,12 @@ public:
 	TriplanarMesh();
 	~TriplanarMesh();
 
+	GLuint GetVAO() const;
+	GLuint GetVBO() const;
+	void UpdateVao(int triCount);
+
+	GLsizei GetTriCount() const;
+
 private:
 	GLuint m_vbo;
 	GLuint m_vao;

@@ -27,6 +27,11 @@ void Hud::Update(int fps, const RenderInfo& renderInfo)
 	ss.precision(2);
 
 	ss << "FPS: " << fps << std::endl << std::endl;
+	ss << "Marching-Cubes:" << std::endl;
+	ss << "  Seed: " << renderInfo.Seed << std::endl;
+	ss << "  Noise Scale: " << renderInfo.NoiseScale << std::endl;
+	ss << "  Layer: " << renderInfo.StartLayer << std::endl;
+	ss << "  Resolution: " << renderInfo.Resolution.x << "/" << renderInfo.Resolution.y << "/" << renderInfo.Resolution.z << std::endl;
 	m_infoText.SetString(ss.str());
 }
 

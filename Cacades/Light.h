@@ -30,6 +30,7 @@ protected:
 	Shader& m_shadowShader;
 	GLfloat m_farPlane;
 	GLfloat m_nearPlane;
+	GLboolean m_castShadow;
 
 	BaseObject* m_debugCube;
 };
