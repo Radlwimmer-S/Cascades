@@ -14,8 +14,13 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 position;
-out vec3 normal;
+struct Vertex
+{
+	vec3 position;
+	vec3 normal;
+};
+
+out Vertex gs_out;
 
 struct CellTriangles
 {
@@ -107,21 +112,21 @@ void main()
 		vec3 pos2 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
 		vec3 pos3 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
-		vec3 triNormal = CalculateNormal(pos1, pos2, pos3);
+		vec3 normal = CalculateNormal(pos1, pos2, pos3);
 
 		gl_Position	= projection * view * model * vec4(pos1, 1.0f);
-		position = pos1;
-		normal = triNormal;
+		gs_out.position = pos1;
+		gs_out.normal = normal;
 		EmitVertex();
 
 		gl_Position	= projection * view * model *vec4(pos2, 1.0f);
-		position = pos2;
-		normal = triNormal;
+		gs_out.position = pos2;
+		gs_out.normal = normal;
 		EmitVertex();
 
 		gl_Position	= projection * view * model *vec4(pos3, 1.0f);
-		position = pos3;
-		normal = triNormal;
+		gs_out.position = pos3;
+		gs_out.normal = normal;
 		EmitVertex();
 
 		EndPrimitive();
