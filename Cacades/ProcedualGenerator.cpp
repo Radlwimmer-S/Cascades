@@ -15,9 +15,10 @@ ProcedualGenerator::ProcedualGenerator(int seed) : m_random(seed), m_randomAngle
 
 void ProcedualGenerator::SetupMC()
 {
-	//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
-	m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
-	m_marchingCubeShader->Test("MarchingCubes");
+	//const GLchar* feedbackVaryings[] = { "position", "normal"};
+	////m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
+	//m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 2);
+	//m_marchingCubeShader->Test("MarchingCubes");
 
 	m_noise = new Noise[4]{
 		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 1)),

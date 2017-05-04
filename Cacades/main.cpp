@@ -50,8 +50,8 @@ int main(int argc, char** argv)
 
 		Engine* engine = Engine::Instance();
 
-		//const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal"};
-		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag");
+		const GLchar* feedbackVaryings[] = { "position", "normal"};
+		Shader* marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", "./shaders/MarchingCubes.frag", feedbackVaryings, 2);
 		marchingCubeShader->Test("MarchingCubes");
 
 		Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");

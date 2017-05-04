@@ -1,10 +1,7 @@
 #version 330 core
 
-in Vertex
-{
-	vec3 position;
-	vec3 normal;
-} fs_in;
+in vec3 position;
+in vec3 normal;
 
 out vec4 FragColor;
 
@@ -33,7 +30,7 @@ LightComponents CalculateLight(in vec3 normal, in vec3 lightDir)
 
 	// Specular
 	float specularStrength = 0.1f;
-	vec3 viewDir = normalize(viewPos - fs_in.position);
+	vec3 viewDir = normalize(viewPos - position);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
 	lighting.Specular = specularStrength * spec;
@@ -43,7 +40,7 @@ LightComponents CalculateLight(in vec3 normal, in vec3 lightDir)
 
 void main()
 {
-	LightComponents light0 = CalculateLight(fs_in.normal, normalize(vec3(10, 10, -10) - fs_in.position));
+	LightComponents light0 = CalculateLight(normal, normalize(vec3(10, 10, -10) - position));
 
 	float l = light0.Ambient + light0.Diffuse + light0.Specular;
 	vec3 lighting = vec3(l);

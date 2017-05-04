@@ -119,7 +119,7 @@ void Engine::RenderMcMesh(Shader& shader)
 	// Create transform feedback buffer
 	glGenBuffers(1, &m_tbo);
 	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_tbo);
-	glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, m_generator.GetVertexCount() * sizeof(glm::vec3) * 3, nullptr, GL_DYNAMIC_COPY);
+	glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, m_generator.GetVertexCount() * 3 * sizeof(glm::vec3) * 2, nullptr, GL_DYNAMIC_COPY);
 	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
 	glCheckError();
 
@@ -162,24 +162,24 @@ void Engine::RenderMcMesh(Shader& shader)
 	glBindVertexArray(m_generator.GetVaoId());
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tbo);
 
-	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
-	//glBeginTransformFeedback(GL_TRIANGLES);
-	glDrawArraysInstanced(GL_POINTS, 0, m_generator.GetVertexCount(), m_generator.LAYERS);
-	//glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
-	//glEndTransformFeedback();
-	//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	glBeginTransformFeedback(GL_TRIANGLES);
+		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
+			glDrawArraysInstanced(GL_POINTS, 0, m_generator.GetVertexCount(), m_generator.LAYERS);
+			glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
+		glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	glEndTransformFeedback();
 
 	glBindVertexArray(0);
 
 	//glDisable(GL_RASTERIZER_DISCARD);
 
-	//glFlush();
+	glFlush();
 
-	//// Fetch and print results
-	//glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &m_triCount);
-	//printf("%u primitives generated!\n\n", m_triCount);
+	// Fetch and print results
+	glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &m_triCount);
+	printf("%u primitives generated!\n\n", m_triCount);
 
-	//glDeleteQueries(1, &queryTF);
+	glDeleteQueries(1, &queryTF);
 
 	//glDeleteVertexArrays(1, &m_vao);
 	//glDeleteBuffers(1, &m_vbo);
@@ -189,7 +189,7 @@ void Engine::RenderMcMesh(Shader& shader)
 
 	//glGenBuffers(1, &m_vbo);
 	//glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	//glBufferData(GL_ARRAY_BUFFER, 3 * m_triCount * sizeof(glm::vec3), nullptr, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, m_triCount  * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_DRAW);
 	//glCopyBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_ARRAY_BUFFER, 0, 0, 3 * m_triCount * sizeof(glm::vec3));
 	//glCheckError();
 	//// Position attribute
