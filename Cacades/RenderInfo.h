@@ -15,4 +15,6 @@ struct RenderInfo
 	int Seed;
 	int StartLayer;
 	float NoiseScale;
+	glm::vec3 GeometryScale;
+	float IsoLevel;
 };

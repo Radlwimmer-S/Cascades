@@ -23,14 +23,14 @@ static GLuint SCREEN_HEIGHT = 1080;
 #define glCheckError() 
 #endif
 
-inline glm::quat MakeQuad(GLfloat pitch, GLfloat yaw, GLfloat roll)
+inline glm::quat MakeQuat(GLfloat pitch, GLfloat yaw, GLfloat roll)
 {
 	return glm::quat(glm::vec3(glm::radians(pitch), glm::radians(yaw), glm::radians(roll)));
 }
 
 inline glm::quat MakeQuad(glm::vec3 v)
 {
-	return MakeQuad(v.x, v.y, v.z);
+	return MakeQuat(v.x, v.y, v.z);
 }
 
 inline void PrintCSAA()

@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
-#include "CameraPath.h"
+#include "CircularPath.h"
 #include <glm/gtc/quaternion.hpp>
 #include "BaseObject.h"
 
@@ -23,7 +23,7 @@ class Camera : public BaseObject
 {
 public:
 	Camera();
-	Camera(CameraPath* path);
+	Camera(CircularPath* path);
 	~Camera();
 
 	void Update(GLfloat deltaTime) override;
@@ -51,7 +51,7 @@ public:
 protected:
 	CameraMode m_mode;
 	CameraType m_type;
-	CameraPath* m_path;
+	CircularPath* m_path;
 	bool m_renderPath;
 	glm::vec2 m_mousePos;
 };

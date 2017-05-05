@@ -18,16 +18,7 @@ uniform mat4 projection;
 
 void main()
 {
-	gl_Position = projection * view *  model * vec4(position, 1.0f);
-	vs_out.FragPos = vec3(model * vec4(position, 1.0f));
-	vs_out.UV = vec2(uv.x, 1 - uv.y);
-	vs_out.Normal = mat3(transpose(inverse(model))) * normal;
-
-	vec3 T = normalize(vec3(model * vec4(tangent, 0.0)));
-	vec3 N = normalize(vec3(model * vec4(normal, 0.0)));
-	// re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
-	// then retrieve perpendicular vector B with the cross product of T and N
-	vec3 B = cross(N, T);
-	vs_out.TBN = mat3(T, B, N);
+  gl_Position	= projection * view * model * vec4(position, 1.0f);
+  vs_out.FragPos = position;
+  vs_out.Normal = normal;
 }

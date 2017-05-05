@@ -2,6 +2,8 @@
 
 out vec4 FragColor;
 
+#pragma include "ShaderEnums.h"
+
 in VS_OUT
 {
 	vec3 FragPos;
@@ -20,7 +22,7 @@ struct LightComponents
 	float Specular;
 };
 
-const int LIGHT_COUNT = 10;
+const int LIGHT_COUNT = 5;
 
 struct LightSource
 {
@@ -42,17 +44,15 @@ struct LightSource
 
 uniform LightSource Lights[LIGHT_COUNT];
 
-uniform int colorMode;
-uniform vec3 objectColor;
+uniform int colorMode = COLOR_ONLY_MODE;
+uniform vec3 objectColor = vec3(1);
 uniform sampler2D objectTexture;
 
-uniform int normalMode;
+uniform int normalMode = NORMALS_ONLY_MODE;
 uniform sampler2D normalMap;
 uniform float bumbiness = 2f;
 
 uniform vec3 viewPos;
-
-#pragma include "ShaderEnums.h"
 
 vec3 DetermineFragmentColor(in int colorMode)
 {
@@ -109,7 +109,7 @@ float CalculatePointShadow(in LightSource light, in vec3 normal)
 
 	if (!SoftShadows)
 	{
-		// Use the light to fragment vector to sample from the depth map    
+		// Use the light to fragment vector to sample from the depth map
 		float closestDepth = texture(light.depthCube, fragToLight).r;
 		// It is currently in linear range between [0,1]. Re-transform back to original value
 		closestDepth *= light.far_plane;
@@ -146,7 +146,7 @@ LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lig
 	float ambientStrength = 0.1f;
 	lighting.Ambient = ambientStrength;
 
-	// Diffuse 
+	// Diffuse
 	float diffuseStrength = 1.0f;
 	vec3 norm = normalize(normal);
 	float diff = max(dot(norm, lightDir), 0.0);
@@ -191,7 +191,7 @@ float CalculateDirShadow(in LightSource light, in vec3 normal, in float baseBias
 		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 	else
 	{
-		// PCF	
+		// PCF
 		vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
 		for (int x = -1; x <= 1; ++x)
 		{
@@ -271,7 +271,7 @@ void main()
 	{
 		FragColor = vec4(color, 1.0f);
 		return;
-	}	
+	}
 
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < LIGHT_COUNT; i++)

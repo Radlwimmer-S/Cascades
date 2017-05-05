@@ -54,6 +54,8 @@ public:
 	void SetStartLayer(int layer);
 	void SetResolution(glm::ivec3 cubesPerDimension);
 	void SetNoiseScale(float scale);
+	void SetGeometryScale(glm::vec3 scale);
+	void SetIsoLevel(float isoLevel);
 
 	static const int WIDTH = 96, DEPTH = 96, LAYERS = 256;
 
@@ -79,9 +81,11 @@ protected:
 	GLuint m_vertexCount = 0;
 
 	glm::vec3 m_mcResolution;
+	glm::vec3 m_geometryScale;
 	glm::ivec3 m_cubesPerDimension;
 	int m_startLayer;
 	float m_noiseScale;
+	float m_isoLevel;
 
 	Shader* m_marchingCubeShader, *m_densityShader;
 	GpuLookupTable m_lookupTable;

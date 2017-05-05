@@ -242,10 +242,10 @@ void ProcedualGenerator::SetRandomSeed(int seed)
 	//delete[] m_noise;
 	m_noise = new Noise[4]
 	{
-		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 1)),
-		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 2)),
-		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 3)),
-		Noise(glm::toMat4(MakeQuad(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 4))
+		Noise(glm::toMat4(MakeQuat(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 1)),
+		Noise(glm::toMat4(MakeQuat(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 2)),
+		Noise(glm::toMat4(MakeQuat(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 3)),
+		Noise(glm::toMat4(MakeQuat(m_randomAngle(m_random), m_randomAngle(m_random), m_randomAngle(m_random))), NoiseTexture(16, 16, 16, 4))
 	};
 }
 
@@ -265,13 +265,22 @@ void ProcedualGenerator::SetNoiseScale(float scale)
 	m_noiseScale = scale;
 }
 
+void ProcedualGenerator::SetGeometryScale(glm::vec3 scale)
+{
+	m_geometryScale = scale;
+}
+
+void ProcedualGenerator::SetIsoLevel(float isoLevel)
+{
+	m_isoLevel = isoLevel;
+}
+
 void ProcedualGenerator::UpdateUniformsMc()
 {
 	m_lookupTable.UpdateUniforms(*m_marchingCubeShader);
 
-	glm::vec3 resolution = m_mcResolution;
 	GLint resolutioneLoc = glGetUniformLocation(m_marchingCubeShader->Program, "resolution");
-	glUniform3fv(resolutioneLoc, 1, glm::value_ptr(resolution));
+	glUniform3fv(resolutioneLoc, 1, glm::value_ptr(m_mcResolution));
 	glCheckError();
 
 	GLuint layerLocation = glGetUniformLocation(m_marchingCubeShader->Program, "startLayer");
@@ -298,20 +307,17 @@ void ProcedualGenerator::UpdateUniformsMc()
 	}
 
 	glActiveTexture(GL_TEXTURE4);
-	GLuint textureId = m_densityId;
 	GLint textureLoc = glGetUniformLocation(m_marchingCubeShader->Program, "densityTex");
 	glUniform1i(textureLoc, 4);
-	glBindTexture(GL_TEXTURE_3D, textureId);
+	glBindTexture(GL_TEXTURE_3D, m_densityId);
 	glCheckError();
 
-	GLuint isoLevel = 0;
 	GLint isoLevelLoc = glGetUniformLocation(m_marchingCubeShader->Program, "isoLevel");
-	glUniform1i(isoLevelLoc, isoLevel);
+	glUniform1i(isoLevelLoc, m_isoLevel);
 	glCheckError();
 
-	glm::vec3 scale = glm::vec3(5, 10, 5);
 	GLuint scaleLocation = glGetUniformLocation(m_marchingCubeShader->Program, "scale");
-	glUniform3fv(scaleLocation, 1, glm::value_ptr(scale));
+	glUniform3fv(scaleLocation, 1, glm::value_ptr(m_geometryScale));
 	glCheckError();
 }
 

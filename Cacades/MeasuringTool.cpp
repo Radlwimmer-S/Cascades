@@ -5,8 +5,8 @@
 
 
 MeasuringTool::MeasuringTool() : m_hits {
-Model(glm::vec3(0, 0, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(.1f)), 12, glm::vec3(1, 0, 0), NoNormals),
-Model(glm::vec3(0, 0, 0), MakeQuad(0, 0, 0), Box::GetTris(glm::vec3(.1f)), 12, glm::vec3(1, 0, 0), NoNormals)
+Model(glm::vec3(0, 0, 0), MakeQuat(0, 0, 0), Box::GetTris(glm::vec3(.1f)), 12, glm::vec3(1, 0, 0), NoNormals),
+Model(glm::vec3(0, 0, 0), MakeQuat(0, 0, 0), Box::GetTris(glm::vec3(.1f)), 12, glm::vec3(1, 0, 0), NoNormals)
 }
 {
 	glGenVertexArrays(1, &vao_);

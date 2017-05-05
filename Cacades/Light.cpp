@@ -1,7 +1,7 @@
 #include "Light.h"
 #include "Shader.h"
 
-Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), m_color(color), depthMap(0), depthMapFBO(0), m_shadowShader(shadowShader), m_farPlane(farPlane), m_nearPlane(nearPlane), m_castShadow(false), m_debugCube(nullptr)
+Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), m_color(color), depthMap(0), depthMapFBO(0), m_shadowShader(shadowShader), m_farPlane(farPlane), m_nearPlane(nearPlane), m_castShadow(true), m_debugCube(nullptr)
 {
 }
 
@@ -43,4 +43,14 @@ void Light::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex)
 void Light::PostRender() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Light::CastsShadows(bool value)
+{
+	m_castShadow = value;
+}
+
+bool Light::CastsShadows() const
+{
+	return m_castShadow;
 }

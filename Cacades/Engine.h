@@ -10,6 +10,7 @@
 #include "RenderInfo.h"
 #include "UpdateInfo.h"
 
+class Light;
 class Hud;
 class Camera;
 class Shader;
@@ -32,10 +33,14 @@ public:
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	static void ResizeCallback(GLFWwindow* window, int width, int height);
 	void Update(GLfloat deltaTime);
-	void RenderMesh();
+	void RenderScene();
+	void RenderHud();
 	void Start();
+	void AddLight(Light& light);
 protected:
-	void RenderMcMesh(Shader& shader);
+	void RenderLights() const;
+	void UpdateUniforms() const;
+	void MoveActiveObject();
 	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void m_CursorPosCallback(GLFWwindow* window, double x, double y);
 	void m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -49,8 +54,10 @@ protected:
 	Shader* m_mcShader;
 	Shader* m_shader;
 	Camera* m_camera;
+	std::vector<Light*> m_lights;
 
 	ProcedualGenerator m_generator;
+	int m_activeObject;
 
 	TriplanarMesh* m_mesh;
 		

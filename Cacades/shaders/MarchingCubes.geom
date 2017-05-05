@@ -109,7 +109,7 @@ void main()
 		vec3 pos2 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
 		vec3 pos3 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
-		vec3 normal = CalculateNormal(pos1, pos2, pos3);
+		vec3 normal = -CalculateNormal(pos1, pos2, pos3);
 
 		gs_out.position = pos1;
 		gs_out.normal = normal;

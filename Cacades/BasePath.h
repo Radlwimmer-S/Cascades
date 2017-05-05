@@ -1,10 +1,9 @@
 #pragma once
+#include <glm/detail/type_vec3.hpp>
 #include <vector>
 #include <glm/gtx/quaternion.hpp>
 #include <GL/glew.h>
 #include "Model.h"
-
-class Shader;
 
 struct ControlPoint
 {
@@ -19,19 +18,13 @@ struct ControlPoint
 	glm::vec3 Orientation;
 	GLfloat TimeStamp;
 };
-
-class CameraPath
+class BasePath
 {
 public:
-	CameraPath(std::vector<ControlPoint>& controlPoints);
-	CameraPath(std::vector<ControlPoint>& controlPoints, GLuint duration);
-	~CameraPath();
-	void Initialize(bool recalculateTimeSteps);
+	BasePath(std::vector<ControlPoint>& controlPoints, GLuint duration);;
+	virtual ~BasePath();
 	virtual void Update(GLfloat deltaTime);
 	virtual void Render(Shader& shader) const;
-
-	virtual glm::vec3 GetPosByTime(GLfloat timestamp) const;
-	virtual glm::quat GetRotByTime(GLfloat timestamp) const;
 
 	glm::vec3 GetPosition() const
 	{
@@ -47,14 +40,22 @@ public:
 	{
 		return m_duration;
 	}
-private:
-	void DoubleControlPoints();
-	void CalculateTimeSteps();
+
+protected:
+	glm::vec3 GetPosByTime(GLfloat timestamp) const;
+	glm::quat GetRotByTime(GLfloat timestamp) const;
 	void CalculateApprox();
 	GLfloat NormalizeTimeStamp(GLfloat timestamp) const;
 	GLuint GetIndex(GLfloat timestamp) const;
-	glm::vec3 CatmullRomSpline(const std::vector<ControlPoint>& cp, float t) const;
-	glm::quat Squad(const std::vector<ControlPoint>& cp, float t) const;
+	virtual glm::vec3 CatmullRomSpline(const std::vector<ControlPoint>& cp, float t) const = 0;
+	virtual glm::quat Squad(const std::vector<ControlPoint>& cp, float t) const = 0;
+
+	static glm::vec3 CatmullRomSpline(ControlPoint cp0, ControlPoint cp1, ControlPoint cp2, ControlPoint cp3, float t);
+	static glm::quat Squad(ControlPoint cp0, ControlPoint cp1, ControlPoint cp2, ControlPoint cp3, float t);
+
+	GLuint m_duration;
+	glm::vec3 m_position;
+	glm::quat m_rotation;
 
 	std::vector<ControlPoint>& m_controlPoints;
 	GLuint m_controlCount;
@@ -62,10 +63,6 @@ private:
 	GLuint m_vao;
 
 	GLfloat m_timer;
-
-	GLuint m_duration;
-	glm::vec3 m_position;
-	glm::quat m_rotation;
 
 	Model* m_debugCube;
 };

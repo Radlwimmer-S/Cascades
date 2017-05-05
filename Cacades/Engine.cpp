@@ -8,13 +8,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Font.h"
 #include "Hud.h"
+#include "Light.h"
 
-Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator()
+Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator(), m_activeObject(-1), m_mesh(nullptr)
 {
-
-	m_shader = new  Shader("./shaders/Simple.vert", nullptr, "./shaders/Simple.frag");
+	m_shader = new Shader("./shaders/default.vert", nullptr, "./shaders/default.frag");
 	m_shader->Test("SimpleLight");
-	
+
 	Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
 	hudShader->Test("Text/Hud");
 	Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
@@ -80,9 +80,9 @@ GLFWwindow* Engine::InitWindow(const char* windowTitle, bool fullscreen)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LESS);
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
@@ -104,15 +104,19 @@ void Engine::Init(char* windowTitle, GLuint width, GLuint height)
 
 void Engine::Start()
 {
-	m_renderInfo.Seed = 0;
+	m_renderInfo.Seed = -7;
 	m_renderInfo.Resolution = glm::vec3(m_generator.WIDTH, m_generator.LAYERS, m_generator.DEPTH);
 	m_renderInfo.StartLayer = 0;
 	m_renderInfo.NoiseScale = 0.6f;
+	m_renderInfo.IsoLevel = 0;
+	m_renderInfo.GeometryScale = glm::vec3(5, 10, 5);
 
 	m_generator.SetRandomSeed(m_renderInfo.Seed);
 	m_generator.SetResolution(m_renderInfo.Resolution);
 	m_generator.SetStartLayer(m_renderInfo.StartLayer);
 	m_generator.SetNoiseScale(m_renderInfo.NoiseScale);
+	m_generator.SetIsoLevel(m_renderInfo.IsoLevel);
+	m_generator.SetGeometryScale(m_renderInfo.GeometryScale);
 
 	m_generator.GenerateMcVbo();
 	m_generator.Generate3dTexture();
@@ -121,49 +125,50 @@ void Engine::Start()
 	Loop();
 }
 
-void Engine::RenderMcMesh(Shader& shader)
+void Engine::AddLight(Light& light)
 {
+	m_lights.push_back(&light);
 }
 
 void Engine::Update(GLfloat deltaTime)
 {
-	m_camera->ProcessInput(m_window);
+	MoveActiveObject();
+
+	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+	{
+		if ((*it)->IsEnabled())
+			(*it)->Update(deltaTime);
+	}
+
 	m_camera->Update(deltaTime);
 
 	m_hud->Update(m_updateInfo.FPS, m_renderInfo);
 }
 
-void Engine::RenderMesh()
+void Engine::RenderScene()
 {
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glClearColor(.1f, .1f, .1f, 1.0f);
+
 	m_shader->Use();
+	UpdateUniforms();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_mesh->Render(*m_shader);
 
-	glm::vec3 viewPos = m_camera->GetPosition();
-	GLuint viewPosLocation = glGetUniformLocation(m_shader->Program, "viewPos");
-	glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
-	glCheckError();
+	if (m_renderInfo.DrawLightPosition)
+		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+			if ((*it)->IsEnabled())
+				(*it)->RenderDebug(*m_shader);
+}
 
-	glm::vec3 geomPos(0, 0, 0);
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, geomPos);
-	GLuint modelLocation = glGetUniformLocation(m_shader->Program, "model");
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
-	glCheckError();
-
-	glm::mat4 view = m_camera->GetViewMatrix();
-	GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-	glCheckError();
-
-	glm::mat4 proj = m_camera->GetProjectionMatrix();
-	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
-	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
-	glCheckError();
-
-	glBindVertexArray(m_mesh->GetVAO());
-	glCheckError();
-	glDrawArrays(GL_TRIANGLES, 0, m_mesh->GetTriCount() * 3);
-	glCheckError();
-	glBindVertexArray(0);
+void Engine::RenderHud()
+{
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	m_hud->Render();
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void Engine::Loop()
@@ -189,13 +194,13 @@ void Engine::Loop()
 
 		Update(deltaTime);	
 
-		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-		glClearColor(.5f, .5f, .5f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCheckError();	
 
-		RenderMesh();
-		m_hud->Render();
+		RenderLights();
+
+		RenderScene();
+
+		RenderHud();
 
 		glfwSwapBuffers(&m_window);
 		glCheckError();
@@ -213,6 +218,60 @@ void Engine::Loop()
 	glfwTerminate();
 }
 
+void Engine::RenderLights() const
+{
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+	{
+		if (!(*it)->CastsShadows())
+			continue;
+
+		(*it)->PreRender();
+		m_mesh->Render((*it)->GetShadowShader());
+		(*it)->PostRender();
+	}
+	glCullFace(GL_BACK); 
+	glDisable(GL_CULL_FACE);
+}
+
+void Engine::UpdateUniforms() const
+{
+	for (int i = 0; i < m_lights.size(); ++i)
+	{
+		m_lights[i]->UpdateUniforms(*m_shader, i, MaxTexturesPerModel + i);
+	}
+
+	glm::vec3 viewPos = m_camera->GetPosition();
+	GLuint viewPosLocation = glGetUniformLocation(m_shader->Program, "viewPos");
+	glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
+	glCheckError();
+
+	glm::mat4 view = m_camera->GetViewMatrix();
+	GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+	glCheckError();
+
+	glm::mat4 proj = m_camera->GetProjectionMatrix();
+	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
+	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+	glCheckError();
+}
+
+void Engine::MoveActiveObject()
+{
+	if (m_activeObject == -1)
+		m_camera->ProcessInput(m_window);
+	//else if (m_activeObject == 0)
+	//{
+	//	m_camera->ProcessInput(m_window);
+	//	m_lights[0]->SetPosition(m_camera->GetPosition() + glm::vec3(0, -.5f, -1) * m_camera->GetOrientation());
+	//	m_lights[0]->SetOrientation(m_camera->GetOrientation());
+	//}
+	else
+		m_lights[m_activeObject]->ProcessInput(m_window);
+}
+
 void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	Instance()->m_KeyCallback(window, key, scancode, action, mode);
@@ -227,6 +286,33 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 	if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		switch (key)
 		{
+		case GLFW_KEY_0:
+		case GLFW_KEY_1:
+		case GLFW_KEY_2:
+		case GLFW_KEY_3:
+		case GLFW_KEY_4:
+		case GLFW_KEY_5:
+		case GLFW_KEY_6:
+		case GLFW_KEY_7:
+		case GLFW_KEY_8:
+		case GLFW_KEY_9:
+		{
+			int index = key - GLFW_KEY_0 - 1;
+			if (index >= m_lights.size())
+				index = -1;
+			m_activeObject = index;
+		} break;
+
+		case GLFW_KEY_DELETE:
+		{
+			int index = m_activeObject;
+			if (index != -1)
+			{
+				Light* activeLight = m_lights[index];
+				activeLight->IsEnabled(!activeLight->IsEnabled());
+			}
+		} break;
+
 		case GLFW_KEY_KP_1:
 			m_renderInfo.StartLayer -= 5;
 			m_generator.SetStartLayer(m_renderInfo.StartLayer);

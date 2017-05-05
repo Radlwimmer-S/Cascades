@@ -1,16 +1,31 @@
 #include "BaseObject.h"
 #include <GLFW/glfw3.h>
+#include "BasePath.h"
 
 BaseObject::BaseObject(glm::vec3 position) : BaseObject(position, glm::quat())
 {
 }
 
-BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton), m_isEnabled(true)
+BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton), m_isEnabled(true), m_path(nullptr)
 {
 }
 
 BaseObject::~BaseObject()
 {
+}
+
+void BaseObject::Update(GLfloat deltaTime)
+{
+	if (m_path != nullptr)
+	{
+		m_path->Update(deltaTime);
+		m_position = m_path->GetPosition();
+		m_orientation = m_path->GetRotation();
+	}
+	else
+	{
+		m_position += m_velocity * deltaTime;
+	}
 }
 
 void BaseObject::SetPosition(glm::vec3 position)
@@ -21,6 +36,16 @@ void BaseObject::SetPosition(glm::vec3 position)
 glm::vec3 BaseObject::GetPosition() const
 {
 	return m_position;
+}
+
+void BaseObject::SetVelocity(glm::vec3 velocity)
+{
+	m_velocity = velocity;
+}
+
+glm::vec3 BaseObject::GetVelocity() const
+{
+	return m_velocity;
 }
 
 void BaseObject::Move(glm::vec3 direction, GLfloat speed)
@@ -43,6 +68,11 @@ glm::quat BaseObject::GetOrientation() const
 void BaseObject::Rotate(glm::quat rotation)
 {
 	m_orientation = glm::normalize(glm::quat(rotation) * m_orientation);
+}
+
+void BaseObject::FollowPath(BasePath* path)
+{
+	m_path = path;
 }
 
 void BaseObject::IsEnabled(bool isEnabled)

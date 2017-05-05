@@ -3,8 +3,9 @@
 #include "Texture.h"
 #include "Enums.h"
 #include <glm/detail/type_vec3.hpp>
+#include "BaseObject.h"
 
-class TriplanarMesh
+class TriplanarMesh : public BaseObject
 {
 public:
 	TriplanarMesh();
@@ -13,6 +14,9 @@ public:
 	GLuint GetVAO() const;
 	GLuint GetVBO() const;
 	void UpdateVao(int triCount);
+
+	void Update(GLfloat deltaTime) override;
+	void Render(Shader& shader) const override;
 
 	GLsizei GetTriCount() const;
 

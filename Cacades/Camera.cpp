@@ -4,11 +4,11 @@
 #include "glm/glm.hpp"
 #include <GLFW/glfw3.h>
 
-Camera::Camera() : BaseObject(glm::vec3(0, 0, 20), MakeQuad(0, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
+Camera::Camera() : BaseObject(glm::vec3(0, 0, 20), MakeQuat(0, 0, 0)), m_mode(Manual), m_type(FPS), m_path(nullptr), m_renderPath(false)
 {
 }
 
-Camera::Camera(CameraPath* path) : BaseObject(glm::vec3(0, 10, 10), MakeQuad(45, 0, 0)), m_mode(Manual), m_type(FPS), m_path(path), m_renderPath(false)
+Camera::Camera(CircularPath* path) : BaseObject(glm::vec3(0, 10, 10), MakeQuat(45, 0, 0)), m_mode(Manual), m_type(FPS), m_path(path), m_renderPath(false)
 {
 }
 
@@ -28,7 +28,7 @@ void Camera::Update(GLfloat deltaTime)
 	{
 	case Overview:
 		m_position = glm::vec3(0.0f, 20.0f, 0.0f);
-		m_orientation = MakeQuad(90, 0, 0);
+		m_orientation = MakeQuat(90, 0, 0);
 		break;
 	case Automatic:
 		if (m_path == nullptr)

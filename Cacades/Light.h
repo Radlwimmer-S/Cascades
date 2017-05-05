@@ -19,6 +19,9 @@ public:
 		return m_shadowShader;
 	}
 
+	void CastsShadows(bool value);
+	bool CastsShadows() const;
+
 	virtual LightType GetType() = 0;
 
 protected:

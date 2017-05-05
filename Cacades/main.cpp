@@ -4,8 +4,40 @@
 #include "Engine.h"
 #include "Camera.h"
 #include "Global.h"
-#include "Font.h"
 #include "Hud.h"
+#include "PointLight.h"
+#include "DirectionalLight.h"
+#include "LinearPath.h"
+
+std::vector<ControlPoint>* GetGreenLightPath()
+{
+	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
+	path->push_back(ControlPoint(glm::vec3(0, -10, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 10, 0), glm::radians(glm::vec3(0, 0, 0))));
+	return path;
+}
+
+std::vector<ControlPoint>* GetRedLightPath()
+{
+	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
+	path->push_back(ControlPoint(glm::vec3(5, 10, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 7.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(-5, 5, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 2.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(5, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -2.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(-5, -5, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -7.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(5, -10, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -7.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(-5, -5, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -2.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(5, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 2.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(-5, 5, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 7.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
+	return path;
+}
 
 void TestCSAA()
 {
@@ -49,6 +81,31 @@ int main(int argc, char** argv)
 #endif
 
 		Engine* engine = Engine::Instance();
+
+		Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.geom", "./shaders/PointLight.frag");
+		pointLightShader->Test("pointLightShader");
+
+		Shader* directionalLightShader = new Shader("./shaders/DirectionalLight.vert", nullptr, "./shaders/DirectionalLight.frag");
+		directionalLightShader->Test("directionalLightShader");
+				
+		PointLight* greenLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
+		greenLight->IsEnabled(true);
+		greenLight->FollowPath(new LinearPath(*GetGreenLightPath(), 10, true));
+		engine->AddLight(*greenLight);
+
+		PointLight* redLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0.5f, 0, 0), *pointLightShader, 15);
+		redLight->IsEnabled(true);
+		redLight->FollowPath(new CircularPath(*GetRedLightPath(), 20, true));
+		engine->AddLight(*redLight);
+
+		DirectionalLight* mainLight1 = new DirectionalLight(glm::vec3(10), glm::vec3(0.5f), *directionalLightShader, 50, -10);
+		mainLight1->IsEnabled(false);
+		mainLight1->CastsShadows(true);
+		engine->AddLight(*mainLight1);
+
+		DirectionalLight* antiLight1 = new DirectionalLight(glm::vec3(-10), glm::vec3(0, 0, 0.05f), *directionalLightShader, 50, -10);
+		antiLight1->IsEnabled(false);
+		engine->AddLight(*antiLight1);
 
 		engine->Start();
 

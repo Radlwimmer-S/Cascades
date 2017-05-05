@@ -10,6 +10,8 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& 
 
 DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, orientation, color, shadowShader, nearPlane, farPlane)
 {
+	m_castShadow = false;
+
 	glGenFramebuffers(1, &depthMapFBO);
 
 	glGenTextures(1, &depthMap);
