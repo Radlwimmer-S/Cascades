@@ -93,7 +93,7 @@ GLuint BasePath::GetIndex(GLfloat timestamp) const
 {
 	for (int i = 0; i < m_controlCount; i++)
 	{
-		if (m_controlPoints[i].TimeStamp <= timestamp && timestamp < m_controlPoints[i + 1].TimeStamp)
+		if (m_controlPoints[i].TimeStamp <= timestamp && timestamp <= m_controlPoints[i + 1].TimeStamp)
 			return i;
 	}
 	std::cerr << "Error in CameraPath::GetIndex for timeStamp: " << timestamp << std::endl;

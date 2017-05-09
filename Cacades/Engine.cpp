@@ -313,6 +313,21 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			}
 		} break;
 
+		case GLFW_KEY_UP:
+			for (int i = 0; i < 3; ++i)
+				m_renderInfo.Resolution[i] *= 1.2f;
+			m_generator.SetResolution(m_renderInfo.Resolution);
+			m_generator.GenerateMcVbo();
+			m_mesh = m_generator.GenerateMesh();
+			break;
+		case GLFW_KEY_DOWN:
+			for (int i = 0; i < 3; ++i)
+				m_renderInfo.Resolution[i] /= 1.2f;
+			m_generator.SetResolution(m_renderInfo.Resolution);
+			m_generator.GenerateMcVbo();
+			m_mesh = m_generator.GenerateMesh();
+			break;
+
 		case GLFW_KEY_KP_1:
 			m_renderInfo.StartLayer -= 5;
 			m_generator.SetStartLayer(m_renderInfo.StartLayer);

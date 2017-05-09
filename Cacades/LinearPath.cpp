@@ -24,14 +24,20 @@ void LinearPath::Update(GLfloat deltaTime)
 		m_timer += deltaTime;
 
 		if (m_timer >= m_duration)
+		{
+			m_timer = m_duration;
 			m_forward = false;
+		}
 	}
 	else
 	{
 		m_timer -= deltaTime;
 
 		if (m_timer <= 0)
+		{
+			m_timer = 0;
 			m_forward = true;
+		}
 	}
 
 	m_position = GetPosByTime(m_timer);
