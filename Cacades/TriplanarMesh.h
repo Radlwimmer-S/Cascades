@@ -11,19 +11,22 @@ public:
 	TriplanarMesh();
 	~TriplanarMesh();
 
-	GLuint GetVAO() const;
-	GLuint GetVBO() const;
-	void UpdateVao(int triCount);
+	GLuint GetVAO(int index) const;
+	GLuint GetVBO(int index) const;
+	void UpdateVao(int index, int triCount);
 
 	void Update(GLfloat deltaTime) override;
 	void Render(Shader& shader) const override;
 
-	GLsizei GetTriCount() const;
+	GLsizei GetTriCount(int index) const;
+
+	GLuint GetVaoCount() const;
 
 private:
-	GLuint m_vbo;
-	GLuint m_vao;
-	GLsizei m_triCount;
+	GLuint* m_vbo;
+	GLuint* m_vao;
+	GLsizei* m_triCount;
+	GLuint m_vaoCount;
 	glm::vec3 m_color;
 	ColorBlendMode m_colorMode;
 	NormalBlendMode m_normalMode;

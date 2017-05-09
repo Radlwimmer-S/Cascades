@@ -4,47 +4,55 @@
 #include "Shader.h"
 
 
-TriplanarMesh::TriplanarMesh() : BaseObject(glm::vec3(0)), m_triCount(0), m_colorMode(ColorBlendMode::ColorOnly), m_normalMode(NormalBlendMode::NormalsOnly), m_texture(nullptr), m_normalMap(nullptr), m_displacementMap(nullptr)
+TriplanarMesh::TriplanarMesh() : BaseObject(glm::vec3(0)), m_triCount(nullptr), m_vaoCount(16), m_colorMode(ColorBlendMode::ColorOnly), m_normalMode(NormalBlendMode::NormalsOnly), m_texture(nullptr), m_normalMap(nullptr), m_displacementMap(nullptr)
 {
 	m_color = glm::vec3(1);
 
-	glGenVertexArrays(1, &m_vao);
-	glBindVertexArray(m_vao);
+	m_triCount = new GLsizei[m_vaoCount];
 
-	glGenBuffers(1, &m_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, m_triCount * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_DRAW);
-	glCheckError();
-	// Position attribute
-	glEnableVertexAttribArray(VS_IN_POSITION);
-	glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)0);
-	glEnableVertexAttribArray(VS_IN_NORMAL);
-	glVertexAttribPointer(VS_IN_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)sizeof(glm::vec3));
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glCheckError();
-	glBindVertexArray(0);
+	m_vao = new GLuint[m_vaoCount];
+	glGenVertexArrays(m_vaoCount, m_vao);
+	m_vbo = new GLuint[m_vaoCount];
+	glGenBuffers(m_vaoCount, m_vbo);
+
+	for (int i = 0; i < m_vaoCount; ++i)
+	{
+		glBindVertexArray(m_vao[i]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo[i]);
+		//glBufferData(GL_ARRAY_BUFFER, m_triCount[i] * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_DRAW);
+		glCheckError();
+		// Position attribute
+		glEnableVertexAttribArray(VS_IN_POSITION);
+		glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)0);
+		glEnableVertexAttribArray(VS_IN_NORMAL);
+		glVertexAttribPointer(VS_IN_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)sizeof(glm::vec3));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glCheckError();
+		glBindVertexArray(0);
+	}
 }
 
 
 TriplanarMesh::~TriplanarMesh()
 {
-	glDeleteVertexArrays(1, &m_vao);
-	glDeleteBuffers(1, &m_vbo);
+	glDeleteVertexArrays(m_vaoCount, m_vao);
+	glDeleteBuffers(m_vaoCount, m_vbo);
 }
 
-GLuint TriplanarMesh::GetVAO() const
+GLuint TriplanarMesh::GetVAO(int index) const
 {
-	return m_vao;
+	return m_vao[index];
 }
 
-GLuint TriplanarMesh::GetVBO() const
+GLuint TriplanarMesh::GetVBO(int index) const
 {
-	return m_vbo;
+	return m_vbo[index];
 }
 
-void TriplanarMesh::UpdateVao(int triCount)
+void TriplanarMesh::UpdateVao(int index, int triCount)
 {
-	m_triCount = triCount;
+	m_triCount[index] = triCount;
 }
 
 void TriplanarMesh::Update(GLfloat deltaTime)
@@ -69,16 +77,22 @@ void TriplanarMesh::Render(Shader& shader) const
 	glUniform1i(normalModeLoc, m_normalMode);
 	glCheckError();
 
-	glBindVertexArray(m_vao);
-	glCheckError();
-	glDrawArrays(GL_TRIANGLES, 0, m_triCount * 3);
-
-	glCheckError();
-
-	glBindVertexArray(0);
+	for (int i = 0; i < m_vaoCount; ++i)
+	{
+		glBindVertexArray(m_vao[i]);
+		glCheckError();
+		glDrawArrays(GL_TRIANGLES, 0, m_triCount[i] * 3);
+		glCheckError();
+		glBindVertexArray(0);
+	}
 }
 
-GLsizei TriplanarMesh::GetTriCount() const
+GLsizei TriplanarMesh::GetTriCount(int index) const
 {
-	return m_triCount;
+	return m_triCount[index];
+}
+
+GLuint TriplanarMesh::GetVaoCount() const
+{
+	return m_vaoCount;
 }

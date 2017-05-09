@@ -83,7 +83,7 @@ protected:
 	glm::vec3 m_mcResolution;
 	glm::vec3 m_geometryScale;
 	glm::ivec3 m_cubesPerDimension;
-	int m_startLayer;
+	int m_layerCorrection;
 	float m_noiseScale;
 	float m_isoLevel;
 

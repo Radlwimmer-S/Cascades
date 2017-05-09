@@ -161,13 +161,12 @@ void ProcedualGenerator::GenerateMcVbo()
 	delete[] vertices;
 
 	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_tboMc);
-		glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, GetVertexCountTf() * 5 * 3 * sizeof(glm::vec3) * 2, nullptr, GL_DYNAMIC_COPY);
+		glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, (GetVertexCountTf() * 5 * (3 * sizeof(glm::vec3) * 2)) / m_mcMesh.GetVaoCount(), nullptr, GL_DYNAMIC_COPY);
 	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
 }
 
 TriplanarMesh* ProcedualGenerator::GenerateMesh()
 {
-	GLuint triCount;
 
 	m_marchingCubeShader->Use();
 	UpdateUniformsMc();
@@ -179,39 +178,48 @@ TriplanarMesh* ProcedualGenerator::GenerateMesh()
 	// Perform feedback transform
 	glEnable(GL_RASTERIZER_DISCARD);
 
-	glBindVertexArray(m_vaoMc);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tboMc);
+	int layerPerVao = m_cubesPerDimension.y / m_mcMesh.GetVaoCount();
+	GLuint sumTriCount = 0;
+	GLuint triCount;
 
-	glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
-		glBeginTransformFeedback(GL_TRIANGLES);
-			glDrawArraysInstanced(GL_POINTS, 0, GetVertexCountMc(), m_cubesPerDimension.y);
-			//glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
-		glEndTransformFeedback();
-	glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	for (int vao = 0; vao < m_mcMesh.GetVaoCount(); ++vao)
+	{
+		GLuint layerLocation = glGetUniformLocation(m_marchingCubeShader->Program, "layerStart");
+		glUniform1i(layerLocation, vao * layerPerVao);
+		glCheckError();
 
-	glBindVertexArray(0);
+		glBindVertexArray(m_vaoMc);
+		glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tboMc);
+	
+		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
+			glBeginTransformFeedback(GL_TRIANGLES);
+				glDrawArraysInstanced(GL_POINTS, 0, GetVertexCountMc(), layerPerVao);
+				//glDrawArrays(GL_POINTS, 0, m_generator.GetVertexCount());
+			glEndTransformFeedback();
+		glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 
+		glBindVertexArray(0);
+
+		// Fetch and print results
+		glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &triCount);
+		sumTriCount += triCount;
+
+		glBindVertexArray(m_mcMesh.GetVAO(vao));
+			glBindBuffer(GL_ARRAY_BUFFER, m_mcMesh.GetVBO(vao));
+				glBufferData(GL_ARRAY_BUFFER, triCount * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_COPY);
+				glCheckError();
+				glCopyBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_ARRAY_BUFFER, 0, 0, triCount * 3 * sizeof(glm::vec3) * 2);
+			glCheckError();
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		m_mcMesh.UpdateVao(vao, triCount);
+	}
 	glDisable(GL_RASTERIZER_DISCARD);
 
-	glFlush();
-
-	// Fetch and print results
-	glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &triCount);
-	printf("%u primitives generated!\n\n", triCount);
+	//glFlush();
 
 	glDeleteQueries(1, &queryTF);
-
-	glBindVertexArray(m_mcMesh.GetVAO());
-		glBindBuffer(GL_ARRAY_BUFFER, m_mcMesh.GetVBO());
-			glBufferData(GL_ARRAY_BUFFER, triCount * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_DRAW);
-			glCheckError();
-			glCopyBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_ARRAY_BUFFER, 0, 0, triCount * 3 * sizeof(glm::vec3) * 2);
-			glCheckError();
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	m_mcMesh.UpdateVao(triCount);
-
-	glFlush();
+	printf("%u primitives generated!\n\n", sumTriCount);
 
 	return &m_mcMesh;
 }
@@ -251,7 +259,7 @@ void ProcedualGenerator::SetRandomSeed(int seed)
 
 void ProcedualGenerator::SetStartLayer(int layer)
 {
-	m_startLayer = layer;
+	m_layerCorrection = layer;
 }
 
 void ProcedualGenerator::SetResolution(glm::ivec3 cubesPerDimension)
@@ -283,8 +291,8 @@ void ProcedualGenerator::UpdateUniformsMc()
 	glUniform3fv(resolutioneLoc, 1, glm::value_ptr(m_mcResolution));
 	glCheckError();
 
-	GLuint layerLocation = glGetUniformLocation(m_marchingCubeShader->Program, "startLayer");
-	glUniform1i(layerLocation, m_startLayer);
+	GLuint layerLocation = glGetUniformLocation(m_marchingCubeShader->Program, "layerCorrection");
+	glUniform1i(layerLocation, m_layerCorrection * m_cubesPerDimension.y / LAYERS);
 	glCheckError();
 
 	GLuint noiseScaleLocation = glGetUniformLocation(m_marchingCubeShader->Program, "noiseScale");
@@ -328,7 +336,7 @@ void ProcedualGenerator::UpdateUniformsD()
 	glCheckError();
 
 	GLuint layerLocation = glGetUniformLocation(m_densityShader->Program, "startLayer");
-	glUniform1i(layerLocation, m_startLayer);
+	glUniform1i(layerLocation, m_layerCorrection);
 	glCheckError();
 
 	for (int i = 0; i < 4; ++i)

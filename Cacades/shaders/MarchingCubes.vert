@@ -7,7 +7,9 @@ struct Noise
 	sampler3D tex;
 };
 
-uniform int startLayer;
+
+uniform int layerStart;
+uniform int layerCorrection;
 uniform vec3 resolution;
 uniform int isoLevel = 0;
 uniform sampler3D densityTex;
@@ -39,9 +41,9 @@ float GetNoise(vec3 texCoord)
 
 void main()
 {
-	float layer = -1 + (resolution.y * (gl_InstanceID + 0.5f));
-	float layerCorrection = -resolution.y * startLayer;
+	float layer = -1 + (resolution.y * (gl_InstanceID + layerStart + 0.5f));
 	vec3 ws = vec3(position.x, layer, position.y);
+	float noiseCorrection = -resolution.y * layerCorrection;
 
 	//TODO: Check this
 	vs_out.p[0] = ws + (resolution * vec3(-0.5f, -0.5f, -0.5f));
@@ -57,7 +59,7 @@ void main()
 	for (int i = 0; i < 8; ++i)
 	{
 		vec3 texCoord = ws_to_UVW(vs_out.p[i]);
-		vec3 noiseCoord = ws_to_UVW(vs_out.p[i] - vec3(0, layerCorrection, 0));
+		vec3 noiseCoord = ws_to_UVW(vs_out.p[i] - vec3(0, noiseCorrection, 0));
 		vs_out.val[i] = texture(densityTex, texCoord).r + noiseScale * GetNoise(noiseCoord * 4.0f);
 	}
 
