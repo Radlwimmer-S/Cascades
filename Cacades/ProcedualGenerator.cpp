@@ -15,8 +15,8 @@ ProcedualGenerator::ProcedualGenerator() : m_random(0), m_randomAngle(0, 359), m
 
 void ProcedualGenerator::SetupMC()
 {
-	const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal" };
-	m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 2);
+	const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal", "gs_out.uvw" };
+	m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 3);
 	m_marchingCubeShader->Test("MarchingCubes");
 
 	m_lookupTable.WriteLookupTablesToGpu();
@@ -33,6 +33,7 @@ void ProcedualGenerator::SetupMC()
 	glBindVertexArray(0);
 
 	glGenBuffers(1, &m_tboMc);
+	glCheckError();
 }
 
 void ProcedualGenerator::SetupDensity()
@@ -84,6 +85,7 @@ void ProcedualGenerator::SetupDensity()
 	glEnableVertexAttribArray(VS_IN_POSITION);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glCheckError();
 }
 
 
@@ -161,8 +163,9 @@ void ProcedualGenerator::GenerateMcVbo()
 	delete[] vertices;
 
 	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_tboMc);
-		glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, (GetVertexCountTf() * 5 * (3 * sizeof(glm::vec3) * 2)) / m_mcMesh.GetVaoCount(), nullptr, GL_DYNAMIC_COPY);
+		glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, (GetVertexCountTf() * 5 * (3 * sizeof(glm::vec3) * 3)) / m_mcMesh.GetVaoCount(), nullptr, GL_DYNAMIC_COPY);
 	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
+	glCheckError();
 }
 
 TriplanarMesh* ProcedualGenerator::GenerateMesh()
@@ -206,9 +209,9 @@ TriplanarMesh* ProcedualGenerator::GenerateMesh()
 
 		glBindVertexArray(m_mcMesh.GetVAO(vao));
 			glBindBuffer(GL_ARRAY_BUFFER, m_mcMesh.GetVBO(vao));
-				glBufferData(GL_ARRAY_BUFFER, triCount * 3 * sizeof(glm::vec3) * 2, nullptr, GL_STATIC_COPY);
+				glBufferData(GL_ARRAY_BUFFER, triCount * 3 * (sizeof(glm::vec3) * 3), nullptr, GL_STATIC_COPY);
 				glCheckError();
-				glCopyBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_ARRAY_BUFFER, 0, 0, triCount * 3 * sizeof(glm::vec3) * 2);
+				glCopyBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_ARRAY_BUFFER, 0, 0, triCount * 3 * (sizeof(glm::vec3) * 3));
 			glCheckError();
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -297,6 +300,10 @@ void ProcedualGenerator::UpdateUniformsMc()
 
 	GLuint noiseScaleLocation = glGetUniformLocation(m_marchingCubeShader->Program, "noiseScale");
 	glUniform1f(noiseScaleLocation, m_noiseScale);
+	glCheckError();
+
+	GLuint textureRepeatLocation = glGetUniformLocation(m_marchingCubeShader->Program, "textureRepeat");
+	glUniform3fv(textureRepeatLocation, 1, glm::value_ptr(glm::vec3(WIDTH / 8, LAYERS / 8, DEPTH / 8)));
 	glCheckError();
 
 	for (int i = 0; i < 4; ++i)

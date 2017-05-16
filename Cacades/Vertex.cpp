@@ -33,4 +33,5 @@ void Vertex::ConfigVertexArrayObject(GLuint vao)
 	glEnableVertexAttribArray(VS_IN_TANGENT);
 
 	glBindVertexArray(0);
+	glCheckError();
 }

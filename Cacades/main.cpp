@@ -79,7 +79,6 @@ int main(int argc, char** argv)
 #else
 		Engine::Init("Camera", 1900, 1000);
 #endif
-
 		Engine* engine = Engine::Instance();
 
 		Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.geom", "./shaders/PointLight.frag");

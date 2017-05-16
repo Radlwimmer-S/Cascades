@@ -24,13 +24,22 @@ TriplanarMesh::TriplanarMesh() : BaseObject(glm::vec3(0)), m_triCount(nullptr), 
 		glCheckError();
 		// Position attribute
 		glEnableVertexAttribArray(VS_IN_POSITION);
-		glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)0);
+		glVertexAttribPointer(VS_IN_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 3, (GLvoid*)0);
 		glEnableVertexAttribArray(VS_IN_NORMAL);
-		glVertexAttribPointer(VS_IN_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2, (GLvoid*)sizeof(glm::vec3));
+		glVertexAttribPointer(VS_IN_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 3, (GLvoid*)sizeof(glm::vec3));
+		glEnableVertexAttribArray(VS_IN_UV);
+		glVertexAttribPointer(VS_IN_UV, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 3, (GLvoid*)(2 * sizeof(glm::vec3)));
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glCheckError();
 		glBindVertexArray(0);
 	}
+
+	m_texture = new Texture[3] {Texture("textures/floor_d.jpg"), Texture("textures/floor_d.jpg") , Texture("textures/floor_d.jpg") };
+	m_normalMap = new Texture[3]{ Texture("textures/floor_n.jpg"), Texture("textures/floor_n.jpg") , Texture("textures/floor_n.jpg") };
+	m_displacementMap = new Texture[3]{ Texture("textures/floor_h.jpg"), Texture("textures/floor_h.jpg") , Texture("textures/floor_h.jpg") };
+	//m_texture = new Texture[3] {Texture("textures/grass01.png"), Texture("textures/grass02.png") , Texture("textures/grass03.png") };
+	//m_normalMap = new Texture[3] {Texture("textures/grass01_n.png"), Texture("textures/grass02_n.png") , Texture("textures/grass03_n.png") };
+	//m_displacementMap = new Texture[3] {Texture("textures/grass01_h.png"), Texture("textures/grass02_h.png") , Texture("textures/grass03_h.png") };
 }
 
 
@@ -76,6 +85,25 @@ void TriplanarMesh::Render(Shader& shader) const
 	GLint normalModeLoc = glGetUniformLocation(shader.Program, "normalMode");
 	glUniform1i(normalModeLoc, m_normalMode);
 	glCheckError();
+
+	for (int i = 0; i < 3; ++i)
+	{
+		int textureLoc = glGetUniformLocation(shader.Program, ("objectTexture[" + std::to_string(i) + "]").c_str());
+		glActiveTexture(GL_TEXTURE1 + i * 3);
+		glBindTexture(GL_TEXTURE_2D, m_texture[i].GetId());
+		glUniform1i(textureLoc, 1 + i * 3);
+		glCheckError();
+		int normalLoc = glGetUniformLocation(shader.Program, ("normalMap[" + std::to_string(i) + "]").c_str());
+		glActiveTexture(GL_TEXTURE2 + i * 3);
+		glBindTexture(GL_TEXTURE_2D, m_texture[i].GetId());
+		glUniform1i(normalLoc, 2 + i * 3);
+		glCheckError();
+		int displacementLoc = glGetUniformLocation(shader.Program, ("displacementMap[" + std::to_string(i) + "]").c_str());
+		glActiveTexture(GL_TEXTURE3 + i * 3);
+		glBindTexture(GL_TEXTURE_2D, m_texture[i].GetId());
+		glUniform1i(displacementLoc, 3 + i * 3);
+		glCheckError();
+	}
 
 	for (int i = 0; i < m_vaoCount; ++i)
 	{

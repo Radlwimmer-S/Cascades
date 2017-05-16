@@ -11,7 +11,7 @@ public:
 	PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane = 0.1f);
 	virtual ~PointLight();
 
-	void UpdateUniforms(Shader& shader, int lightIndex, int textureIndex) override;
+	void UpdateUniforms(const Shader& shader, int lightIndex, int textureIndex) override;
 
 	void PreRender() const override;
 	void RenderDebug(Shader& shader) const override;

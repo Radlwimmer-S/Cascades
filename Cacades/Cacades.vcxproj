@@ -254,6 +254,8 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\Simple.vert" />
     <None Include="shaders\Text.frag" />
     <None Include="shaders\Text.vert" />
+    <None Include="shaders\TriPlanar.vert" />
+    <None Include="shaders\TriPlanar.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

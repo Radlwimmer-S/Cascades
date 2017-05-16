@@ -4,14 +4,12 @@
 class Texture
 {
 public:
-	Texture(GLchar* texturePath, GLchar* name);
+	Texture(GLchar* texturePath);
 	~Texture();
 
 	GLuint GetId() const;
-	GLchar* GetName() const;
 
 private:
 	GLuint m_id;
-	GLchar* m_name;
 };
 

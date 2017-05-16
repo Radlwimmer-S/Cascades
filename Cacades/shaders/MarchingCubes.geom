@@ -9,12 +9,14 @@ in Gridcell {
 } gs_in[];
 
 uniform int isoLevel = 0;
-uniform vec3 scale;
+uniform vec3 scale = vec3(1.0f);
+uniform vec3 textureRepeat = vec3(1.0f);
 
 struct Vertex
 {
 	vec3 position;
 	vec3 normal;
+	vec3 uvw;
 };
 
 out Vertex gs_out;
@@ -67,7 +69,12 @@ vec3 CalculateNormal(vec3 p1, vec3 p2, vec3 p3)
 	normal.y = (u.z * v.x) - (u.x * v.z);
 	normal.z = (u.x * v.y) - (u.y * v.x);
 
-	return normalize(normal);
+	return -normalize(normal);
+}
+
+vec3 CalculateUVW(vec3 ws)
+{
+	return ws * 0.5f + 0.5f;
 }
 
 void main()
@@ -105,22 +112,25 @@ void main()
 	/* Create the triangle */
 	for (int i = 0; triTable[gs_in[0].mc_case].tris[i] != -1; i += 3)
 	{
-		vec3 pos1 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i  ]];
-		vec3 pos2 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
-		vec3 pos3 = scale * vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
+		vec3 pos1 = vertlist[triTable[gs_in[0].mc_case].tris[i  ]];
+		vec3 pos2 = vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
+		vec3 pos3 = vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
-		vec3 normal = -CalculateNormal(pos1, pos2, pos3);
+		vec3 normal = CalculateNormal(pos1, pos2, pos3);
 
-		gs_out.position = pos1;
+		gs_out.position = scale * pos1;
 		gs_out.normal = normal;
+		gs_out.uvw = textureRepeat * CalculateUVW(pos1);
 		EmitVertex();
 
-		gs_out.position = pos2;
+		gs_out.position = scale * pos2;
 		gs_out.normal = normal;
+		gs_out.uvw = textureRepeat * CalculateUVW(pos2);
 		EmitVertex();
 
-		gs_out.position = pos3;
+		gs_out.position = scale * pos3;
 		gs_out.normal = normal;
+		gs_out.uvw = textureRepeat * CalculateUVW(pos3);
 		EmitVertex();
 
 		EndPrimitive();

@@ -10,10 +10,13 @@
 #include "Hud.h"
 #include "Light.h"
 
-Engine::Engine(GLFWwindow& window) : m_window(window), m_mcShader(nullptr), m_generator(), m_activeObject(-1), m_mesh(nullptr)
+Engine::Engine(GLFWwindow& window) : m_window(window), m_generator(), m_activeObject(-1), m_mesh(nullptr)
 {
-	m_shader = new Shader("./shaders/default.vert", nullptr, "./shaders/default.frag");
-	m_shader->Test("SimpleLight");
+	m_shader = new Shader("./shaders/TriPlanar.vert", nullptr, "./shaders/TriPlanar.frag");
+	m_shader->Test("TriPlanar");
+
+	m_debugShader = new Shader("./shaders/Simple.vert", nullptr, "./shaders/Simple.frag");
+	m_debugShader->Test("Debug");
 
 	Shader* hudShader = new Shader("./shaders/Text.vert", nullptr, "./shaders/Text.frag");
 	hudShader->Test("Text/Hud");
@@ -151,14 +154,16 @@ void Engine::RenderScene()
 	glClearColor(.1f, .1f, .1f, 1.0f);
 
 	m_shader->Use();
-	UpdateUniforms();
+	UpdateUniforms(*m_shader);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_mesh->Render(*m_shader);
 
+	m_debugShader->Use();
+	UpdateUniforms(*m_debugShader);
 	if (m_renderInfo.DrawLightPosition)
 		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			if ((*it)->IsEnabled())
-				(*it)->RenderDebug(*m_shader);
+				(*it)->RenderDebug(*m_debugShader);
 }
 
 void Engine::RenderHud()
@@ -224,7 +229,7 @@ void Engine::RenderLights() const
 	glCullFace(GL_FRONT);
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
-		if (!(*it)->CastsShadows())
+		if (!(*it)->CastsShadows() || !(*it)->IsEnabled())
 			continue;
 
 		(*it)->PreRender();
@@ -235,25 +240,25 @@ void Engine::RenderLights() const
 	glDisable(GL_CULL_FACE);
 }
 
-void Engine::UpdateUniforms() const
+void Engine::UpdateUniforms(const Shader& shader) const
 {
 	for (int i = 0; i < m_lights.size(); ++i)
 	{
-		m_lights[i]->UpdateUniforms(*m_shader, i, MaxTexturesPerModel + i);
+		m_lights[i]->UpdateUniforms(shader, i, MaxTexturesPerModel + i);
 	}
 
 	glm::vec3 viewPos = m_camera->GetPosition();
-	GLuint viewPosLocation = glGetUniformLocation(m_shader->Program, "viewPos");
+	GLuint viewPosLocation = glGetUniformLocation(shader.Program, "viewPos");
 	glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
 	glCheckError();
 
 	glm::mat4 view = m_camera->GetViewMatrix();
-	GLuint viewLocation = glGetUniformLocation(m_shader->Program, "view");
+	GLuint viewLocation = glGetUniformLocation(shader.Program, "view");
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 	glCheckError();
 
 	glm::mat4 proj = m_camera->GetProjectionMatrix();
-	GLuint projLocation = glGetUniformLocation(m_shader->Program, "projection");
+	GLuint projLocation = glGetUniformLocation(shader.Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
 }

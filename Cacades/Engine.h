@@ -39,7 +39,7 @@ public:
 	void AddLight(Light& light);
 protected:
 	void RenderLights() const;
-	void UpdateUniforms() const;
+	void UpdateUniforms(const Shader& shader) const;
 	void MoveActiveObject();
 	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void m_CursorPosCallback(GLFWwindow* window, double x, double y);
@@ -51,8 +51,8 @@ protected:
 
 	Hud* m_hud;
 	GLFWwindow& m_window;
-	Shader* m_mcShader;
 	Shader* m_shader;
+	Shader* m_debugShader;
 	Camera* m_camera;
 	std::vector<Light*> m_lights;
 
@@ -61,7 +61,7 @@ protected:
 
 	TriplanarMesh* m_mesh;
 		
-	const GLuint MaxTexturesPerModel = 3;
+	const GLuint MaxTexturesPerModel = 10;
 
 	RenderInfo m_renderInfo;
 	UpdateInfo m_updateInfo;

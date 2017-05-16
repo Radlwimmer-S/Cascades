@@ -7,7 +7,6 @@ struct Noise
 	sampler3D tex;
 };
 
-
 uniform int layerStart;
 uniform int layerCorrection;
 uniform vec3 resolution;

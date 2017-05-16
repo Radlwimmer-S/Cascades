@@ -56,7 +56,7 @@ void Shader::Load()
 	m_isTempValid = true;
 	m_isDirty = false;
 
-	GLuint* shaders = new GLuint[m_sourceFiles.size()];
+	GLuint* shaders = new GLuint[m_sourceFiles.size()] {0};
 	
 	for (int i = 0; i < m_sourceFiles.size(); ++i)
 	{
@@ -71,6 +71,7 @@ void Shader::Load()
 
 	glLinkProgram(tempProgram);
 	glGetProgramiv(tempProgram, GL_LINK_STATUS, &success);
+	glCheckError();
 
 	if (m_isTempValid)
 	{

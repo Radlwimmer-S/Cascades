@@ -39,7 +39,7 @@ DirectionalLight::~DirectionalLight()
 {
 }
 
-void DirectionalLight::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex)
+void DirectionalLight::UpdateUniforms(const Shader& shader, int lightIndex, int textureIndex)
 {
 	Light::UpdateUniforms(shader, lightIndex, textureIndex);
 

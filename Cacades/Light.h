@@ -8,7 +8,7 @@ public:
 	Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane);
 	virtual ~Light();
 
-	virtual void UpdateUniforms(Shader& shader, int lightIndex, int textureIndex);
+	virtual void UpdateUniforms(const Shader& shader, int lightIndex, int textureIndex);
 
 	virtual void PreRender() const = 0;
 	virtual void PostRender() const;

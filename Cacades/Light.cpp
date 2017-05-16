@@ -9,7 +9,7 @@ Light::~Light()
 {
 }
 
-void Light::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex)
+void Light::UpdateUniforms(const Shader& shader, int lightIndex, int textureIndex)
 {
 	GLint posLoc = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].Pos").c_str());
 	glUniform3f(posLoc, m_position.x, m_position.y, m_position.z);

@@ -1,55 +1,10 @@
 #version 330 core
 
-in Vertex
-{
-	vec3 position;
-	vec3 normal;
-} fs_in;
-
 out vec4 FragColor;
 
-struct LightComponents
-{
-	float Ambient;
-	float Diffuse;
-	float Specular;
-};
-
-uniform vec3 viewPos;
-
-LightComponents CalculateLight(in vec3 normal, in vec3 lightDir)
-{
-	LightComponents lighting;
-
-	// Ambient
-	float ambientStrength = 0.1f;
-	lighting.Ambient = ambientStrength;
-
-	// Diffuse
-	float diffuseStrength = 1.0f;
-	vec3 norm = normalize(normal);
-	float diff = max(dot(norm, lightDir), 0.0);
-	lighting.Diffuse = diffuseStrength * diff;
-
-	// Specular
-	float specularStrength = 0.1f;
-	vec3 viewDir = normalize(viewPos - fs_in.position);
-	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
-	lighting.Specular = specularStrength * spec;
-
-	return lighting;
-}
+uniform vec3 objectColor = vec3(1);
 
 void main()
 {
-	LightComponents light0 = CalculateLight(fs_in.normal, normalize(fs_in.position - vec3(0, 0, 10)));
-
-	float l = light0.Ambient + light0.Diffuse + light0.Specular;
-	vec3 lighting = vec3(l);
-
-	lighting = clamp(lighting, 0, 1);
-  lighting = lighting * fs_in.normal;
-
-	FragColor = vec4(lighting, 1.0f);
+	FragColor = vec4(objectColor, 1.0f);
 }

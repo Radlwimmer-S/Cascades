@@ -35,7 +35,7 @@ PointLight::~PointLight()
 {
 }
 
-void PointLight::UpdateUniforms(Shader& shader, int lightIndex, int textureIndex)
+void PointLight::UpdateUniforms(const Shader& shader, int lightIndex, int textureIndex)
 {
 	Light::UpdateUniforms(shader, lightIndex, textureIndex);
 
