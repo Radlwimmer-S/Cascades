@@ -197,9 +197,10 @@ void Engine::Loop()
 		lastFrame = currentFrame;
 		glfwPollEvents();
 
-		Update(deltaTime);	
+		if (!m_updateInfo.IsPaused)
+			Update(deltaTime);
 
-		glCheckError();	
+		glCheckError();
 
 		RenderLights();
 
@@ -236,7 +237,7 @@ void Engine::RenderLights() const
 		m_mesh->Render((*it)->GetShadowShader());
 		(*it)->PostRender();
 	}
-	glCullFace(GL_BACK); 
+	glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
 }
 
@@ -307,6 +308,11 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 				index = -1;
 			m_activeObject = index;
 		} break;
+
+		case GLFW_KEY_P:
+		{
+			m_updateInfo.IsPaused = !m_updateInfo.IsPaused;
+		}
 
 		case GLFW_KEY_DELETE:
 		{
