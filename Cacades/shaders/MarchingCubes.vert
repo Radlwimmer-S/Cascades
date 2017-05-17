@@ -44,15 +44,16 @@ void main()
 	vec3 ws = vec3(position.x, layer, position.y);
 	float noiseCorrection = -resolution.y * layerCorrection;
 
+	
 	//TODO: Check this
-	vs_out.p[0] = ws + (resolution * vec3(-0.5f, -0.5f, -0.5f));
-	vs_out.p[1] = ws + (resolution * vec3(+0.5f, -0.5f, -0.5f));
-	vs_out.p[2] = ws + (resolution * vec3(+0.5f, -0.5f, +0.5f));
-	vs_out.p[3] = ws + (resolution * vec3(-0.5f, -0.5f, +0.5f));
-	vs_out.p[4] = ws + (resolution * vec3(-0.5f, +0.5f, -0.5f));
-	vs_out.p[5] = ws + (resolution * vec3(+0.5f, +0.5f, -0.5f));
-	vs_out.p[6] = ws + (resolution * vec3(+0.5f, +0.5f, +0.5f));
-	vs_out.p[7] = ws + (resolution * vec3(-0.5f, +0.5f, +0.5f));
+	vs_out.p[0] = ws + (resolution * vec3(0, 0, 0));
+	vs_out.p[1] = ws + (resolution * vec3(1, 0, 0));
+	vs_out.p[2] = ws + (resolution * vec3(1, 0, 1));
+	vs_out.p[3] = ws + (resolution * vec3(0, 0, 1));
+	vs_out.p[4] = ws + (resolution * vec3(0, 1, 0));
+	vs_out.p[5] = ws + (resolution * vec3(1, 1, 0));
+	vs_out.p[6] = ws + (resolution * vec3(1, 1, 1));
+	vs_out.p[7] = ws + (resolution * vec3(0, 1, 1));
 
 
 	for (int i = 0; i < 8; ++i)
