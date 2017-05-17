@@ -132,18 +132,16 @@ void ProcedualGenerator::GenerateMcVbo()
 {
 	glCheckError();
 
-	glm::ivec3 vertexPerDimension = m_cubesPerDimension - glm::ivec3(1, 0, 1);
-
-	m_vertexCount = vertexPerDimension.x * vertexPerDimension.z;
+	m_vertexCount = m_cubesPerDimension.x * m_cubesPerDimension.z;
 	glm::vec2* vertices = new glm::vec2[m_vertexCount];
 	glm::vec2 tmpResolution(m_mcResolution.x, m_mcResolution.z);
 
 	glm::vec2 pos = glm::vec2(-1) + tmpResolution / 2.0f;
 	int index = 0;
-	for (int x = 0; x < vertexPerDimension.x; ++x)
+	for (int x = 0; x < m_cubesPerDimension.x - 1; ++x)
 	{
 		pos.y = -1.0f + m_mcResolution.z / 2.0f;
-		for (int z = 0; z < vertexPerDimension.z; ++z)
+		for (int z = 0; z < m_cubesPerDimension.z - 1; ++z)
 		{
 			vertices[index] = pos;
 			++index;

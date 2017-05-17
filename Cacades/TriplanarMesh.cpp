@@ -4,7 +4,7 @@
 #include "Shader.h"
 
 
-TriplanarMesh::TriplanarMesh() : BaseObject(glm::vec3(0)), m_triCount(nullptr), m_vaoCount(16), m_colorMode(ColorBlendMode::ColorOnly), m_normalMode(NormalBlendMode::NormalsOnly), m_texture(nullptr), m_normalMap(nullptr), m_displacementMap(nullptr)
+TriplanarMesh::TriplanarMesh() : BaseObject(glm::vec3(0)), m_triCount(nullptr), m_vaoCount(64), m_colorMode(ColorBlendMode::ColorOnly), m_normalMode(NormalBlendMode::NormalsOnly), m_texture(nullptr), m_normalMap(nullptr), m_displacementMap(nullptr)
 {
 	m_color = glm::vec3(1);
 

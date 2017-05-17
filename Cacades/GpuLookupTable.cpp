@@ -19,17 +19,11 @@ void GpuLookupTable::WriteLookupTablesToGpu()
 	glGenBuffers(1, &m_edgeIndex);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_edgeIndex);
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(MC_EdgeTable), &m_edgeTable, GL_STATIC_DRAW);
-	GLvoid* p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	memcpy(p, &m_edgeTable, sizeof(MC_EdgeTable));
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glGenBuffers(1, &m_trisIndex);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_trisIndex);
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(MC_TrisTable), &m_trisTable, GL_STATIC_DRAW);
-	//p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	//memcpy(p, &m_trisTable, sizeof(MC_TrisTable));
-	//glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 

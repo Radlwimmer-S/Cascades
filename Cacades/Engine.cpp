@@ -325,14 +325,14 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 		} break;
 
 		case GLFW_KEY_UP:
-			if (m_renderInfo.Resolution.y < 1024)
+			if (m_renderInfo.Resolution.y < 4000)
 				m_renderInfo.Resolution *= 2;// += glm::ivec3(6, 16, 6);
 			m_generator.SetResolution(m_renderInfo.Resolution);
 			m_generator.GenerateMcVbo();
 			m_mesh = m_generator.GenerateMesh();
 			break;
 		case GLFW_KEY_DOWN:
-			if (m_renderInfo.Resolution.y > 16)
+			if (m_renderInfo.Resolution.y > 64)
 				m_renderInfo.Resolution /= 2;// -= glm::ivec3(6, 16, 6);
 			m_generator.SetResolution(m_renderInfo.Resolution);
 			m_generator.GenerateMcVbo();
