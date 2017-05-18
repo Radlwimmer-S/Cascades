@@ -11,6 +11,8 @@ in Gridcell {
 uniform int isoLevel = 0;
 uniform vec3 scale = vec3(1.0f);
 uniform vec3 textureRepeat = vec3(1.0f);
+uniform vec3 resolution;
+uniform sampler3D densityTex;
 
 struct Vertex
 {
@@ -56,6 +58,24 @@ vec3 VertexInterp(float isoLevel, vec3 p1, vec3 p2, float valp1, float valp2)
 	p.z = p1.z + mu * (p2.z - p1.z);
 
 	return(p);
+}
+
+vec3 ws_to_UVW(vec3 ws)
+{
+	vec3 scaled = ws * 0.5f + 0.5f;
+	return vec3(scaled.xz, scaled.y);
+}
+
+vec3 ComputeNormal(vec3 ws)
+{
+	vec3 gradient = vec3(
+		   texture(densityTex, ws_to_UVW(ws + vec3(resolution.x, 0, 0))).r
+     - texture(densityTex, ws_to_UVW(ws - vec3(resolution.x, 0, 0))).r,
+		   texture(densityTex, ws_to_UVW(ws + vec3(0, resolution.y, 0))).r
+     - texture(densityTex, ws_to_UVW(ws - vec3(0, resolution.y, 0))).r,
+		   texture(densityTex, ws_to_UVW(ws + vec3(0, 0, resolution.z))).r
+     - texture(densityTex, ws_to_UVW(ws - vec3(0, 0, resolution.z))).r	);
+	return normalize(-gradient);
 }
 
 vec3 CalculateNormal(vec3 p1, vec3 p2, vec3 p3)
@@ -116,20 +136,18 @@ void main()
 		vec3 pos2 = vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
 		vec3 pos3 = vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
-		vec3 normal = CalculateNormal(pos1, pos2, pos3);
-
 		gs_out.position = scale * pos1;
-		gs_out.normal = normal;
+		gs_out.normal = ComputeNormal(pos1);
 		gs_out.uvw = textureRepeat * CalculateUVW(pos1);
 		EmitVertex();
 
 		gs_out.position = scale * pos2;
-		gs_out.normal = normal;
+		gs_out.normal = ComputeNormal(pos2);
 		gs_out.uvw = textureRepeat * CalculateUVW(pos2);
 		EmitVertex();
 
 		gs_out.position = scale * pos3;
-		gs_out.normal = normal;
+		gs_out.normal = ComputeNormal(pos3);
 		gs_out.uvw = textureRepeat * CalculateUVW(pos3);
 		EmitVertex();
 
