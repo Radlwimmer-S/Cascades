@@ -7,7 +7,7 @@
 #include <string>
 #include "BoundingBox.h"
 
-ProcedualGenerator::ProcedualGenerator() : m_random(0), m_randomAngle(0, 359), m_randomRand(-glm::pi<float>(), glm::pi<float>()), m_randomFloat(0.0f, 1000.0f), m_noise(nullptr)
+ProcedualGenerator::ProcedualGenerator() : m_noise(nullptr), m_random(0), m_randomAngle(0, 359), m_randomRand(-glm::pi<float>(), glm::pi<float>()), m_randomFloat(0.0f, 1000.0f)
 {
 	SetupDensity(); 
 	SetupMC();
@@ -15,8 +15,8 @@ ProcedualGenerator::ProcedualGenerator() : m_random(0), m_randomAngle(0, 359), m
 
 void ProcedualGenerator::SetupMC()
 {
-	const GLchar* feedbackVaryings[] = { "gs_out.position", "gs_out.normal", "gs_out.uvw" };
-	m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, feedbackVaryings, 3);
+	GLchar** feedbackVaryings = new GLchar*[3]{ "gs_out.position", "gs_out.normal", "gs_out.uvw" };
+	m_marchingCubeShader = new Shader("./shaders/MarchingCubes.vert", "./shaders/MarchingCubes.geom", nullptr, const_cast<const GLchar**>(feedbackVaryings), 3);
 	m_marchingCubeShader->Test("MarchingCubes");
 
 	m_lookupTable.WriteLookupTablesToGpu();
@@ -167,7 +167,6 @@ void ProcedualGenerator::GenerateMcVbo()
 
 TriplanarMesh* ProcedualGenerator::GenerateMesh()
 {
-
 	m_marchingCubeShader->Use();
 	UpdateUniformsMc();
 

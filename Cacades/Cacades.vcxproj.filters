@@ -215,9 +215,6 @@
     <ClInclude Include="Plane.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\ShaderEnums.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="BoundingBox.h">
       <Filter>Header Files\kdTree</Filter>
     </ClInclude>
@@ -281,6 +278,18 @@
     <ClInclude Include="CircularPath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\EnumColorMode.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumLightType.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumNormalMode.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumParticleType.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
@@ -328,12 +337,6 @@
     <None Include="shaders\Density.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\Debug3D.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\Debug3D.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="shaders\Simple.vert">
       <Filter>Shaders</Filter>
     </None>
@@ -344,6 +347,21 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\TriPlanar.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleUpdate.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleUpdate.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleRender.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleRender.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\ParticleRender.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

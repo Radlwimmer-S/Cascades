@@ -211,6 +211,10 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="Light.h" />
     <ClInclude Include="LinearPath.h" />
     <ClInclude Include="MeasuringTool.h" />
+    <ClInclude Include="shaders\EnumColorMode.h" />
+    <ClInclude Include="shaders\EnumLightType.h" />
+    <ClInclude Include="shaders\EnumNormalMode.h" />
+    <ClInclude Include="shaders\EnumParticleType.h" />
     <ClInclude Include="TriplanarMesh.h" />
     <ClInclude Include="NoiseTexture.h" />
     <ClInclude Include="Plane.h" />
@@ -220,7 +224,6 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="RenderInfo.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="shaders\ShaderEnums.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
@@ -232,8 +235,6 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
   </ItemGroup>
   <ItemGroup>
     <None Include="CopyAssets.bat" />
-    <None Include="shaders\Debug3D.frag" />
-    <None Include="shaders\Debug3D.vert" />
     <None Include="shaders\default.vert">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -246,6 +247,11 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\DirectionalLight.vert" />
     <None Include="shaders\MarchingCubes.geom" />
     <None Include="shaders\MarchingCubes.vert" />
+    <None Include="shaders\ParticleRender.geom" />
+    <None Include="shaders\ParticleRender.vert" />
+    <None Include="shaders\ParticleRender.frag" />
+    <None Include="shaders\ParticleUpdate.geom" />
+    <None Include="shaders\ParticleUpdate.vert" />
     <None Include="shaders\PointLight.frag" />
     <None Include="shaders\PointLight.geom" />
     <None Include="shaders\PointLight.vert" />

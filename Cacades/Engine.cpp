@@ -137,6 +137,10 @@ void Engine::Update(GLfloat deltaTime)
 {
 	MoveActiveObject();
 
+	m_hud->Update(m_updateInfo.FPS, m_renderInfo);
+
+	if (!m_updateInfo.IsPaused)
+
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		if ((*it)->IsEnabled())
@@ -144,8 +148,6 @@ void Engine::Update(GLfloat deltaTime)
 	}
 
 	m_camera->Update(deltaTime);
-
-	m_hud->Update(m_updateInfo.FPS, m_renderInfo);
 }
 
 void Engine::RenderScene()
@@ -197,8 +199,7 @@ void Engine::Loop()
 		lastFrame = currentFrame;
 		glfwPollEvents();
 
-		if (!m_updateInfo.IsPaused)
-			Update(deltaTime);
+		Update(deltaTime);
 
 		glCheckError();
 
@@ -312,7 +313,7 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 		case GLFW_KEY_P:
 		{
 			m_updateInfo.IsPaused = !m_updateInfo.IsPaused;
-		}
+		} break;
 
 		case GLFW_KEY_DELETE:
 		{

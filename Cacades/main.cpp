@@ -81,6 +81,9 @@ int main(int argc, char** argv)
 #endif
 		Engine* engine = Engine::Instance();
 
+		Shader* particleUpdate = new Shader("./shaders/ParticleUpdate.vert", "./shaders/ParticleUpdate.geom", nullptr);
+		particleUpdate->Test("particleUpdate");
+
 		Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.geom", "./shaders/PointLight.frag");
 		pointLightShader->Test("pointLightShader");
 
@@ -89,17 +92,19 @@ int main(int argc, char** argv)
 				
 		PointLight* greenLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
 		greenLight->IsEnabled(true);
+		greenLight->CastsShadows(false);
 		greenLight->FollowPath(new LinearPath(*GetGreenLightPath(), 10, true));
 		engine->AddLight(*greenLight);
 
 		PointLight* redLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0.5f, 0, 0), *pointLightShader, 15);
 		redLight->IsEnabled(true);
+		redLight->CastsShadows(false);
 		redLight->FollowPath(new CircularPath(*GetRedLightPath(), 20, true));
 		engine->AddLight(*redLight);
 
 		DirectionalLight* mainLight1 = new DirectionalLight(glm::vec3(10), glm::vec3(0.5f), *directionalLightShader, 50, -10);
 		mainLight1->IsEnabled(false);
-		mainLight1->CastsShadows(true);
+		mainLight1->CastsShadows(false);
 		engine->AddLight(*mainLight1);
 
 		DirectionalLight* antiLight1 = new DirectionalLight(glm::vec3(-10), glm::vec3(0, 0, 0.05f), *directionalLightShader, 50, -10);

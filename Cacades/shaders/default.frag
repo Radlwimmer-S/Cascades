@@ -2,7 +2,9 @@
 
 out vec4 FragColor;
 
-#pragma include "ShaderEnums.h"
+#pragma include "EnumNormalMode.h"
+#pragma include "EnumLightType.h"
+#pragma include "EnumColorMode.h"
 
 in VS_OUT
 {

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "shaders/ShaderEnums.h"
+#include "shaders/EnumNormalMode.h"
+#include "shaders/EnumColorMode.h"
+#include "shaders/EnumLightType.h"
 
 enum NormalBlendMode
 {
