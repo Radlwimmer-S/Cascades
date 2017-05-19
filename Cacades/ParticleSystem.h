@@ -1,6 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 #include "Shader.h"
+#include <glm/detail/type_vec2.hpp>
 #include <glm/detail/type_vec3.hpp>
 #include "Enums.h"
 #include "Texture.h"
@@ -13,8 +14,8 @@ struct Particle
 {
 	glm::vec3 position;
 	glm::vec3 velocity;
+	glm::vec2 seed;
 	float lifeTime;
-	float seed;
 	ParticleType type;
 };
 

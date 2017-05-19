@@ -8,7 +8,7 @@
 ParticleSystem::ParticleSystem(const Camera& camera, const Texture& densityTex, const Texture& normalTexture)
 	: readBuf(0), writeBuf(1), m_particleCount(0), m_camera(camera), m_densityTex(densityTex), m_normalTex(normalTexture)
 {
-	GLchar** feedbackVaryings = new GLchar*[5]{"gs_out.position", "gs_out.velocity", "gs_out.lifeTime", "gs_out.seed", "gs_out.type"};
+	GLchar** feedbackVaryings = new GLchar*[5]{ "gs_out.position", "gs_out.velocity", "gs_out.lifeTime", "gs_out.seed", "gs_out.type" };
 	m_updateShader = new Shader("./shaders/ParticleUpdate.vert", "./shaders/ParticleUpdate.geom", nullptr, const_cast<const GLchar**>(feedbackVaryings), 5);
 	m_updateShader->Test("ParticleUpdateShader");
 
@@ -28,14 +28,14 @@ ParticleSystem::ParticleSystem(const Camera& camera, const Texture& densityTex, 
 		// Velocity attribute
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)sizeof(glm::vec3));
 		glEnableVertexAttribArray(1);
-		// lifeTime attribute
-		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3)));
-		glEnableVertexAttribArray(2);
 		// seed attribute
-		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3)));
+		glEnableVertexAttribArray(2);
+		// lifeTime attribute
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
 		glEnableVertexAttribArray(3);
 		// type attribute
-		glVertexAttribPointer(4, 1, GL_INT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + 2 * sizeof(float)));
+		glVertexAttribPointer(4, 1, GL_INT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(float)));
 		glEnableVertexAttribArray(4);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -68,11 +68,8 @@ void ParticleSystem::Update(GLfloat deltaTime, const UpdateInfo& info)
 
 	glEnable(GL_RASTERIZER_DISCARD);
 
-	glBindVertexArray(m_vbos[readBuf]);
+	glBindVertexArray(m_vaos[readBuf]);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_vbos[writeBuf]);
-	float clear = 0;
-	//glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, MAX_PARTICLES * sizeof(Particle), nullptr, GL_STREAM_COPY);
-	glClearBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, GL_R16F, GL_RED, GL_FLOAT, nullptr);
 
 	glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
 	glBeginTransformFeedback(GL_POINTS);
@@ -81,12 +78,12 @@ void ParticleSystem::Update(GLfloat deltaTime, const UpdateInfo& info)
 	glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 
 	glBindVertexArray(0);
- 	glCheckError();
-	
+	glCheckError();
+
 	// Fetch result
 #ifdef _DEBUG
 	Particle* particlesBefore = new Particle[m_particleCount];
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[readBuf]);
 	glGetBufferSubData(GL_ARRAY_BUFFER, 0, m_particleCount * sizeof(Particle), particlesBefore);
 	glCheckError();
 
@@ -98,7 +95,7 @@ void ParticleSystem::Update(GLfloat deltaTime, const UpdateInfo& info)
 	if (m_particleCount > 0)
 	{
 		Particle* particlesAfter = new Particle[m_particleCount];
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[1]);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[writeBuf]);
 		glGetBufferSubData(GL_ARRAY_BUFFER, 0, m_particleCount * sizeof(Particle), particlesAfter);
 		glCheckError();
 		delete[] particlesAfter;
@@ -150,7 +147,7 @@ void ParticleSystem::Render(const RenderInfo& info)
 	m_renderShader->Use();
 	UpdateUniformsR(info);
 
-	glBindVertexArray(m_vbos[readBuf]);
+	glBindVertexArray(m_vaos[readBuf]);
 	glDrawArrays(GL_POINTS, 0, m_particleCount);
 	glBindVertexArray(0);
 	glCheckError();
@@ -181,12 +178,15 @@ void ParticleSystem::UpdateUniformsR(const RenderInfo& info)
 
 void ParticleSystem::AddEmitter(glm::vec3 viewPos, glm::vec3 viewDir)
 {
+	if (m_particleCount == MAX_PARTICLES)
+		return;
+
 	Particle rayParticle;
-	rayParticle.position = viewPos / m_geometryScale;
-	rayParticle.velocity = viewDir;
+	rayParticle.position = glm::vec3(0);//viewPos / m_geometryScale;
+	rayParticle.velocity = glm::vec3(0, -1, 0); //viewDir;
 	rayParticle.lifeTime = 0;
+	rayParticle.seed = glm::vec2(rand(), rand());
 	rayParticle.type = EmitterRay;
-	rayParticle.seed = rand();
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbos[readBuf]);
 	glBufferSubData(GL_ARRAY_BUFFER, m_particleCount * sizeof(Particle), sizeof(Particle), &rayParticle);

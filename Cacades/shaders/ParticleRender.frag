@@ -16,4 +16,10 @@ void main()
         FragColor = vec4(1, 0, 0, 1);
     else
         FragColor = vec4(0, 0, 1, 1);
+
+    if (fs_in.type < -1 )
+        FragColor = vec4(-fs_in.type, 0, 0, 1);
+
+    if (fs_in.type > 4)
+        FragColor = vec4(0, fs_in.type, 0, 1);
 }

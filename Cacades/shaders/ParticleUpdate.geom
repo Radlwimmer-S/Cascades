@@ -6,8 +6,8 @@ in Particle
 {
 	vec3 position;
 	vec3 velocity;
+	vec2 seed;
 	float lifeTime;
-	float seed;
 	int type;
 } gs_in[];
 
@@ -15,8 +15,8 @@ struct ParticleOut
 {
 	vec3 position;
 	vec3 velocity;
+	vec2 seed;
 	float lifeTime;
-	float seed;
 	int type;
 };
 out ParticleOut gs_out;
@@ -32,22 +32,28 @@ uniform float velocityScale = 0.01f;
 uniform float maxRayLenght = 10;
 uniform vec3 resolution;
 
-float randomSeed;
+vec2 randomSeed;
 
 #pragma include "EnumParticleType.h"
 
-void InitRandom(float seed)
+void InitRandom()
 {
-	randomSeed = seed;
+	randomSeed = gs_in[0].seed;
 }
 
-float Random(float min = -1, float max = 1)
+float Random()
 {
-	float value = noise1(randomSeed);
+	float value = fract(sin(dot(randomSeed ,vec2(12.9898,78.233))) * 43758.5453);
+	randomSeed.x += value;
+	randomSeed.y -= value;
+	return value;
+}
+
+float Random(float min, float max)
+{
+	float value = Random();
 	value *= (max - min) / 2;
 	value += (max - min) / 2 + min;
-
-	randomSeed = value;
 	return value;
 }
 
@@ -78,7 +84,7 @@ void SpawnEmitters()
     gs_out.position = origin - dir;
     gs_out.velocity = -normalize(dir);
     gs_out.lifeTime = 0;
-    gs_out.seed = Random();
+    gs_out.seed = vec2(Random(), Random());
     gs_out.type = PARTICLE_EMITTER;
     EmitVertex();
     EndPrimitive();
@@ -105,7 +111,7 @@ void SpawnWater()
     gs_out.position = gs_in[0].position;
     gs_out.velocity = gs_in[0].velocity;
     gs_out.lifeTime = gs_in[0].lifeTime + deltaTime;
-    gs_out.seed = Random();
+    gs_out.seed = vec2(Random(), Random());
     gs_out.type = gs_in[0].type;
 
     float spawnRate = 1 / particlesPerSecond;
@@ -122,7 +128,7 @@ void SpawnWater()
 		gs_out.position = gs_in[0].position + gs_in[0].velocity * velocityScale;
 		gs_out.velocity = gs_in[0].velocity * velocityScale;
 		gs_out.lifeTime = 0;
-		gs_out.seed = Random();
+		gs_out.seed = vec2(Random(), Random());
 		gs_out.type = PARTICLE_WATER_FLOWING;
 		EmitVertex();
 		EndPrimitive();
@@ -146,7 +152,7 @@ void UpdateWater()
 		return;
 	}
 
-	gs_out.seed = Random();
+	gs_out.seed = vec2(Random(), Random());
 	gs_out.type = PARTICLE_WATER_FLOWING;
 	EmitVertex();
 	EndPrimitive();
@@ -158,7 +164,16 @@ void UpdateMist()
 
 void main()
 {
-	InitRandom(gs_in[0].seed);
+	InitRandom();
+
+	gs_out.velocity = gs_in[0].velocity + vec3(0, 9.81f, 0) * deltaTime * velocityScale;
+	gs_out.position = gs_in[0].position + gs_out.velocity * deltaTime;
+	gs_out.lifeTime = gs_in[0].lifeTime + deltaTime;
+	gs_out.seed = vec2(Random(), Random());
+	gs_out.type = 1;
+	EmitVertex();
+	EndPrimitive();
+	return;
 
     switch(gs_in[0].type)
 	{

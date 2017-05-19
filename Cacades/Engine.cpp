@@ -1,3 +1,4 @@
+//float3 pos; float3 vel; float2 seed; float time; int type
 #include "Engine.h"
 #include <GL/glew.h>
 #include "Shader.h"
@@ -155,9 +156,6 @@ void Engine::Update(GLfloat deltaTime)
 
 void Engine::RenderScene()
 {
-	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glClearColor(.1f, .1f, .1f, 1.0f);
-
 	m_shader->Use();
 	UpdateUniforms(*m_shader);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -204,17 +202,16 @@ void Engine::Loop()
 
 		Update(deltaTime);
 
-		glCheckError();
-
-		m_generator.Generate3dTexture();
-
 		RenderLights();
+		
+		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		glClearColor(.1f, .1f, .1f, 1.0f);
 
 		RenderScene();
 
-		m_particleSystem.Render(m_renderInfo);
-
 		RenderHud();
+
+		m_particleSystem.Render(m_renderInfo);
 
 		glfwSwapBuffers(&m_window);
 		glCheckError();
