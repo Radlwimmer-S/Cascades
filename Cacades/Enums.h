@@ -3,6 +3,7 @@
 #include "shaders/EnumNormalMode.h"
 #include "shaders/EnumColorMode.h"
 #include "shaders/EnumLightType.h"
+#include "shaders/EnumParticleType.h"
 
 enum NormalBlendMode
 {
@@ -16,6 +17,16 @@ enum ColorBlendMode
 	ColorOnly = COLOR_ONLY_MODE,
 	Mix = COLOR_MIX_MODE,
 	TextureOnly = TEXTURE_ONLY_MODE,
+};
+
+enum ParticleType
+{
+	EmitterRay = PARTICLE_RAY,
+	Emitter = PARTICLE_EMITTER,
+	FlowingWater = PARTICLE_WATER_FLOWING,
+	FallingWater = PARTICLE_WATER_FALLING,
+	CollisionMist = PARTICLE_MIST_COLLISION,
+	FallingMist = PARTICLE_MIST_FALLING,
 };
 
 enum State

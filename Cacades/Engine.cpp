@@ -4,13 +4,15 @@
 #include "Camera.h"
 #include "Global.h"
 #include <sstream>
-#include "Timer.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "Font.h"
 #include "Hud.h"
 #include "Light.h"
 
-Engine::Engine(GLFWwindow& window) : m_window(window), m_generator(), m_activeObject(-1), m_mesh(nullptr)
+Engine::Engine(GLFWwindow& window)
+	: m_window(window), m_camera(), m_generator(),
+	m_particleSystem(m_camera, m_generator.GetDensityTexture(), m_generator.GetNormalTexture()),
+	m_activeObject(-1), m_mesh(nullptr)
 {
 	m_shader = new Shader("./shaders/TriPlanar.vert", nullptr, "./shaders/TriPlanar.frag");
 	m_shader->Test("TriPlanar");
@@ -22,8 +24,6 @@ Engine::Engine(GLFWwindow& window) : m_window(window), m_generator(), m_activeOb
 	hudShader->Test("Text/Hud");
 	Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
 	m_hud = new Hud(*font, *hudShader);
-
-	m_camera = new Camera();
 }
 
 Engine::~Engine()
@@ -139,7 +139,10 @@ void Engine::Update(GLfloat deltaTime)
 
 	m_hud->Update(m_updateInfo.FPS, m_renderInfo);
 
-	if (!m_updateInfo.IsPaused)
+	if (m_updateInfo.IsPaused)
+		return; 
+
+	m_particleSystem.Update(deltaTime, m_updateInfo);
 
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
@@ -147,7 +150,7 @@ void Engine::Update(GLfloat deltaTime)
 			(*it)->Update(deltaTime);
 	}
 
-	m_camera->Update(deltaTime);
+	m_camera.Update(deltaTime);
 }
 
 void Engine::RenderScene()
@@ -207,6 +210,8 @@ void Engine::Loop()
 
 		RenderScene();
 
+		m_particleSystem.Render(m_renderInfo);
+
 		RenderHud();
 
 		glfwSwapBuffers(&m_window);
@@ -249,17 +254,17 @@ void Engine::UpdateUniforms(const Shader& shader) const
 		m_lights[i]->UpdateUniforms(shader, i, MaxTexturesPerModel + i);
 	}
 
-	glm::vec3 viewPos = m_camera->GetPosition();
+	glm::vec3 viewPos = m_camera.GetPosition();
 	GLuint viewPosLocation = glGetUniformLocation(shader.Program, "viewPos");
 	glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
 	glCheckError();
 
-	glm::mat4 view = m_camera->GetViewMatrix();
+	glm::mat4 view = m_camera.GetViewMatrix();
 	GLuint viewLocation = glGetUniformLocation(shader.Program, "view");
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 	glCheckError();
 
-	glm::mat4 proj = m_camera->GetProjectionMatrix();
+	glm::mat4 proj = m_camera.GetProjectionMatrix();
 	GLuint projLocation = glGetUniformLocation(shader.Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
@@ -268,7 +273,7 @@ void Engine::UpdateUniforms(const Shader& shader) const
 void Engine::MoveActiveObject()
 {
 	if (m_activeObject == -1)
-		m_camera->ProcessInput(m_window);
+		m_camera.ProcessInput(m_window);
 	//else if (m_activeObject == 0)
 	//{
 	//	m_camera->ProcessInput(m_window);
@@ -386,7 +391,7 @@ void Engine::CursorPosCallback(GLFWwindow* window, double x, double y)
 
 void Engine::m_CursorPosCallback(GLFWwindow* window, double x, double y)
 {
-	m_camera->CursorPosCallback(x, y);
+	m_camera.CursorPosCallback(x, y);
 }
 
 void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -394,14 +399,17 @@ void Engine::MouseButtonCallback(GLFWwindow* window, int button, int action, int
 	Instance()->m_MouseButtonCallback(window, button, action, mods);
 }
 
+void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+	{
+		m_particleSystem.AddEmitter(m_camera.GetPosition(), -(glm::vec3(0, 0, 1) * m_camera.GetOrientation()));
+	}
+}
+
 void Engine::ResizeCallback(GLFWwindow* window, int width, int height)
 {
 	Instance()->m_ResizeCallback(window, width, height);
-}
-
-void Engine::m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-
 }
 
 void Engine::m_ResizeCallback(GLFWwindow* window, int width, int height)

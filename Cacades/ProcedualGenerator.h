@@ -50,12 +50,17 @@ public:
 	GLuint GetVertexCountMc() const;
 	GLuint GetVertexCountTf() const;
 
+	const Texture& GetDensityTexture() const;
+	const Texture& GetNormalTexture() const;
+
 	void SetRandomSeed(int seed);
 	void SetStartLayer(int layer);
 	void SetResolution(glm::ivec3 cubesPerDimension);
 	void SetNoiseScale(float scale);
-	void SetGeometryScale(glm::vec3 scale);
 	void SetIsoLevel(float isoLevel);
+
+	void SetGeometryScale(glm::vec3 scale);
+	const glm::vec3 GetGeometryScale() const;
 
 	static const int WIDTH = 96, DEPTH = 96, LAYERS = 256;
 
@@ -75,7 +80,7 @@ protected:
 
 	Noise* m_noise;
 
-	GLuint m_densityId = 0;
+	Texture m_densityTex, m_normalTex;
 	GLuint m_vaoMc = 0, m_vboMc = 0, m_tboMc = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0;
 
 	GLuint m_vertexCount = 0;

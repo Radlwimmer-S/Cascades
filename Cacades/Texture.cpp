@@ -4,6 +4,11 @@
 #include "Global.h"
 
 
+Texture::Texture()
+{
+	glGenTextures(1, &m_id);
+}
+
 Texture::Texture(GLchar* texturePath)
 {
 	{

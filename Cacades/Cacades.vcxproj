@@ -169,6 +169,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LinearPath.cpp" />
     <ClCompile Include="MeasuringTool.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="TriplanarMesh.cpp" />
     <ClCompile Include="NoiseTexture.cpp" />
     <ClCompile Include="Plane.cpp" />
@@ -211,6 +212,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="Light.h" />
     <ClInclude Include="LinearPath.h" />
     <ClInclude Include="MeasuringTool.h" />
+    <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="shaders\EnumColorMode.h" />
     <ClInclude Include="shaders\EnumLightType.h" />
     <ClInclude Include="shaders\EnumNormalMode.h" />

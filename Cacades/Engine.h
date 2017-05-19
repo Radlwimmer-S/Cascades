@@ -9,6 +9,8 @@
 #include "ProcedualGenerator.h"
 #include "RenderInfo.h"
 #include "UpdateInfo.h"
+#include "ParticleSystem.h"
+#include "Camera.h"
 
 class Light;
 class Hud;
@@ -53,10 +55,11 @@ protected:
 	GLFWwindow& m_window;
 	Shader* m_shader;
 	Shader* m_debugShader;
-	Camera* m_camera;
+	Camera m_camera;
 	std::vector<Light*> m_lights;
 
 	ProcedualGenerator m_generator;
+	ParticleSystem m_particleSystem;
 	int m_activeObject;
 
 	TriplanarMesh* m_mesh;

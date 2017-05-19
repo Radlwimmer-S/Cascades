@@ -41,8 +41,7 @@ void ProcedualGenerator::SetupDensity()
 	m_densityShader = new  Shader("./shaders/Density.vert", "./shaders/Density.geom", "./shaders/Density.frag");
 	m_densityShader->Test("Density"); 
 
-	glGenTextures(1, &m_densityId);
-	glBindTexture(GL_TEXTURE_3D, m_densityId);
+	glBindTexture(GL_TEXTURE_3D, m_densityTex.GetId());
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, WIDTH, DEPTH, LAYERS, 0, GL_RED, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -53,8 +52,17 @@ void ProcedualGenerator::SetupDensity()
 
 	glGenFramebuffers(1, &m_fboD);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fboD);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_densityId, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_densityTex.GetId(), 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glCheckError();
+
+	glBindTexture(GL_TEXTURE_3D, m_normalTex.GetId());
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, WIDTH, DEPTH, LAYERS, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glCheckError();
 
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -233,6 +241,16 @@ GLuint ProcedualGenerator::GetVertexCountTf() const
 	return m_vertexCount * m_cubesPerDimension.y;
 }
 
+const Texture& ProcedualGenerator::GetDensityTexture() const
+{
+	return m_densityTex;
+}
+
+const Texture& ProcedualGenerator::GetNormalTexture() const
+{
+	return m_normalTex;
+}
+
 void ProcedualGenerator::SetRandomSeed(int seed)
 {
 	m_random.seed(seed);
@@ -275,6 +293,11 @@ void ProcedualGenerator::SetNoiseScale(float scale)
 void ProcedualGenerator::SetGeometryScale(glm::vec3 scale)
 {
 	m_geometryScale = scale;
+}
+
+const glm::vec3 ProcedualGenerator::GetGeometryScale() const
+{
+	return m_geometryScale;
 }
 
 void ProcedualGenerator::SetIsoLevel(float isoLevel)
@@ -320,7 +343,7 @@ void ProcedualGenerator::UpdateUniformsMc()
 	glActiveTexture(GL_TEXTURE4);
 	GLint textureLoc = glGetUniformLocation(m_marchingCubeShader->Program, "densityTex");
 	glUniform1i(textureLoc, 4);
-	glBindTexture(GL_TEXTURE_3D, m_densityId);
+	glBindTexture(GL_TEXTURE_3D, m_densityTex.GetId());
 	glCheckError();
 
 	GLint isoLevelLoc = glGetUniformLocation(m_marchingCubeShader->Program, "isoLevel");

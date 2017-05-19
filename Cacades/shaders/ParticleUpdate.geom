@@ -4,21 +4,22 @@ layout (points, max_vertices = 5) out;
 
 in Particle
 {
-    vec3 position;
-    vec3 velocity;
-    float lifeTime;
-    float seed;
-    int type;
+	vec3 position;
+	vec3 velocity;
+	float lifeTime;
+	float seed;
+	int type;
 } gs_in[];
 
-out Particle
+struct ParticleOut
 {
-    vec3 position;
-    vec3 velocity;
-    float lifeTime;
-    float seed;
-    int type;
-} gs_out;
+	vec3 position;
+	vec3 velocity;
+	float lifeTime;
+	float seed;
+	int type;
+};
+out ParticleOut gs_out;
 
 uniform sampler3D densityTex;
 uniform float waterTTL = 15.0f;
@@ -27,6 +28,8 @@ uniform float deltaTime;
 uniform float isoLevel = 0;
 uniform float particlesPerSecond = 20;
 uniform float velocityScale = 0.01f;
+uniform float maxRayLenght = 10;
+uniform vec3 resolution;
 
 float randomSeed;
 
@@ -68,24 +71,32 @@ vec3 ws_to_UVW(vec3 ws)
 void SpawnEmitters()
 {
     vec3 origin = gs_in[0].position;
-    vec3 dir = 2 * gs_in[0].velocity / 100;
-    for (int i = 0; i < 100; ++i)
-	{
-        origin += dir;
-        if (texture(densityTex, ws_to_UVW(origin)).r > isoLevel)
-		{
-            gs_out.position = origin - dir;
-            gs_out.velocity = -normalize(dir);
-            gs_out.lifeTime = 0;
-            gs_out.seed = Random();
-            gs_out.type = PARTICLE_EMITTER;
-            EmitVertex();
-            EndPrimitive();
-            return;
-        }
+	int steps = 1000;
+	vec3 dir = maxRayLenght / steps * gs_in[0].velocity;
 
+    gs_out.position = origin - dir;
+    gs_out.velocity = -normalize(dir);
+    gs_out.lifeTime = 0;
+    gs_out.seed = Random();
+    gs_out.type = PARTICLE_EMITTER;
+    EmitVertex();
+    EndPrimitive();
 
-	}
+ //   for (int i = 0; i < steps; ++i)
+	//{
+ //       origin += dir;
+ //       if (texture(densityTex, ws_to_UVW(origin)).r > isoLevel)
+	//	{
+ //           gs_out.position = origin - dir;
+ //           gs_out.velocity = -normalize(dir);
+ //           gs_out.lifeTime = 0;
+ //           gs_out.seed = Random();
+ //           gs_out.type = PARTICLE_EMITTER;
+ //           EmitVertex();
+ //           EndPrimitive();
+ //           return;
+ //       }
+	//}
 }
 
 void SpawnWater()
@@ -160,6 +171,4 @@ void main()
 		case PARTICLE_MIST_FALLING: UpdateMist();
         break;
     }
-
-
 }

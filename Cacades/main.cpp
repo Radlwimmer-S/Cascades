@@ -9,6 +9,8 @@
 #include "DirectionalLight.h"
 #include "LinearPath.h"
 
+#define CPP true
+
 std::vector<ControlPoint>* GetGreenLightPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
@@ -80,9 +82,6 @@ int main(int argc, char** argv)
 		Engine::Init("Camera", 1900, 1000);
 #endif
 		Engine* engine = Engine::Instance();
-
-		Shader* particleUpdate = new Shader("./shaders/ParticleUpdate.vert", "./shaders/ParticleUpdate.geom", nullptr);
-		particleUpdate->Test("particleUpdate");
 
 		Shader* pointLightShader = new Shader("./shaders/PointLight.vert", "./shaders/PointLight.geom", "./shaders/PointLight.frag");
 		pointLightShader->Test("pointLightShader");
