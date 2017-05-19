@@ -39,7 +39,10 @@ void ProcedualGenerator::SetupMC()
 void ProcedualGenerator::SetupDensity()
 {
 	m_densityShader = new  Shader("./shaders/Density.vert", "./shaders/Density.geom", "./shaders/Density.frag");
-	m_densityShader->Test("Density"); 
+	m_densityShader->Test("Density");
+
+	m_normalShader = new  Shader("./shaders/Normal.vert", "./shaders/Normal.geom", "./shaders/Normal.frag");
+	m_normalShader->Test("Normal");
 
 	glBindTexture(GL_TEXTURE_3D, m_densityTex.GetId());
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R16F, WIDTH, DEPTH, LAYERS, 0, GL_RED, GL_FLOAT, nullptr);
@@ -63,6 +66,12 @@ void ProcedualGenerator::SetupDensity()
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glCheckError();
+
+	glGenFramebuffers(1, &m_fboN);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboN);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_normalTex.GetId(), 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
 
 	glBindTexture(GL_TEXTURE_3D, 0);
@@ -121,17 +130,34 @@ void ProcedualGenerator::Generate3dTexture()
 	m_densityShader->Use();
 	UpdateUniformsD();
 	glBindVertexArray(m_vaoD);
-		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, LAYERS);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, LAYERS);
+
 	glBindVertexArray(0);
-	glCheckError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glCheckError();
 	glBindTexture(GL_TEXTURE_3D, 0);
-	glCheckError();
 	glUseProgram(0);
-	glCheckError();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fboN);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glReadBuffer(GL_NONE);
+
+	glViewport(0, 0, WIDTH, DEPTH);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glCheckError();
+
+	m_normalShader->Use();
+	UpdateUniformsN();
+	glBindVertexArray(m_vaoD);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, LAYERS);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_3D, 0);
+	glUseProgram(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glCheckError();
 }
@@ -189,6 +215,7 @@ TriplanarMesh* ProcedualGenerator::GenerateMesh()
 	GLuint sumTriCount = 0;
 	GLuint triCount;
 
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tboMc);
 	for (int vao = 0; vao < m_mcMesh.GetVaoCount(); ++vao)
 	{
 		GLuint layerLocation = glGetUniformLocation(m_marchingCubeShader->Program, "layerStart");
@@ -196,7 +223,6 @@ TriplanarMesh* ProcedualGenerator::GenerateMesh()
 		glCheckError();
 
 		glBindVertexArray(m_vaoMc);
-		glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_tboMc);
 	
 		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryTF);
 			glBeginTransformFeedback(GL_TRIANGLES);
@@ -221,9 +247,10 @@ TriplanarMesh* ProcedualGenerator::GenerateMesh()
 		glBindVertexArray(0);
 		m_mcMesh.UpdateVao(vao, triCount);
 	}
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
 	glDisable(GL_RASTERIZER_DISCARD);
 
-	//glFlush();
+	glFlush();
 
 	glDeleteQueries(1, &queryTF);
 	printf("%u primitives generated!\n\n", sumTriCount);
@@ -407,6 +434,19 @@ void ProcedualGenerator::UpdateUniformsD()
 		glUniform1i(signLocation, m_shelf.frequenceSign);
 		glCheckError();
 	}
+}
+
+void ProcedualGenerator::UpdateUniformsN()
+{
+	GLuint resLocation = glGetUniformLocation(m_normalShader->Program, "resolution");
+	glUniform3f(resLocation, 2.0f / WIDTH, 2.0f / LAYERS, 2.0f / DEPTH);
+	glCheckError();
+
+	glActiveTexture(GL_TEXTURE0);
+	GLint textureLoc = glGetUniformLocation(m_normalShader->Program, "densityTex");
+	glUniform1i(textureLoc, 0);
+	glBindTexture(GL_TEXTURE_3D, m_densityTex.GetId());
+	glCheckError();
 }
 
 float ProcedualGenerator::NormalizeCoord(int coord, int dim)

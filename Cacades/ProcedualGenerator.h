@@ -70,6 +70,7 @@ protected:
 
 	void UpdateUniformsMc();
 	void UpdateUniformsD();
+	void UpdateUniformsN();
 
 	static float NormalizeCoord(int coord, int dim);
 	static int ToSignBit(int random);
@@ -81,7 +82,7 @@ protected:
 	Noise* m_noise;
 
 	Texture m_densityTex, m_normalTex;
-	GLuint m_vaoMc = 0, m_vboMc = 0, m_tboMc = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0;
+	GLuint m_vaoMc = 0, m_vboMc = 0, m_tboMc = 0, m_vaoD = 0, m_vboD = 0, m_fboD = 0, m_fboN;
 
 	GLuint m_vertexCount = 0;
 
@@ -92,7 +93,7 @@ protected:
 	float m_noiseScale;
 	float m_isoLevel;
 
-	Shader* m_marchingCubeShader, *m_densityShader;
+	Shader* m_marchingCubeShader, *m_densityShader, *m_normalShader;
 	GpuLookupTable m_lookupTable;
 
 	TriplanarMesh m_mcMesh;

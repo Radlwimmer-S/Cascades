@@ -22,6 +22,7 @@ struct ParticleOut
 out ParticleOut gs_out;
 
 uniform sampler3D densityTex;
+uniform sampler3D normalTex;
 uniform float waterTTL = 15.0f;
 uniform float mistTTL = 2.0f;
 uniform float deltaTime;
@@ -117,7 +118,7 @@ void SpawnWater()
     EndPrimitive();
 
     if (spawn)
-	{		
+	{
 		gs_out.position = gs_in[0].position + gs_in[0].velocity * velocityScale;
 		gs_out.velocity = gs_in[0].velocity * velocityScale;
 		gs_out.lifeTime = 0;
@@ -140,7 +141,8 @@ void UpdateWater()
 
 	if (texture(densityTex, ws_to_UVW(gs_out.position)).r > isoLevel)
 	{
-		// TODO: Add Collision-Resolve 
+		vec3 normal = texture(normalTex, ws_to_UVW(gs_out.position)).rgb;
+		// TODO: Add Collision-Resolve
 		return;
 	}
 
@@ -152,7 +154,7 @@ void UpdateWater()
 
 void UpdateMist()
 {
-} 
+}
 
 void main()
 {

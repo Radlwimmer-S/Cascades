@@ -18,7 +18,7 @@ static GLuint SCREEN_HEIGHT = 1080;
 
 #define CHECK_GL_ERROR
 #ifdef CHECK_GL_ERROR
-#define glCheckError() glCheckError_(__FILE__, __LINE__) 
+#define glCheckError() glCheckError_(__FUNCTION__, __LINE__) 
 #else
 #define glCheckError() 
 #endif
@@ -58,7 +58,7 @@ inline void PrintCSAA()
 		std::cout << "CSAA-Extension not available";
 }
 
-GLenum static glCheckError_(const char *file, int line)
+GLenum static glCheckError_(const char *function, int line)
 {
 	GLenum errorCode;
 	while ((errorCode = glGetError()) != GL_NO_ERROR)
@@ -74,7 +74,8 @@ GLenum static glCheckError_(const char *file, int line)
 		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
 		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 		}
-		std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+		printf("%s | %s (%i)\n", error.c_str(), function, line);
+		//std::cout << error << " | " << file << " (" << line << ")" << std::endl;
 		std::cin.ignore();
 	}
 	return errorCode;

@@ -23,21 +23,20 @@ ParticleSystem::ParticleSystem(const Camera& camera, const Texture& densityTex, 
 		glBindVertexArray(m_vaos[i]);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbos[i]);
 		// Position attribute
-		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
 		// Velocity attribute
-		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)sizeof(glm::vec3));
-		// Velocity attribute
-		glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(1);
+		// lifeTime attribute
 		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3)));
-		// Velocity attribute
-		glEnableVertexAttribArray(3);
+		glEnableVertexAttribArray(2);
+		// seed attribute
 		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(float)));
-		// Velocity attribute
-		glEnableVertexAttribArray(4);
+		glEnableVertexAttribArray(3);
+		// type attribute
 		glVertexAttribPointer(4, 1, GL_INT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + 2 * sizeof(float)));
-
+		glEnableVertexAttribArray(4);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -109,6 +108,10 @@ void ParticleSystem::Update(GLfloat deltaTime, const UpdateInfo& info)
 	glGetQueryObjectuiv(queryTF, GL_QUERY_RESULT, &m_particleCount);
 	printf("%u particles generated!\n\n", m_particleCount);
 #endif
+
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
+
+	glFlush();
 
 	glDisable(GL_RASTERIZER_DISCARD);
 	glDeleteQueries(1, &queryTF);

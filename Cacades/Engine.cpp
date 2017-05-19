@@ -206,6 +206,8 @@ void Engine::Loop()
 
 		glCheckError();
 
+		m_generator.Generate3dTexture();
+
 		RenderLights();
 
 		RenderScene();

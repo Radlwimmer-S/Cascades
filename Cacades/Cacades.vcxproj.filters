@@ -370,5 +370,14 @@
     <None Include="shaders\ParticleRender.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\Normal.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Normal.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\Normal.geom">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
