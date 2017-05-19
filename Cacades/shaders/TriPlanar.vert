@@ -18,14 +18,14 @@ uniform mat4 projection;
 void main()
 {
 	gl_Position	= projection * view * model * vec4(position, 1.0f);
-    vs_out.FragPos = position;
-    vs_out.Normal = normal;
+    vs_out.FragPos = vec3(model * vec4(position, 1.0f));
+    vs_out.Normal = normalize(vec3(transpose(inverse(model)) * vec4(normal, 1.0f)));
     vs_out.UVW = uvw;
 
     vec3 tangent = vec3(1, 0, 0);
-    vec3 binormal = normalize(cross(tangent, normal));
-    tangent = normalize(cross(normal, binormal));
-    mat3 TBN = transpose(mat3(tangent, binormal, normal));
+    vec3 binormal = normalize(cross(tangent, vs_out.Normal));
+    tangent = normalize(cross(vs_out.Normal, binormal));
+    mat3 TBN = transpose(mat3(tangent, binormal, vs_out.Normal));
 
   	vs_out.TBN = TBN;
 }

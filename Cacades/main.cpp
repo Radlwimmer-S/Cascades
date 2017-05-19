@@ -90,24 +90,24 @@ int main(int argc, char** argv)
 		directionalLightShader->Test("directionalLightShader");
 				
 		PointLight* greenLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
-		greenLight->IsEnabled(true);
+		greenLight->IsEnabled(false);
 		greenLight->CastsShadows(true);
 		greenLight->FollowPath(new LinearPath(*GetGreenLightPath(), 10, true));
 		engine->AddLight(*greenLight);
 
 		PointLight* redLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0.5f, 0, 0), *pointLightShader, 15);
-		redLight->IsEnabled(true);
+		redLight->IsEnabled(false);
 		redLight->CastsShadows(true);
 		redLight->FollowPath(new CircularPath(*GetRedLightPath(), 20, true));
 		engine->AddLight(*redLight);
 
 		DirectionalLight* mainLight1 = new DirectionalLight(glm::vec3(10), glm::vec3(0.5f), *directionalLightShader, 50, -10);
-		mainLight1->IsEnabled(false);
+		mainLight1->IsEnabled(true);
 		mainLight1->CastsShadows(true);
 		engine->AddLight(*mainLight1);
 
 		DirectionalLight* antiLight1 = new DirectionalLight(glm::vec3(-10), glm::vec3(0, 0, 0.05f), *directionalLightShader, 50, -10);
-		antiLight1->IsEnabled(false);
+		antiLight1->IsEnabled(true);
 		engine->AddLight(*antiLight1);
 
 		engine->Start();

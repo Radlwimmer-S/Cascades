@@ -5,6 +5,8 @@
 #include "FileWatcher.h"
 typedef std::chrono::system_clock::time_point time_point;
 
+#define DEBUG_SHADER true
+
 class Shader
 {
 	struct SourceFile

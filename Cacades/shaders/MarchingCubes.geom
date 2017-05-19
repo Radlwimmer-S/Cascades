@@ -9,7 +9,6 @@ in Gridcell {
 } gs_in[];
 
 uniform int isoLevel = 0;
-uniform vec3 scale = vec3(1.0f);
 uniform vec3 textureRepeat = vec3(1.0f);
 uniform vec3 resolution;
 uniform sampler3D densityTex;
@@ -136,17 +135,17 @@ void main()
 		vec3 pos2 = vertlist[triTable[gs_in[0].mc_case].tris[i+1]];
 		vec3 pos3 = vertlist[triTable[gs_in[0].mc_case].tris[i+2]];
 
-		gs_out.position = scale * pos1;
+		gs_out.position = pos1;
 		gs_out.normal = ComputeNormal(pos1);
 		gs_out.uvw = textureRepeat * CalculateUVW(pos1);
 		EmitVertex();
 
-		gs_out.position = scale * pos2;
+		gs_out.position = pos2;
 		gs_out.normal = ComputeNormal(pos2);
 		gs_out.uvw = textureRepeat * CalculateUVW(pos2);
 		EmitVertex();
 
-		gs_out.position = scale * pos3;
+		gs_out.position = pos3;
 		gs_out.normal = ComputeNormal(pos3);
 		gs_out.uvw = textureRepeat * CalculateUVW(pos3);
 		EmitVertex();

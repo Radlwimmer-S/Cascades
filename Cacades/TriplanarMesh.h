@@ -19,7 +19,6 @@ public:
 	void Render(Shader& shader) const override;
 
 	GLsizei GetTriCount(int index) const;
-
 	GLuint GetVaoCount() const;
 
 private:

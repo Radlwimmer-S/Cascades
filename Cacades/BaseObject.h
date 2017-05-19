@@ -29,6 +29,10 @@ public:
 	virtual void SetOrientation(glm::quat orientation);
 	virtual glm::quat GetOrientation() const;
 	virtual void Rotate(glm::quat rotation);
+
+	virtual void SetScale(glm::vec3 scale);
+	virtual glm::vec3 GetScale() const;
+	virtual void Scale(glm::vec3 scale);
 	
 	virtual void FollowPath(BasePath* path);
 	
@@ -44,6 +48,7 @@ public:
 protected:
 	glm::vec3 m_position;
 	glm::vec3 m_velocity;
+	glm::vec3 m_scale;
 	glm::quat m_orientation;
 	bool m_isEnabled;
 

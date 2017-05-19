@@ -6,7 +6,7 @@ BaseObject::BaseObject(glm::vec3 position) : BaseObject(position, glm::quat())
 {
 }
 
-BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton), m_isEnabled(true), m_path(nullptr)
+BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton), m_scale(1), m_isEnabled(true), m_path(nullptr)
 {
 }
 
@@ -70,6 +70,21 @@ void BaseObject::Rotate(glm::quat rotation)
 	m_orientation = glm::normalize(glm::quat(rotation) * m_orientation);
 }
 
+void BaseObject::SetScale(glm::vec3 scale)
+{
+	m_scale = scale;
+}
+
+glm::vec3 BaseObject::GetScale() const
+{
+	return m_scale;
+}
+
+void BaseObject::Scale(glm::vec3 scale)
+{
+	m_scale *= scale;
+}
+
 void BaseObject::FollowPath(BasePath* path)
 {
 	m_path = path;
@@ -113,9 +128,11 @@ bool BaseObject::CursorPosCallback(float x, float y)
 
 glm::mat4 BaseObject::GetMatrix() const
 {
-	glm::mat4 translation = glm::mat4(1.0f);
+	glm::mat4 scale(1.0f);
+	scale = glm::scale(scale, m_scale);
+	glm::mat4 translation(1.0f);
 	translation = glm::translate(translation, m_position);
 	glm::mat4 rotation = glm::toMat4(glm::normalize(m_orientation));
 
-	return translation * rotation;
+	return translation * rotation * scale;
 }

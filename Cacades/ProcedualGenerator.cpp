@@ -59,6 +59,9 @@ void ProcedualGenerator::SetupDensity()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
 
+	glBindTexture(GL_TEXTURE_3D, 0);
+	glCheckError();
+
 	glBindTexture(GL_TEXTURE_3D, m_normalTex.GetId());
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, WIDTH, DEPTH, LAYERS, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -320,6 +323,7 @@ void ProcedualGenerator::SetNoiseScale(float scale)
 void ProcedualGenerator::SetGeometryScale(glm::vec3 scale)
 {
 	m_geometryScale = scale;
+	m_mcMesh.SetScale(scale);
 }
 
 const glm::vec3 ProcedualGenerator::GetGeometryScale() const

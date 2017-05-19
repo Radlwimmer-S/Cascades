@@ -145,6 +145,10 @@ std::string Shader::ReadFile(const GLchar* shaderPath)
 GLuint Shader::LoadShader(const GLchar* shaderPath, GLenum shaderType, bool& isValid)
 {
 	std::string shaderCode = ReadFile(shaderPath);
+#if DEBUG_SHADER
+	size_t newLine = shaderCode.find('\n');
+	shaderCode.insert(newLine + 1, "#pragma optimize(off)\n#pragma debug(on)\n");
+#endif
 	HandleIncludes(shaderCode, shaderPath);
 
 	const GLchar* vShaderCode = shaderCode.c_str();
