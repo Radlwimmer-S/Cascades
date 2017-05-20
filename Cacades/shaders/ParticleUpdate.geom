@@ -7,8 +7,8 @@ in Particle
 	vec3 position;
 	vec3 velocity;
 	vec2 seed;
-	float lifeTime;
-	int type;
+	flat float lifeTime;
+	flat int type;
 } gs_in[];
 
 struct ParticleOut
@@ -23,7 +23,7 @@ out ParticleOut gs_out;
 
 uniform sampler3D densityTex;
 uniform sampler3D normalTex;
-uniform float waterTTL = 15.0f;
+uniform float waterTTL = 2.0f;
 uniform float mistTTL = 2.0f;
 uniform float deltaTime;
 uniform float isoLevel = 0;
@@ -81,29 +81,29 @@ void SpawnEmitters()
 	int steps = 1000;
 	vec3 dir = maxRayLenght / steps * gs_in[0].velocity;
 
-    gs_out.position = origin - dir;
-    gs_out.velocity = -normalize(dir);
-    gs_out.lifeTime = 0;
-    gs_out.seed = vec2(Random(), Random());
-    gs_out.type = PARTICLE_EMITTER;
-    EmitVertex();
-    EndPrimitive();
+    // gs_out.position = origin - dir;
+    // gs_out.velocity = -normalize(dir);
+    // gs_out.lifeTime = 0;
+    // gs_out.seed = vec2(Random(), Random());
+    // gs_out.type = PARTICLE_EMITTER;
+    // EmitVertex();
+    // EndPrimitive();
 
- //   for (int i = 0; i < steps; ++i)
-	//{
- //       origin += dir;
- //       if (texture(densityTex, ws_to_UVW(origin)).r > isoLevel)
-	//	{
- //           gs_out.position = origin - dir;
- //           gs_out.velocity = -normalize(dir);
- //           gs_out.lifeTime = 0;
- //           gs_out.seed = Random();
- //           gs_out.type = PARTICLE_EMITTER;
- //           EmitVertex();
- //           EndPrimitive();
- //           return;
- //       }
-	//}
+   for (int i = 0; i < steps; ++i)
+	{
+       origin += dir;
+       if (texture(densityTex, ws_to_UVW(origin)).r > isoLevel)
+		{
+           gs_out.position = origin - dir;
+           gs_out.velocity = -normalize(dir);
+           gs_out.lifeTime = 0;
+           gs_out.seed = vec2(Random(), Random());
+           gs_out.type = PARTICLE_EMITTER;
+           EmitVertex();
+           EndPrimitive();
+           return;
+       }
+	}
 }
 
 void SpawnWater()
@@ -142,7 +142,7 @@ void UpdateWater()
 	if (gs_out.lifeTime >= waterTTL)
 		return;
 
-	gs_out.velocity = gs_in[0].velocity + vec3(0, 9.81f, 0) * deltaTime * velocityScale;
+	gs_out.velocity = gs_in[0].velocity - vec3(0, 9.81f, 0) * deltaTime * velocityScale;
 	gs_out.position = gs_in[0].position + gs_out.velocity * deltaTime;
 
 	if (texture(densityTex, ws_to_UVW(gs_out.position)).r > isoLevel)
@@ -165,15 +165,6 @@ void UpdateMist()
 void main()
 {
 	InitRandom();
-
-	gs_out.velocity = gs_in[0].velocity + vec3(0, 9.81f, 0) * deltaTime * velocityScale;
-	gs_out.position = gs_in[0].position + gs_out.velocity * deltaTime;
-	gs_out.lifeTime = gs_in[0].lifeTime + deltaTime;
-	gs_out.seed = vec2(Random(), Random());
-	gs_out.type = 1;
-	EmitVertex();
-	EndPrimitive();
-	return;
 
     switch(gs_in[0].type)
 	{

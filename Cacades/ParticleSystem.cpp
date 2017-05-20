@@ -1,3 +1,4 @@
+// float4 pos; float4 vel; float2 seed; float time; int type
 #include "ParticleSystem.h"
 #include "Global.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -35,7 +36,7 @@ ParticleSystem::ParticleSystem(const Camera& camera, const Texture& densityTex, 
 		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
 		glEnableVertexAttribArray(3);
 		// type attribute
-		glVertexAttribPointer(4, 1, GL_INT, GL_FALSE, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(float)));
+		glVertexAttribIPointer(4, 1, GL_INT, sizeof(Particle), (GLvoid*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(float)));
 		glEnableVertexAttribArray(4);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -182,8 +183,8 @@ void ParticleSystem::AddEmitter(glm::vec3 viewPos, glm::vec3 viewDir)
 		return;
 
 	Particle rayParticle;
-	rayParticle.position = glm::vec3(0);//viewPos / m_geometryScale;
-	rayParticle.velocity = glm::vec3(0, -1, 0); //viewDir;
+	rayParticle.position = viewPos / m_geometryScale;
+	rayParticle.velocity = viewDir;
 	rayParticle.lifeTime = 0;
 	rayParticle.seed = glm::vec2(rand(), rand());
 	rayParticle.type = EmitterRay;

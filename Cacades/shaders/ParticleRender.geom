@@ -2,23 +2,16 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
-//struct Particle
-//{
-//	vec3 position;
-//	int type;
-//};
-//in Particle gs_in[];
-
 in Particle
 {
-	vec3 position;
 	int type;
+	vec3 position;
 } gs_in[];
 
 out ParticleQuad
 {
-    vec2 uv;
     flat int type;
+    vec2 uv;
 } gs_out;
 
 #pragma include "EnumParticleType.h"
@@ -26,7 +19,7 @@ out ParticleQuad
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform float size = 0.5f;
+uniform float size = 0.1f;
 
 void RenderScreenOriented()
 {
@@ -90,10 +83,10 @@ void main()
     switch(gs_in[0].type)
     {
       case PARTICLE_RAY: return;
-      case PARTICLE_EMITTER:        RenderGeometryOriented(); break;
+      case PARTICLE_EMITTER:
       case PARTICLE_WATER_FLOWING:  RenderGeometryOriented(); break;
-      case PARTICLE_WATER_FALLING:  RenderScreenOriented(); break;
-      case PARTICLE_MIST_COLLISION: RenderScreenOriented(); break;
+      case PARTICLE_WATER_FALLING:
+      case PARTICLE_MIST_COLLISION:
       case PARTICLE_MIST_FALLING:   RenderScreenOriented(); break;
       default: RenderError(); break;
     }

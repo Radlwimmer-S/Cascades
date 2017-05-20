@@ -2,8 +2,8 @@
 
 in ParticleQuad
 {
-    vec2 uv;
     flat int type;
+    vec2 uv;
 } fs_in;
 
 out vec4 FragColor;

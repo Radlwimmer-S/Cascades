@@ -5,17 +5,10 @@ layout(location = 2) in vec2 seed;
 layout(location = 3) in float lifeTime;
 layout(location = 4) in int type;
 
-//struct Particle
-//{
-//	vec3 position;
-//	int type;
-//};
-//out Particle vs_out;
-
 out Particle
 {
-	vec3 position;
 	int type;
+	vec3 position;
 } vs_out;
 
 void main()

@@ -10,8 +10,8 @@ out Particle
 	vec3 position;
 	vec3 velocity;
 	vec2 seed;
-	float lifeTime;
-	int type;
+	flat float lifeTime;
+	flat int type;
 } vs_out;
 
 void main()
