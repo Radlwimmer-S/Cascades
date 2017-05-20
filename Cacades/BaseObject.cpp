@@ -6,7 +6,7 @@ BaseObject::BaseObject(glm::vec3 position) : BaseObject(position, glm::quat())
 {
 }
 
-BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_orientation(orientaton), m_scale(1), m_isEnabled(true), m_path(nullptr)
+BaseObject::BaseObject(glm::vec3 position, glm::quat orientaton) : m_position(position), m_scale(1), m_orientation(orientaton), m_isEnabled(true), m_path(nullptr)
 {
 }
 

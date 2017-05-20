@@ -23,11 +23,11 @@ out ParticleOut gs_out;
 
 uniform sampler3D densityTex;
 uniform sampler3D normalTex;
-uniform float waterTTL = 2.0f;
+uniform float waterTTL = 1.0f;
 uniform float mistTTL = 2.0f;
 uniform float deltaTime;
 uniform float isoLevel = 0;
-uniform float particlesPerSecond = 20;
+uniform float particlesPerSecond = 2;
 uniform float velocityScale = 0.01f;
 uniform float maxRayLenght = 10;
 uniform vec3 resolution;
@@ -95,7 +95,7 @@ void SpawnEmitters()
        if (texture(densityTex, ws_to_UVW(origin)).r > isoLevel)
 		{
            gs_out.position = origin - dir;
-           gs_out.velocity = -normalize(dir);
+           gs_out.velocity = texture(normalTex, ws_to_UVW(origin)).rgb;
            gs_out.lifeTime = 0;
            gs_out.seed = vec2(Random(), Random());
            gs_out.type = PARTICLE_EMITTER;
@@ -126,10 +126,10 @@ void SpawnWater()
     if (spawn)
 	{
 		gs_out.position = gs_in[0].position + gs_in[0].velocity * velocityScale;
-		gs_out.velocity = gs_in[0].velocity * velocityScale;
+		gs_out.velocity = gs_in[0].velocity * 10.0f * velocityScale;
 		gs_out.lifeTime = 0;
 		gs_out.seed = vec2(Random(), Random());
-		gs_out.type = PARTICLE_WATER_FLOWING;
+		gs_out.type = PARTICLE_WATER_FALLING;
 		EmitVertex();
 		EndPrimitive();
     }
@@ -147,19 +147,45 @@ void UpdateWater()
 
 	if (texture(densityTex, ws_to_UVW(gs_out.position)).r > isoLevel)
 	{
-		vec3 normal = texture(normalTex, ws_to_UVW(gs_out.position)).rgb;
-		// TODO: Add Collision-Resolve
-		return;
+		if (Random() < 0.25f)
+		{
+			vec3 normal = texture(normalTex, ws_to_UVW(gs_out.position)).rgb;
+
+			gs_out.position = gs_out.position - gs_out.velocity * deltaTime;
+			gs_out.velocity = vec3(0);
+			gs_out.seed = vec2(Random(), Random());
+			gs_out.type = PARTICLE_MIST_COLLISION;
+			EmitVertex();
+			EndPrimitive();
+			return;
+		}
 	}
 
 	gs_out.seed = vec2(Random(), Random());
-	gs_out.type = PARTICLE_WATER_FLOWING;
+	gs_out.type = gs_in[0].type;
 	EmitVertex();
 	EndPrimitive();
 }
 
 void UpdateMist()
 {
+	gs_out.lifeTime = gs_in[0].lifeTime + deltaTime;
+
+	if (gs_out.lifeTime >= waterTTL)
+		return;
+
+	gs_out.velocity = gs_in[0].velocity - vec3(0, 9.81f, 0) * deltaTime * velocityScale / 10.0f;
+	gs_out.position = gs_in[0].position + gs_out.velocity * deltaTime;
+
+	if (texture(densityTex, ws_to_UVW(gs_out.position)).r > isoLevel)
+	{
+		gs_out.position = gs_out.position - gs_out.velocity * deltaTime;
+	}
+
+	gs_out.seed = vec2(Random(), Random());
+	gs_out.type = gs_in[0].type;
+	EmitVertex();
+	EndPrimitive();
 }
 
 void main()

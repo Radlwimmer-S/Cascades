@@ -5,6 +5,7 @@
 #include <glm/detail/type_vec3.hpp>
 #include "Enums.h"
 #include "Texture.h"
+#include "BaseObject.h"
 
 struct RenderInfo;
 struct UpdateInfo;
@@ -19,7 +20,7 @@ struct Particle
 	ParticleType type;
 };
 
-class ParticleSystem
+class ParticleSystem : public BaseObject
 {
 public:
 	ParticleSystem(const Camera& camera, const Texture& densityTex, const Texture& normalTexture);
@@ -31,6 +32,8 @@ public:
 	void UpdateUniformsR(const RenderInfo& info);
 
 	void AddEmitter(glm::vec3 viewPos, glm::vec3 viewDir);
+
+	void SetResolution(glm::ivec3 cubesPerDimension);
 
 protected:
 
@@ -47,7 +50,6 @@ protected:
 	GLuint m_vbos[2];
 	GLuint m_particleCount;
 
-	glm::vec3 m_geometryScale;
 	glm::vec3 m_resolution;
 
 	const Camera& m_camera;

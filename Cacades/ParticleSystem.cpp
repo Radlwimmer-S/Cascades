@@ -7,7 +7,7 @@
 #include "Camera.h"
 
 ParticleSystem::ParticleSystem(const Camera& camera, const Texture& densityTex, const Texture& normalTexture)
-	: readBuf(0), writeBuf(1), m_particleCount(0), m_camera(camera), m_densityTex(densityTex), m_normalTex(normalTexture)
+	: BaseObject(glm::vec3(0)), readBuf(0), writeBuf(1), m_particleCount(0), m_camera(camera), m_densityTex(densityTex), m_normalTex(normalTexture)
 {
 	GLchar** feedbackVaryings = new GLchar*[5]{ "gs_out.position", "gs_out.velocity", "gs_out.lifeTime", "gs_out.seed", "gs_out.type" };
 	m_updateShader = new Shader("./shaders/ParticleUpdate.vert", "./shaders/ParticleUpdate.geom", nullptr, const_cast<const GLchar**>(feedbackVaryings), 5);
@@ -139,9 +139,6 @@ void ParticleSystem::UpdateUniformsU(GLfloat deltaTime, const UpdateInfo& info)
 
 void ParticleSystem::Render(const RenderInfo& info)
 {
-	m_geometryScale = info.GeometryScale;
-	m_resolution = 2 / info.Resolution;
-
 	if (m_particleCount == 0)
 		return;
 
@@ -156,14 +153,18 @@ void ParticleSystem::Render(const RenderInfo& info)
 
 void ParticleSystem::UpdateUniformsR(const RenderInfo& info)
 {
-	GLint resolutionLoc = glGetUniformLocation(m_updateShader->Program, "resolution");
+	GLint resolutionLoc = glGetUniformLocation(m_renderShader->Program, "resolution");
 	glUniform3fv(resolutionLoc, 1, glm::value_ptr(m_resolution));
 	glCheckError();
 
-	glm::mat4 model(1);
-	model = glm::scale(model, m_geometryScale);
+	int normalLoc = glGetUniformLocation(m_renderShader->Program, "normalTex");
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_3D, m_normalTex.GetId());
+	glUniform1i(normalLoc, 2);
+	glCheckError();
+
 	GLint modelLoc = glGetUniformLocation(m_renderShader->Program, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(GetMatrix()));
 	glCheckError();
 
 	glm::mat4 view = m_camera.GetViewMatrix();
@@ -183,8 +184,9 @@ void ParticleSystem::AddEmitter(glm::vec3 viewPos, glm::vec3 viewDir)
 		return;
 
 	Particle rayParticle;
-	rayParticle.position = viewPos / m_geometryScale;
-	rayParticle.velocity = viewDir;
+	glm::mat4 antiModel = glm::inverse(GetMatrix());
+	rayParticle.position = glm::vec3(antiModel * glm::vec4(viewPos, 1.0f));
+	rayParticle.velocity = glm::normalize(glm::vec3(antiModel * glm::vec4(viewDir, 1.0f)));
 	rayParticle.lifeTime = 0;
 	rayParticle.seed = glm::vec2(rand(), rand());
 	rayParticle.type = EmitterRay;
@@ -196,6 +198,11 @@ void ParticleSystem::AddEmitter(glm::vec3 viewPos, glm::vec3 viewDir)
 	++m_particleCount;
 
 	glCheckError();
+}
+
+void ParticleSystem::SetResolution(glm::ivec3 cubesPerDimension)
+{
+	m_resolution = 2.0f / glm::vec3(cubesPerDimension);
 }
 
 void ParticleSystem::SwapBuffer()

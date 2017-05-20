@@ -12,14 +12,14 @@ out vec4 FragColor;
 
 void main()
 {
-    if (fs_in.type == PARTICLE_EMITTER)
-        FragColor = vec4(1, 0, 0, 1);
-    else
-        FragColor = vec4(0, 0, 1, 1);
-
-    if (fs_in.type < -1 )
-        FragColor = vec4(-fs_in.type, 0, 0, 1);
-
-    if (fs_in.type > 4)
-        FragColor = vec4(0, fs_in.type, 0, 1);
+    switch(fs_in.type)
+    {
+      case PARTICLE_RAY: return;
+      case PARTICLE_EMITTER: FragColor = vec4(1, 0, 0, 1); break;
+      case PARTICLE_WATER_FLOWING:
+      case PARTICLE_WATER_FALLING: FragColor = vec4(0, 0, 1, 1);  break;
+      case PARTICLE_MIST_COLLISION:
+      case PARTICLE_MIST_FALLING: FragColor = vec4(1, 1, 1, 1);  break;
+      default: FragColor = vec4(0, 1, 1, 1); break;
+    }
 }

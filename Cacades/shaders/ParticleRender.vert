@@ -9,10 +9,12 @@ out Particle
 {
 	int type;
 	vec3 position;
+	vec3 velocity;
 } vs_out;
 
 void main()
 {
 	vs_out.position = position;
 	vs_out.type = type;
+	vs_out.velocity = velocity;
 }

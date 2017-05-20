@@ -122,6 +122,9 @@ void Engine::Start()
 	m_generator.SetIsoLevel(m_renderInfo.IsoLevel);
 	m_generator.SetGeometryScale(m_renderInfo.GeometryScale);
 
+	m_particleSystem.SetScale(m_renderInfo.GeometryScale);
+	m_particleSystem.SetResolution(m_renderInfo.Resolution);
+
 	m_generator.GenerateMcVbo();
 	m_generator.Generate3dTexture();
 	m_mesh = m_generator.GenerateMesh();
@@ -158,7 +161,6 @@ void Engine::RenderScene()
 {
 	m_shader->Use();
 	UpdateUniforms(*m_shader);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_mesh->Render(*m_shader);
 
 	m_debugShader->Use();
@@ -206,12 +208,14 @@ void Engine::Loop()
 		
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glClearColor(.1f, .1f, .1f, 1.0f);
-
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		RenderScene();
+
+		m_particleSystem.Render(m_renderInfo);
 
 		RenderHud();
 
-		m_particleSystem.Render(m_renderInfo);
 
 		glfwSwapBuffers(&m_window);
 		glCheckError();
