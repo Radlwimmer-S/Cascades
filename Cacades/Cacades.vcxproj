@@ -213,10 +213,11 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="LinearPath.h" />
     <ClInclude Include="MeasuringTool.h" />
     <ClInclude Include="ParticleSystem.h" />
-    <ClInclude Include="shaders\EnumColorMode.h" />
-    <ClInclude Include="shaders\EnumLightType.h" />
-    <ClInclude Include="shaders\EnumNormalMode.h" />
-    <ClInclude Include="shaders\EnumParticleType.h" />
+    <ClInclude Include="shaders\EnumColorMode.glh" />
+    <ClInclude Include="shaders\EnumLightType.glh" />
+    <ClInclude Include="shaders\EnumNormalMode.glh" />
+    <ClInclude Include="shaders\EnumParticleType.glh" />
+    <ClInclude Include="shaders\EnumShadowMode.glh" />
     <ClInclude Include="TriplanarMesh.h" />
     <ClInclude Include="NoiseTexture.h" />
     <ClInclude Include="Plane.h" />
@@ -247,6 +248,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\Density.vert" />
     <None Include="shaders\DirectionalLight.frag" />
     <None Include="shaders\DirectionalLight.vert" />
+    <None Include="shaders\Lighting.glh" />
     <None Include="shaders\MarchingCubes.geom" />
     <None Include="shaders\MarchingCubes.vert" />
     <None Include="shaders\Normal.frag" />

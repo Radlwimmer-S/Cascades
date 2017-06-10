@@ -52,6 +52,24 @@
     <Filter Include="Source Files\Utilities">
       <UniqueIdentifier>{6f7f8cd9-bb12-43ad-8eeb-f2af73008877}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Enums">
+      <UniqueIdentifier>{abefb3ac-2384-4118-a5b3-4bd25da225ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Generation">
+      <UniqueIdentifier>{f3b2fd43-fbfd-494a-97fb-d75ac11f40d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Lights">
+      <UniqueIdentifier>{381aece9-93bf-4405-bf51-79b20b867f2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ParticleSystem">
+      <UniqueIdentifier>{2f881611-d7ca-4f73-a040-3463128ea301}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Generation">
+      <UniqueIdentifier>{d0b652bb-1cee-4bcf-93d7-738ba888e118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Generation">
+      <UniqueIdentifier>{677e26b5-7ae4-4c73-bb2f-2c614b00d701}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -132,15 +150,6 @@
     <ClCompile Include="FileWatcher.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="ProcedualGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GpuLookupTable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NoiseTexture.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
@@ -156,8 +165,17 @@
     <ClCompile Include="CircularPath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="GpuLookupTable.cpp">
+      <Filter>Source Files\Generation</Filter>
+    </ClCompile>
     <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Generation</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcedualGenerator.cpp">
+      <Filter>Source Files\Generation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -257,15 +275,6 @@
     <ClInclude Include="Global.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="ProcedualGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GpuLookupTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NoiseTexture.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
@@ -281,39 +290,36 @@
     <ClInclude Include="CircularPath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\EnumColorMode.h">
-      <Filter>Shaders</Filter>
+    <ClInclude Include="GpuLookupTable.h">
+      <Filter>Header Files\Generation</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\EnumLightType.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="shaders\EnumNormalMode.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="shaders\EnumParticleType.h">
-      <Filter>Shaders</Filter>
+    <ClInclude Include="ProcedualGenerator.h">
+      <Filter>Header Files\Generation</Filter>
     </ClInclude>
     <ClInclude Include="ParticleSystem.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Generation</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumColorMode.glh">
+      <Filter>Shaders\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumLightType.glh">
+      <Filter>Shaders\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumNormalMode.glh">
+      <Filter>Shaders\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumParticleType.glh">
+      <Filter>Shaders\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\EnumShadowMode.glh">
+      <Filter>Shaders\Enums</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\DirectionalLight.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\DirectionalLight.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\PointLight.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\PointLight.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\PointLight.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\default.frag">
@@ -325,23 +331,8 @@
     <None Include="shaders\Text.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\MarchingCubes.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\MarchingCubes.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="CopyAssets.bat">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\Density.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\Density.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\Density.frag">
-      <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\Simple.vert">
       <Filter>Shaders</Filter>
@@ -355,29 +346,62 @@
     <None Include="shaders\TriPlanar.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\ParticleUpdate.geom">
-      <Filter>Shaders</Filter>
+    <None Include="shaders\Density.frag">
+      <Filter>Shaders\Generation</Filter>
     </None>
-    <None Include="shaders\ParticleUpdate.vert">
-      <Filter>Shaders</Filter>
+    <None Include="shaders\Density.geom">
+      <Filter>Shaders\Generation</Filter>
     </None>
-    <None Include="shaders\ParticleRender.vert">
-      <Filter>Shaders</Filter>
+    <None Include="shaders\Density.vert">
+      <Filter>Shaders\Generation</Filter>
     </None>
-    <None Include="shaders\ParticleRender.geom">
-      <Filter>Shaders</Filter>
+    <None Include="shaders\MarchingCubes.geom">
+      <Filter>Shaders\Generation</Filter>
     </None>
-    <None Include="shaders\ParticleRender.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\Normal.vert">
-      <Filter>Shaders</Filter>
+    <None Include="shaders\MarchingCubes.vert">
+      <Filter>Shaders\Generation</Filter>
     </None>
     <None Include="shaders\Normal.frag">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Generation</Filter>
     </None>
     <None Include="shaders\Normal.geom">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Generation</Filter>
+    </None>
+    <None Include="shaders\Normal.vert">
+      <Filter>Shaders\Generation</Filter>
+    </None>
+    <None Include="shaders\DirectionalLight.frag">
+      <Filter>Shaders\Lights</Filter>
+    </None>
+    <None Include="shaders\DirectionalLight.vert">
+      <Filter>Shaders\Lights</Filter>
+    </None>
+    <None Include="shaders\PointLight.frag">
+      <Filter>Shaders\Lights</Filter>
+    </None>
+    <None Include="shaders\PointLight.geom">
+      <Filter>Shaders\Lights</Filter>
+    </None>
+    <None Include="shaders\PointLight.vert">
+      <Filter>Shaders\Lights</Filter>
+    </None>
+    <None Include="shaders\ParticleRender.frag">
+      <Filter>Shaders\ParticleSystem</Filter>
+    </None>
+    <None Include="shaders\ParticleRender.geom">
+      <Filter>Shaders\ParticleSystem</Filter>
+    </None>
+    <None Include="shaders\ParticleRender.vert">
+      <Filter>Shaders\ParticleSystem</Filter>
+    </None>
+    <None Include="shaders\ParticleUpdate.geom">
+      <Filter>Shaders\ParticleSystem</Filter>
+    </None>
+    <None Include="shaders\ParticleUpdate.vert">
+      <Filter>Shaders\ParticleSystem</Filter>
+    </None>
+    <None Include="shaders\Lighting.glh">
+      <Filter>Shaders\Lights</Filter>
     </None>
   </ItemGroup>
 </Project>

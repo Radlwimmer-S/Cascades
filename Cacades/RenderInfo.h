@@ -1,10 +1,11 @@
 #pragma once
 #include <glm/detail/type_vec3.hpp>
+#include "Model.h"
 
 struct RenderInfo
 {
 	float NormalMapFactor = 1.0f;
-	bool EnableSoftShadowing = true;
+	ShadowMode ShadowMode = PcfShadows;
 	bool EnableLight = true;
 	bool EnableShadows = true;
 	bool DrawLightPosition = true;

@@ -1,6 +1,8 @@
 #version 330 core
 in vec4 FragPos;
 
+out vec2 varianceShadowMap;
+
 uniform vec3 lightPos;
 uniform float far_plane;
 
@@ -14,4 +16,5 @@ void main()
 
 	// Write this as modified depth
 	gl_FragDepth = lightDistance;
+	varianceShadowMap = vec2(lightDistance, lightDistance * lightDistance);
 }

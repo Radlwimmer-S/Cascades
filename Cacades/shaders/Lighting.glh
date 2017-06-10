@@ -1,30 +1,9 @@
-#version 330 core
-
-out vec4 FragColor;
-
-#pragma include "EnumNormalMode.glh"
-#pragma include "EnumLightType.glh"
-#pragma include "EnumColorMode.glh"
-
-in VS_OUT
-{
-	vec3 FragPos;
-	vec3 Normal;
-	vec2 UV;
-	mat3 TBN;
-} fs_in;
-
-uniform bool SoftShadows = true;
-uniform bool EnableLighting = true;
-
 struct LightComponents
 {
 	float Ambient;
 	float Diffuse;
 	float Specular;
 };
-
-const int LIGHT_COUNT = 5;
 
 struct LightSource
 {
@@ -44,51 +23,12 @@ struct LightSource
 	sampler2D depthMap;
 };
 
-uniform LightSource Lights[LIGHT_COUNT];
-
-uniform int colorMode = COLOR_ONLY_MODE;
-uniform vec3 objectColor = vec3(1);
-uniform sampler2D objectTexture;
-
-uniform int normalMode = NORMALS_ONLY_MODE;
-uniform sampler2D normalMap;
-uniform float bumbiness = 2f;
-
-uniform vec3 viewPos;
-
-vec3 DetermineFragmentColor(in int colorMode)
+struct GlobalIllumination
 {
-	//Check for blending colorMode
-	switch (colorMode)
-	{
-		case COLOR_ONLY_MODE:
-			return objectColor;
-		case COLOR_MIX_MODE:
-			return texture(objectTexture, fs_in.UV).rgb * objectColor;
-		case TEXTURE_ONLY_MODE:
-			return texture(objectTexture, fs_in.UV).rgb;
-	}
-}
-
-vec3 DetermineFragmentNormal(in int normalMode)
-{
-	switch (normalMode)
-	{
-		case NORMALS_ONLY_MODE:
-			return fs_in.Normal;
-		case NO_NORMALS_MODE:
-			return vec3(0.0f);
-		case BUMP_MAP_ONLY_MODE:
-			// Obtain normal from normal map in range [0,1]
-			vec3 tmpNormal = texture(normalMap, fs_in.UV).rgb;
-			// Transform normal vector to range [-1,1]
-			tmpNormal = normalize(tmpNormal * 2.0 - 1.0);
-			// Apply "Bumpiness"
-			tmpNormal = normalize(tmpNormal * vec3(bumbiness, bumbiness, 1.0f));
-			// Convert to global
-			return normalize(fs_in.TBN * tmpNormal);
-	}
-}
+	vec3 ViewPos;
+	vec3 FragPos;
+	int ShadowType;
+};
 
 // array of offset direction for sampling
 vec3 gridSamplingDisk[20] = vec3[]
@@ -100,7 +40,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
-float CalculatePointShadow(in LightSource light, in vec3 normal)
+float CalculatePointShadow(in LightSource light, in int shadowType, in vec3 normal)
 {
 	// Get vector between fragment position and light position
 	vec3 fragToLight = fs_in.FragPos - light.Pos;
@@ -109,31 +49,34 @@ float CalculatePointShadow(in LightSource light, in vec3 normal)
 	float bias = 0.05;
 	float shadow = 0.0;
 
-	if (!SoftShadows)
+	switch(shadowType)
 	{
-		// Use the light to fragment vector to sample from the depth map
-		float closestDepth = texture(light.depthCube, fragToLight).r;
-		// It is currently in linear range between [0,1]. Re-transform back to original value
-		closestDepth *= light.far_plane;
-		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-	}
-	else
-	{
-		// Test for shadows with PCF
-		int samples = 20;
-		float viewDistance = length(viewPos - fs_in.FragPos);
-		float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
-		for (int i = 0; i < samples; ++i)
-		{
-			float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-			closestDepth *= light.far_plane;   // Undo mapping [0;1]
+		case HARD_SHADOWS:
+			// Use the light to fragment vector to sample from the depth map
+			float closestDepth = texture(light.depthCube, fragToLight).r;
+			// It is currently in linear range between [0,1]. Re-transform back to original value
+			closestDepth *= light.far_plane;
+			shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+		break;
+		case PCF_SHADOWS:
+			int samples = 20;
+			float viewDistance = length(viewPos - fs_in.FragPos);
+			float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
+			for (int i = 0; i < samples; ++i)
+			{
+				float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+				closestDepth *= light.far_plane;   // Undo mapping [0;1]
 
-			float distance = length(light.Pos - fs_in.FragPos);
-			float distanceBias = max(bias, bias * distance / 5.0f);
-			if (currentDepth - distanceBias > closestDepth)
-				shadow += 1.0;
-		}
-		shadow /= float(samples);
+				float distance = length(light.Pos - fs_in.FragPos);
+				float distanceBias = max(bias, bias * distance / 5.0f);
+				if (currentDepth - distanceBias > closestDepth)
+					shadow += 1.0;
+			}
+			shadow /= float(samples);
+		break;
+		case VSM_SHADOWS:
+
+		break;
 	}
 
 	// return shadow;
@@ -164,7 +107,7 @@ LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lig
 	return lighting;
 }
 
-float CalculateDirShadow(in LightSource light, in vec3 normal, in float baseBias)
+float CalculateDirShadow(in LightSource light, in int shadowType, in vec3 normal, in float baseBias)
 {
 	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
 
@@ -189,21 +132,26 @@ float CalculateDirShadow(in LightSource light, in vec3 normal, in float baseBias
 
 	float shadow = 0.0;
 	// Check whether current frag pos is in shadow
-	if (!SoftShadows)
-		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-	else
+	switch(shadowType)
 	{
-		// PCF
-		vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
-		for (int x = -1; x <= 1; ++x)
-		{
-			for (int y = -1; y <= 1; ++y)
+		case HARD_SHADOWS:
+			shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+		break;
+		case PCF_SHADOWS:
+			vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
+			for (int x = -1; x <= 1; ++x)
 			{
-				float pcfDepth = texture(light.depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
-				shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+				for (int y = -1; y <= 1; ++y)
+				{
+					float pcfDepth = texture(light.depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
+					shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+				}
 			}
-		}
-		shadow /= 9.0;
+			shadow /= 9.0;
+		break;
+		case VSM_SHADOWS:
+
+		break;
 	}
 
 	return shadow;
@@ -232,7 +180,7 @@ vec3 CalculateDirLightSource(in LightSource light, in vec3 normal)
 	LightComponents components = CalculateLight(light, normal, normalize(light.Pos));
 	float shadow = 0;
 	if (light.CastShadow)
-		shadow = CalculateDirShadow(light, normal, 0.005);
+		shadow = CalculateDirShadow(light, ShadowType, normal, 0.005);
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
@@ -242,7 +190,7 @@ vec3 CalculateSpotLightSource(in LightSource light, in vec3 normal)
 	float shadow = 0;
 	if (light.CastShadow)
 	{
-		shadow = CalculateDirShadow(light, normal, 0.002);
+		shadow = CalculateDirShadow(light, ShadowType, normal, 0.002);
 		float circular = CalculateCircularShadow(light, normal);
 		shadow = clamp(shadow + circular, 0, 1);
 	}
@@ -255,48 +203,9 @@ vec3 CalculatePointLightSource(in LightSource light, in vec3 normal)
 	float shadow = 0;
 	if (light.CastShadow)
 	{
-		shadow = CalculatePointShadow(light, normal);
+		shadow = CalculatePointShadow(light, ShadowType, normal);
 		float distance = CalculateDistanceShadow(light, normal);
 		shadow = clamp(shadow + distance, 0, 1);
 	}
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
-}
-
-
-void main()
-{
-	vec3 color = DetermineFragmentColor(colorMode);
-
-	vec3 normal = DetermineFragmentNormal(normalMode);
-
-	if (!EnableLighting || normal == vec3(0.0f))
-	{
-		FragColor = vec4(color, 1.0f);
-		return;
-	}
-
-	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
-	for (int i = 0; i < LIGHT_COUNT; i++)
-	{
-		if (!Lights[i].IsEnabled)
-			continue;
-
-		switch (Lights[i].Type)
-		{
-		case DIR_LIGHT:
-			lighting += CalculateDirLightSource(Lights[i], normal);
-			break;
-		case SPOT_LIGHT:
-			lighting += CalculateSpotLightSource(Lights[i], normal);
-			break;
-		case POINT_LIGHT:
-			lighting += CalculatePointLightSource(Lights[i], normal);
-			break;
-		}
-	}
-
-	lighting = clamp(lighting, 0, 1);
-	lighting *= color;
-
-	FragColor = vec4(lighting, 1.0f);
 }

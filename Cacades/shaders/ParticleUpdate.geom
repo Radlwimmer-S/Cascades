@@ -34,7 +34,7 @@ uniform vec3 resolution;
 
 vec2 randomSeed;
 
-#pragma include "EnumParticleType.h"
+#pragma include "EnumParticleType.glh"
 
 void InitRandom()
 {

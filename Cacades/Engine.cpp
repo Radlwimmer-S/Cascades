@@ -271,6 +271,10 @@ void Engine::UpdateUniforms(const Shader& shader) const
 	GLuint projLocation = glGetUniformLocation(shader.Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
+
+	GLuint shadowModeLoc = glGetUniformLocation(shader.Program, "shadowMode");
+	glUniform1i(shadowModeLoc, m_renderInfo.ShadowMode);
+	glCheckError();
 }
 
 void Engine::MoveActiveObject()

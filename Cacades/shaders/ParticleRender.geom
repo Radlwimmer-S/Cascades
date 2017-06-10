@@ -15,7 +15,7 @@ out ParticleQuad
     vec2 uv;
 } gs_out;
 
-#pragma include "EnumParticleType.h"
+#pragma include "EnumParticleType.glh"
 
 uniform mat4 model;
 uniform mat4 view;

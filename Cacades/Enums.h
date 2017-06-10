@@ -1,9 +1,10 @@
 #pragma once
 
-#include "shaders/EnumNormalMode.h"
-#include "shaders/EnumColorMode.h"
-#include "shaders/EnumLightType.h"
-#include "shaders/EnumParticleType.h"
+#include "shaders/EnumNormalMode.glh"
+#include "shaders/EnumColorMode.glh"
+#include "shaders/EnumLightType.glh"
+#include "shaders/EnumParticleType.glh"
+#include "shaders/EnumShadowMode.glh"
 
 enum NormalBlendMode
 {
@@ -44,9 +45,9 @@ enum LightType
 	Point = POINT_LIGHT,
 };
 
-enum VertexFormat
+enum ShadowMode
 {
-	V = 3,
-	VN = 6,
-	VNT = 8,
+	HardShadows = HARD_SHADOWS,
+	PcfShadows = PCF_SHADOWS,
+	VsmShadows = VSM_SHADOWS,
 };

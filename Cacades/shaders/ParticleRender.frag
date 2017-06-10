@@ -8,7 +8,7 @@ in ParticleQuad
 
 out vec4 FragColor;
 
-#pragma include "EnumParticleType.h"
+#pragma include "EnumParticleType.glh"
 
 void main()
 {
