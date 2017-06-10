@@ -23,11 +23,13 @@ struct LightSource
 	sampler2D depthMap;
 };
 
-struct GlobalIllumination
+struct LightingGlobals
 {
 	vec3 ViewPos;
 	vec3 FragPos;
+	vec3 FragNormal;
 	int ShadowType;
+	bool EnableLighting;
 };
 
 // array of offset direction for sampling
@@ -40,16 +42,16 @@ vec3 gridSamplingDisk[20] = vec3[]
 	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
-float CalculatePointShadow(in LightSource light, in int shadowType, in vec3 normal)
+float CalculatePointShadow(in LightSource light, in LightingGlobals globals)
 {
 	// Get vector between fragment position and light position
-	vec3 fragToLight = fs_in.FragPos - light.Pos;
+	vec3 fragToLight = globals.FragPos - light.Pos;
 	// Get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
 	float bias = 0.05;
 	float shadow = 0.0;
 
-	switch(shadowType)
+	switch(globals.ShadowType)
 	{
 		case HARD_SHADOWS:
 			// Use the light to fragment vector to sample from the depth map
@@ -60,14 +62,14 @@ float CalculatePointShadow(in LightSource light, in int shadowType, in vec3 norm
 		break;
 		case PCF_SHADOWS:
 			int samples = 20;
-			float viewDistance = length(viewPos - fs_in.FragPos);
+			float viewDistance = length(globals.ViewPos - globals.FragPos);
 			float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
 			for (int i = 0; i < samples; ++i)
 			{
 				float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
 				closestDepth *= light.far_plane;   // Undo mapping [0;1]
 
-				float distance = length(light.Pos - fs_in.FragPos);
+				float distance = length(light.Pos - globals.FragPos);
 				float distanceBias = max(bias, bias * distance / 5.0f);
 				if (currentDepth - distanceBias > closestDepth)
 					shadow += 1.0;
@@ -83,7 +85,7 @@ float CalculatePointShadow(in LightSource light, in int shadowType, in vec3 norm
 	return shadow;
 }
 
-LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lightDir)
+LightComponents CalculateLight(in LightSource light, in LightingGlobals globals, in vec3 lightDir)
 {
 	LightComponents lighting;
 
@@ -93,13 +95,13 @@ LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lig
 
 	// Diffuse
 	float diffuseStrength = 1.0f;
-	vec3 norm = normalize(normal);
+	vec3 norm = normalize(globals.FragNormal);
 	float diff = max(dot(norm, lightDir), 0.0);
 	lighting.Diffuse = diffuseStrength * diff;
 
 	// Specular
 	float specularStrength = 0.1f;
-	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+	vec3 viewDir = normalize(globals.ViewPos - globals.FragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
 	lighting.Specular = specularStrength * spec;
@@ -107,9 +109,9 @@ LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lig
 	return lighting;
 }
 
-float CalculateDirShadow(in LightSource light, in int shadowType, in vec3 normal, in float baseBias)
+float CalculateDirShadow(in LightSource light, in LightingGlobals globals, in float baseBias)
 {
-	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
+	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(globals.FragPos, 1.0f);
 
 	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -128,11 +130,11 @@ float CalculateDirShadow(in LightSource light, in int shadowType, in vec3 normal
 	// Calculate bias (based on depth map resolution and slope)
 	vec3 lightDir = normalize(light.Pos);
 
-	float bias = max(baseBias / 10 * (1.0 - dot(normal, lightDir)), baseBias);
+	float bias = max(baseBias / 10 * (1.0 - dot(globals.FragNormal, lightDir)), baseBias);
 
 	float shadow = 0.0;
 	// Check whether current frag pos is in shadow
-	switch(shadowType)
+	switch(globals.ShadowType)
 	{
 		case HARD_SHADOWS:
 			shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
@@ -157,9 +159,9 @@ float CalculateDirShadow(in LightSource light, in int shadowType, in vec3 normal
 	return shadow;
 }
 
-float CalculateCircularShadow(in LightSource light, in vec3 normal)
+float CalculateCircularShadow(in LightSource light, in LightingGlobals globals)
 {
-	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
+	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(globals.FragPos, 1.0f);
 
 	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -169,42 +171,42 @@ float CalculateCircularShadow(in LightSource light, in vec3 normal)
 	return clamp(distanceToCenter * distanceToCenter, 0, 1);
 }
 
-float CalculateDistanceShadow(in LightSource light, in vec3 normal)
+float CalculateDistanceShadow(in LightSource light, in LightingGlobals globals)
 {
-	float distance = length(light.Pos - fs_in.FragPos);
+	float distance = length(light.Pos - globals.FragPos);
 	return distance / light.far_plane;
 }
 
-vec3 CalculateDirLightSource(in LightSource light, in vec3 normal)
+vec3 CalculateDirLightSource(in LightSource light, in LightingGlobals globals)
 {
-	LightComponents components = CalculateLight(light, normal, normalize(light.Pos));
+	LightComponents components = CalculateLight(light, globals, normalize(light.Pos));
 	float shadow = 0;
 	if (light.CastShadow)
-		shadow = CalculateDirShadow(light, ShadowType, normal, 0.005);
+		shadow = CalculateDirShadow(light, globals, 0.005);
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
-vec3 CalculateSpotLightSource(in LightSource light, in vec3 normal)
+vec3 CalculateSpotLightSource(in LightSource light, in LightingGlobals globals)
 {
-	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
+	LightComponents components = CalculateLight(light, globals, normalize(light.Pos - globals.FragPos));
 	float shadow = 0;
 	if (light.CastShadow)
 	{
-		shadow = CalculateDirShadow(light, ShadowType, normal, 0.002);
-		float circular = CalculateCircularShadow(light, normal);
+		shadow = CalculateDirShadow(light, globals, 0.002);
+		float circular = CalculateCircularShadow(light, globals);
 		shadow = clamp(shadow + circular, 0, 1);
 	}
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
 }
 
-vec3 CalculatePointLightSource(in LightSource light, in vec3 normal)
+vec3 CalculatePointLightSource(in LightSource light, in LightingGlobals globals)
 {
-	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
+	LightComponents components = CalculateLight(light, globals, normalize(light.Pos - globals.FragPos));
 	float shadow = 0;
 	if (light.CastShadow)
 	{
-		shadow = CalculatePointShadow(light, ShadowType, normal);
-		float distance = CalculateDistanceShadow(light, normal);
+		shadow = CalculatePointShadow(light, globals);
+		float distance = CalculateDistanceShadow(light, globals);
 		shadow = clamp(shadow + distance, 0, 1);
 	}
 	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;

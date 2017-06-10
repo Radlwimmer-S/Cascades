@@ -272,7 +272,7 @@ void Engine::UpdateUniforms(const Shader& shader) const
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
 
-	GLuint shadowModeLoc = glGetUniformLocation(shader.Program, "shadowMode");
+	GLuint shadowModeLoc = glGetUniformLocation(shader.Program, "ShadowType");
 	glUniform1i(shadowModeLoc, m_renderInfo.ShadowMode);
 	glCheckError();
 }
@@ -320,6 +320,13 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			if (index >= m_lights.size())
 				index = -1;
 			m_activeObject = index;
+		} break;
+
+		case GLFW_KEY_F1:
+		{
+			m_renderInfo.ShadowMode = static_cast<ShadowMode>(m_renderInfo.ShadowMode + 1);
+			if (m_renderInfo.ShadowMode > VsmShadows)
+				m_renderInfo.ShadowMode = HardShadows;
 		} break;
 
 		case GLFW_KEY_P:

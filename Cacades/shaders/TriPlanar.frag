@@ -4,6 +4,7 @@ out vec4 FragColor;
 
 #pragma include "EnumLightType.glh"
 #pragma include "EnumShadowMode.glh"
+#pragma include "Lighting.glh"
 
 in VS_OUT
 {
@@ -12,6 +13,10 @@ in VS_OUT
 	vec3 UVW;
 	mat3 TBN;
 } fs_in;
+
+const int LIGHT_COUNT = 5;
+
+uniform LightSource Lights[LIGHT_COUNT];
 
 uniform int ShadowType = HARD_SHADOWS;
 uniform bool EnableLighting = true;
@@ -27,12 +32,6 @@ uniform int displacement_refinementSteps = 8;
 uniform float displacement_scale = 0.025f;
 
 uniform vec3 viewPos;
-
-#pragma include "Lighting.glh"
-
-const int LIGHT_COUNT = 5;
-
-uniform LightSource Lights[LIGHT_COUNT];
 
 vec2 Parallax(sampler2D map, vec2 texCoords, vec3 viewDir)
 {
@@ -137,6 +136,8 @@ void main()
 		return;
 	}
 
+	LightingGlobals globals = LightingGlobals(viewPos, fs_in.FragPos, fs_in.Normal, ShadowType, EnableLighting);
+
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < LIGHT_COUNT; i++)
 	{
@@ -146,13 +147,13 @@ void main()
 		switch (Lights[i].Type)
 		{
 		case DIR_LIGHT:
-			lighting += CalculateDirLightSource(Lights[i], normal);
+			lighting += CalculateDirLightSource(Lights[i], globals);
 			break;
 		case SPOT_LIGHT:
-			lighting += CalculateSpotLightSource(Lights[i], normal);
+			lighting += CalculateSpotLightSource(Lights[i], globals);
 			break;
 		case POINT_LIGHT:
-			lighting += CalculatePointLightSource(Lights[i], normal);
+			lighting += CalculatePointLightSource(Lights[i], globals);
 			break;
 		}
 	}
