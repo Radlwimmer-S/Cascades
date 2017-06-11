@@ -14,21 +14,22 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, gl
 
 	glGenFramebuffers(1, &depthMapFBO);
 
+	depthMapType = GL_TEXTURE_2D;
 	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glBindTexture(depthMapType, depthMap);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexImage2D(depthMapType, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
+	glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameterfv(depthMapType, GL_TEXTURE_BORDER_COLOR, borderColor);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, depthMapType, depthMap, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(depthMapType, 0);
 
 	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(.1f, .1f, 1)), 12, m_color, NoNormals);
 }
@@ -46,7 +47,7 @@ void DirectionalLight::UpdateUniforms(const Shader& shader, int lightIndex, int 
 	glCheckError();
 
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glBindTexture(depthMapType, depthMap);
 	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].depthMap").c_str());
 	glUniform1i(depthMapPos, textureIndex);
 	glCheckError();

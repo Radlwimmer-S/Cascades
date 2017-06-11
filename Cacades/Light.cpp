@@ -1,7 +1,9 @@
 #include "Light.h"
 #include "Shader.h"
 
-Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), m_color(color), depthMap(0), depthMapFBO(0), m_shadowShader(shadowShader), m_farPlane(farPlane), m_nearPlane(nearPlane), m_castShadow(true), m_debugCube(nullptr)
+Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), 
+m_color(color), depthMap(0), depthMapFBO(0), m_shadowShader(shadowShader), 
+m_shadowMode(PcfShadows), m_farPlane(farPlane), m_nearPlane(nearPlane), m_castShadow(true), m_debugCube(nullptr)
 {
 }
 
@@ -21,6 +23,10 @@ void Light::UpdateUniforms(const Shader& shader, int lightIndex, int textureInde
 
 	GLint typePos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].Type").c_str());
 	glUniform1i(typePos, GetType());
+	glCheckError();
+
+	GLint shadowModePos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].ShadowType").c_str());
+	glUniform1i(shadowModePos, m_shadowMode);
 	glCheckError();
 
 	GLint enabledPos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].IsEnabled").c_str());
@@ -43,6 +49,36 @@ void Light::UpdateUniforms(const Shader& shader, int lightIndex, int textureInde
 void Light::PostRender() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Light::SetShadowMode(ShadowMode mode)
+{
+	m_shadowMode = mode;
+
+	switch (m_shadowMode)
+	{
+	case VsmShadows:
+		glBindTexture(depthMapType, depthMap);
+
+		glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glBindTexture(depthMapType, 0);
+		break;
+	default:
+		glBindTexture(depthMapType, depthMap);
+
+		glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glBindTexture(depthMapType, 0);
+		break;
+	}
+}
+
+ShadowMode Light::GetShadowMode() const
+{
+	return m_shadowMode;
 }
 
 void Light::CastsShadows(bool value)

@@ -136,7 +136,7 @@ void main()
 		return;
 	}
 
-	LightingGlobals globals = LightingGlobals(viewPos, fs_in.FragPos, fs_in.Normal, ShadowType, EnableLighting);
+	LightingGlobals globals = LightingGlobals(viewPos, fs_in.FragPos, fs_in.Normal, EnableLighting);
 
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < LIGHT_COUNT; i++)

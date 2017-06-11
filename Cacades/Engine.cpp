@@ -114,6 +114,7 @@ void Engine::Start()
 	m_renderInfo.NoiseScale = 0.6f;
 	m_renderInfo.IsoLevel = 0;
 	m_renderInfo.GeometryScale = glm::vec3(5, 10, 5);
+	m_renderInfo.ShadowMode = PcfShadows;
 
 	m_generator.SetRandomSeed(m_renderInfo.Seed);
 	m_generator.SetResolution(m_renderInfo.Resolution);
@@ -271,10 +272,6 @@ void Engine::UpdateUniforms(const Shader& shader) const
 	GLuint projLocation = glGetUniformLocation(shader.Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
 	glCheckError();
-
-	GLuint shadowModeLoc = glGetUniformLocation(shader.Program, "ShadowType");
-	glUniform1i(shadowModeLoc, m_renderInfo.ShadowMode);
-	glCheckError();
 }
 
 void Engine::MoveActiveObject()
@@ -327,6 +324,8 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			m_renderInfo.ShadowMode = static_cast<ShadowMode>(m_renderInfo.ShadowMode + 1);
 			if (m_renderInfo.ShadowMode > VsmShadows)
 				m_renderInfo.ShadowMode = HardShadows;
+			for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
+				(*it)->SetShadowMode(m_renderInfo.ShadowMode);
 		} break;
 
 		case GLFW_KEY_P:

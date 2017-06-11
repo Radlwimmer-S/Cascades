@@ -10,21 +10,23 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader
 {
 	glGenFramebuffers(1, &depthMapFBO);
 
+	depthMapType = GL_TEXTURE_CUBE_MAP;
+
 	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap);
+	glBindTexture(depthMapType, depthMap);
 	for (GLuint i = 0; i < 6; ++i)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, depthMap, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glBindTexture(depthMapType, 0);
 
 	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(.1f)), 12, m_color, NoNormals);
 }
@@ -38,7 +40,7 @@ void PointLight::UpdateUniforms(const Shader& shader, int lightIndex, int textur
 	Light::UpdateUniforms(shader, lightIndex, textureIndex);
 
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap);
+	glBindTexture(depthMapType, depthMap);
 	GLuint depthCubePos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].depthCube").c_str());
 	glUniform1i(depthCubePos, textureIndex);
 	glCheckError();

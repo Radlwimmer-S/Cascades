@@ -32,6 +32,7 @@ void Hud::Update(int fps, const RenderInfo& renderInfo)
 	ss << "  Noise Scale: " << renderInfo.NoiseScale << std::endl;
 	ss << "  Layer: " << renderInfo.StartLayer << std::endl;
 	ss << "  Resolution: " << renderInfo.Resolution.x << "/" << renderInfo.Resolution.y << "/" << renderInfo.Resolution.z << std::endl;
+	ss << "ShadowMode: " << ((renderInfo.ShadowMode == PcfShadows) ? "PCF" : (renderInfo.ShadowMode == VsmShadows) ? "VSM" : "Hard") << std::endl;
 	m_infoText.SetString(ss.str());
 }
 
