@@ -8,25 +8,47 @@
 
 PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, glm::quat(), color, shadowShader, nearPlane, farPlane)
 {
-	glGenFramebuffers(1, &depthMapFBO);
+	glGenFramebuffers(1, &shadowMapFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
 
-	depthMapType = GL_TEXTURE_CUBE_MAP;
+	textureType = GL_TEXTURE_CUBE_MAP;
 
-	glGenTextures(1, &depthMap);
-	glBindTexture(depthMapType, depthMap);
+	glGenTextures(1, &shadowMap);
+	glBindTexture(textureType, shadowMap);
 	for (GLuint i = 0; i < 6; ++i)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
 
-	glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glCheckError();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, depthMap, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, shadowMap, 0);
+	glBindTexture(textureType, 0);
+	glCheckError();
+
+	glGenTextures(1, &depthAttachment);
+	glBindTexture(textureType, depthAttachment);
+	for (GLuint i = 0; i < 6; ++i)
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glCheckError();
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthAttachment, 0);
+	glBindTexture(textureType, 0);
+	glCheckError();
+
+	glCheckFrameBuffer();
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(depthMapType, 0);
+	glCheckError();
 
 	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(.1f)), 12, m_color, NoNormals);
 }
@@ -40,7 +62,7 @@ void PointLight::UpdateUniforms(const Shader& shader, int lightIndex, int textur
 	Light::UpdateUniforms(shader, lightIndex, textureIndex);
 
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture(depthMapType, depthMap);
+	glBindTexture(textureType, shadowMap);
 	GLuint depthCubePos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].depthCube").c_str());
 	glUniform1i(depthCubePos, textureIndex);
 	glCheckError();
@@ -49,8 +71,9 @@ void PointLight::UpdateUniforms(const Shader& shader, int lightIndex, int textur
 void PointLight::PreRender() const
 {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_shadowShader.Use();
 
@@ -65,7 +88,7 @@ void PointLight::PreRender() const
 	GLint lightPosLoc = glGetUniformLocation(m_shadowShader.Program, "lightPos");
 	glUniform3f(lightPosLoc, m_position.x, m_position.y, m_position.z);
 	glCheckError();
-	
+
 	GLint farPlaneLoc = glGetUniformLocation(m_shadowShader.Program, "far_plane");
 	glUniform1f(farPlaneLoc, m_farPlane);
 	glCheckError();

@@ -10,26 +10,47 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::vec3 color, Shader& 
 
 DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, GLfloat farPlane, GLfloat nearPlane) : Light(position, orientation, color, shadowShader, nearPlane, farPlane)
 {
-	m_castShadow = false;
+	glGenFramebuffers(1, &shadowMapFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
 
-	glGenFramebuffers(1, &depthMapFBO);
+	textureType = GL_TEXTURE_2D;
 
-	depthMapType = GL_TEXTURE_2D;
-	glGenTextures(1, &depthMap);
-	glBindTexture(depthMapType, depthMap);
+	glGenTextures(1, &shadowMap);
+	glBindTexture(textureType, shadowMap);
 
-	glTexImage2D(depthMapType, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
-	glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(depthMapType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexImage2D(textureType, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-	glTexParameterfv(depthMapType, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameterfv(textureType, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glCheckError();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, depthMapType, depthMap, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType, shadowMap, 0);
+	glBindTexture(textureType, 0);
+	glCheckError();
+	
+	glGenTextures(1, &depthAttachment);
+	glBindTexture(textureType, depthAttachment);
+
+	glTexImage2D(textureType, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	glTexParameterfv(textureType, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glCheckError();
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAttachment, 0);
+	glBindTexture(textureType, 0);
+	glCheckError();
+
+	glCheckFrameBuffer();
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(depthMapType, 0);
+	glCheckError();
 
 	m_debugCube = new Model(m_position, glm::quat(), Box::GetTris(glm::vec3(.1f, .1f, 1)), 12, m_color, NoNormals);
 }
@@ -47,7 +68,7 @@ void DirectionalLight::UpdateUniforms(const Shader& shader, int lightIndex, int 
 	glCheckError();
 
 	glActiveTexture(GL_TEXTURE0 + textureIndex);
-	glBindTexture(depthMapType, depthMap);
+	glBindTexture(textureType, shadowMap);
 	GLuint depthMapPos = glGetUniformLocation(shader.Program, ("Lights[" + std::to_string(lightIndex) + "].depthMap").c_str());
 	glUniform1i(depthMapPos, textureIndex);
 	glCheckError();
@@ -56,8 +77,9 @@ void DirectionalLight::UpdateUniforms(const Shader& shader, int lightIndex, int 
 void DirectionalLight::PreRender() const
 {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_shadowShader.Use();
 

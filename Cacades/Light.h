@@ -29,9 +29,10 @@ public:
 
 protected:
 	glm::vec3 m_color;
-	GLuint depthMap;
-	GLuint depthMapFBO;
-	GLuint depthMapType;
+	GLuint shadowMap;
+	GLuint shadowMapFBO;
+	GLuint textureType;
+	GLuint depthAttachment;
 	const GLuint SHADOW_RES = 2;
 	const GLuint SHADOW_WIDTH = 1024 * SHADOW_RES, SHADOW_HEIGHT = 1024 * SHADOW_RES;
 	Shader& m_shadowShader;

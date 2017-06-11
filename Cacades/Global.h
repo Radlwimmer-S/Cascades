@@ -23,6 +23,12 @@ static GLuint SCREEN_HEIGHT = 1080;
 #define glCheckError() 
 #endif
 
+#ifdef CHECK_GL_ERROR
+#define glCheckFrameBuffer() glCheckFrameBuffer_(__FUNCTION__, __LINE__) 
+#else
+#define glCheckFBO() 
+#endif
+
 inline glm::quat MakeQuat(GLfloat pitch, GLfloat yaw, GLfloat roll)
 {
 	return glm::quat(glm::vec3(glm::radians(pitch), glm::radians(yaw), glm::radians(roll)));
@@ -58,6 +64,26 @@ inline void PrintCSAA()
 		std::cout << "CSAA-Extension not available";
 }
 
+GLenum static glCheckFrameBuffer_(const char *function, int line)
+{
+	GLuint errorCode = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	std::string error;
+	switch (errorCode)
+	{
+		case GL_FRAMEBUFFER_COMPLETE:						return errorCode;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:			error = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:	error = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:			error = "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"; break;
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:			error = "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"; break;
+	}
+	printf("%s | %s (%i)\n", error.c_str(), function, line);
+	//std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+	std::cin.ignore();
+
+	return errorCode;
+}
+
 GLenum static glCheckError_(const char *function, int line)
 {
 	GLenum errorCode;
@@ -66,13 +92,13 @@ GLenum static glCheckError_(const char *function, int line)
 		std::string error;
 		switch (errorCode)
 		{
-		case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-		case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-		case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-		case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-		case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+			case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+			case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+			case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+			case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+			case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+			case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 		}
 		printf("%s | %s (%i)\n", error.c_str(), function, line);
 		//std::cout << error << " | " << file << " (" << line << ")" << std::endl;

@@ -2,7 +2,7 @@
 #include "Shader.h"
 
 Light::Light(glm::vec3 position, glm::quat orientation, glm::vec3 color, Shader& shadowShader, int nearPlane, int farPlane) : BaseObject(position, orientation), 
-m_color(color), depthMap(0), depthMapFBO(0), m_shadowShader(shadowShader), 
+m_color(color), shadowMap(0), shadowMapFBO(0), m_shadowShader(shadowShader), 
 m_shadowMode(PcfShadows), m_farPlane(farPlane), m_nearPlane(nearPlane), m_castShadow(true), m_debugCube(nullptr)
 {
 }
@@ -58,20 +58,20 @@ void Light::SetShadowMode(ShadowMode mode)
 	switch (m_shadowMode)
 	{
 	case VsmShadows:
-		glBindTexture(depthMapType, depthMap);
+		glBindTexture(textureType, shadowMap);
 
-		glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glBindTexture(depthMapType, 0);
+		glBindTexture(textureType, 0);
 		break;
 	default:
-		glBindTexture(depthMapType, depthMap);
+		glBindTexture(textureType, shadowMap);
 
-		glTexParameteri(depthMapType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(depthMapType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		glBindTexture(depthMapType, 0);
+		glBindTexture(textureType, 0);
 		break;
 	}
 }
