@@ -18,7 +18,7 @@ DirectionalLight::DirectionalLight(glm::vec3 position, glm::quat orientation, gl
 	glGenTextures(1, &shadowMap);
 	glBindTexture(textureType, shadowMap);
 
-	glTexImage2D(textureType, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
+	glTexImage2D(textureType, 0, GL_RG32F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
 	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);

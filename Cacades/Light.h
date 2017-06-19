@@ -33,8 +33,8 @@ protected:
 	GLuint shadowMapFBO;
 	GLuint textureType;
 	GLuint depthAttachment;
-	const GLuint SHADOW_RES = 2;
-	const GLuint SHADOW_WIDTH = 1024 * SHADOW_RES, SHADOW_HEIGHT = 1024 * SHADOW_RES;
+	const GLuint SHADOW_RES = 4;
+	const GLuint SHADOW_WIDTH = 512 * SHADOW_RES, SHADOW_HEIGHT = 512 * SHADOW_RES;
 	Shader& m_shadowShader;
 	ShadowMode m_shadowMode;
 	GLfloat m_farPlane;

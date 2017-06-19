@@ -43,7 +43,7 @@ void InitRandom()
 
 float Random()
 {
-	float value = fract(sin(dot(randomSeed ,vec2(12.9898,78.233))) * 43758.5453);
+	float value = fract(sin(dot(randomSeed, vec2(12.9898,78.233))) * 43758.5453);
 	randomSeed.x += value;
 	randomSeed.y -= value;
 	return value;
@@ -78,7 +78,8 @@ vec3 ws_to_UVW(vec3 ws)
 void SpawnEmitters()
 {
     vec3 origin = gs_in[0].position;
-	int steps = 1000;
+	int steps = 10000;
+	int subSteps = 100;
 	vec3 dir = maxRayLenght / steps * gs_in[0].velocity;
 
     // gs_out.position = origin - dir;
@@ -93,16 +94,25 @@ void SpawnEmitters()
 	{
        origin += dir;
        if (texture(densityTex, ws_to_UVW(origin)).r > isoLevel)
-		{
-           gs_out.position = origin - dir;
-           gs_out.velocity = texture(normalTex, ws_to_UVW(origin)).rgb;
-           gs_out.lifeTime = 0;
-           gs_out.seed = vec2(Random(), Random());
-           gs_out.type = PARTICLE_EMITTER;
-           EmitVertex();
-           EndPrimitive();
-           return;
-       }
+           break;
+	}
+
+	dir /= subSteps;
+
+	for (int i = 0; i < subSteps; ++i)
+	{
+		origin -= dir;
+        if (texture(densityTex, ws_to_UVW(origin)).r < isoLevel)
+            break;
+
+		gs_out.position = origin - 3 * dir;
+		gs_out.velocity = texture(normalTex, ws_to_UVW(origin)).rgb;
+		gs_out.lifeTime = 0;
+		gs_out.seed = vec2(Random(), Random());
+		gs_out.type = PARTICLE_EMITTER;
+		EmitVertex();
+		EndPrimitive();
+		return;
 	}
 }
 
@@ -143,15 +153,21 @@ void UpdateWater()
 		return;
 
 	gs_out.velocity = gs_in[0].velocity - vec3(0, 9.81f, 0) * deltaTime * velocityScale;
-	gs_out.position = gs_in[0].position + gs_out.velocity * deltaTime;
+	vec3 deltaP = gs_out.velocity * deltaTime;
+	gs_out.position = gs_in[0].position + deltaP;
 
-	if (texture(densityTex, ws_to_UVW(gs_out.position)).r > isoLevel)
+	float newDensity = texture(densityTex, ws_to_UVW(gs_out.position)).r;
+	if (newDensity > isoLevel)
 	{
 		if (Random() < 0.25f)
 		{
+			float oldDensity = texture(densityTex, ws_to_UVW(gs_in[0].position)).r;
+			float dentityFactor = abs(oldDensity - isoLevel) / abs(oldDensity - newDensity);
+			gs_out.position -= deltaP * dentityFactor;
+
 			vec3 normal = texture(normalTex, ws_to_UVW(gs_out.position)).rgb;
 
-			gs_out.position = gs_out.position - gs_out.velocity * deltaTime;
+			gs_out.position = gs_out.position - deltaP;
 			gs_out.velocity = vec3(0);
 			gs_out.seed = vec2(Random(), Random());
 			gs_out.type = PARTICLE_MIST_COLLISION;

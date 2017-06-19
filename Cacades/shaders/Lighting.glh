@@ -48,6 +48,8 @@ float CalculatePointShadow(in LightSource light, in LightingGlobals globals)
 	vec3 fragToLight = globals.FragPos - light.Pos;
 	// Get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
+	// Do mapping [0;1]
+	//currentDepth /= light.far_plane;
 	float bias = 0.05;
 	float shadow = 0.0;
 
@@ -56,8 +58,6 @@ float CalculatePointShadow(in LightSource light, in LightingGlobals globals)
 		case HARD_SHADOWS:
 			// Use the light to fragment vector to sample from the depth map
 			float closestDepth = texture(light.depthCube, fragToLight).r;
-			// It is currently in linear range between [0,1]. Re-transform back to original value
-			closestDepth *= light.far_plane;
 			shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 		break;
 		case PCF_SHADOWS:
@@ -67,7 +67,6 @@ float CalculatePointShadow(in LightSource light, in LightingGlobals globals)
 			for (int i = 0; i < samples; ++i)
 			{
 				float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-				closestDepth *= light.far_plane;   // Undo mapping [0;1]
 
 				float distance = length(light.Pos - globals.FragPos);
 				float distanceBias = max(bias, bias * distance / 5.0f);
@@ -77,10 +76,10 @@ float CalculatePointShadow(in LightSource light, in LightingGlobals globals)
 			shadow /= float(samples);
 		break;
 		case VSM_SHADOWS:
-			vec2 moments = texture2D(light.depthMap, fragToLight.xy).xy;
+			vec2 moments = texture(light.depthCube, fragToLight).xy;
 
 			float p = step(currentDepth, moments.x);
-			float variance = max(moments.y - moments.x * moments.x, 0.00002);
+			float variance = max(abs(moments.y - moments.x * moments.x), 0.00002);
 
 			float d = currentDepth - moments.x;
 			float pMax = variance / (variance + d*d);
@@ -115,6 +114,11 @@ LightComponents CalculateLight(in LightSource light, in LightingGlobals globals,
 	lighting.Specular = specularStrength * spec;
 
 	return lighting;
+}
+
+float linstep(float low, float high, float v)
+{
+	return clamp((v-low)/(high-low), 0.0, 1.0);
 }
 
 float CalculateDirShadow(in LightSource light, in LightingGlobals globals, in float baseBias)
@@ -163,7 +167,7 @@ float CalculateDirShadow(in LightSource light, in LightingGlobals globals, in fl
 			vec2 moments = texture2D(light.depthMap, projCoords.xy).xy;
 
 			float p = step(currentDepth, moments.x);
-			float variance = max(moments.y - moments.x * moments.x, 0.00002);
+			float variance = max(abs(moments.y - moments.x * moments.x), 0.00002);
 
 			float d = currentDepth - moments.x;
 			float pMax = variance / (variance + d*d);

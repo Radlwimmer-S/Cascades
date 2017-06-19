@@ -16,7 +16,7 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, Shader& shadowShader
 	glGenTextures(1, &shadowMap);
 	glBindTexture(textureType, shadowMap);
 	for (GLuint i = 0; i < 6; ++i)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RG16F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RG32F, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_RG, GL_FLOAT, nullptr);
 
 	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

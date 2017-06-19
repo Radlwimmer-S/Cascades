@@ -34,7 +34,7 @@ public:
 	void AddEmitter(glm::vec3 viewPos, glm::vec3 viewDir);
 
 	void SetResolution(glm::ivec3 cubesPerDimension);
-
+	void Reset();
 protected:
 
 	void SwapBuffer();

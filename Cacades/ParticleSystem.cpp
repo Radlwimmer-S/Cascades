@@ -205,6 +205,11 @@ void ParticleSystem::SetResolution(glm::ivec3 cubesPerDimension)
 	m_resolution = 2.0f / glm::vec3(cubesPerDimension);
 }
 
+void ParticleSystem::Reset()
+{
+	m_particleCount = 0;
+}
+
 void ParticleSystem::SwapBuffer()
 {
 	readBuf = 1 - readBuf;

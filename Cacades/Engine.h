@@ -40,7 +40,7 @@ public:
 	void Start();
 	void AddLight(Light& light);
 protected:
-	void RenderLights() const;
+	void RenderLights();
 	void UpdateUniforms(const Shader& shader) const;
 	void MoveActiveObject();
 	void m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);

@@ -234,7 +234,7 @@ void Engine::Loop()
 	glfwTerminate();
 }
 
-void Engine::RenderLights() const
+void Engine::RenderLights()
 {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
@@ -324,8 +324,14 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 			m_renderInfo.ShadowMode = static_cast<ShadowMode>(m_renderInfo.ShadowMode + 1);
 			if (m_renderInfo.ShadowMode > VsmShadows)
 				m_renderInfo.ShadowMode = HardShadows;
+
 			for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 				(*it)->SetShadowMode(m_renderInfo.ShadowMode);
+		} break;
+
+		case GLFW_KEY_F2:
+		{
+			m_particleSystem.Reset();
 		} break;
 
 		case GLFW_KEY_P:
