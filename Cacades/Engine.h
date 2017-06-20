@@ -11,6 +11,7 @@
 #include "UpdateInfo.h"
 #include "ParticleSystem.h"
 #include "Camera.h"
+#include "Icosahedron.h"
 
 class Light;
 class Hud;
@@ -54,6 +55,7 @@ protected:
 	Hud* m_hud;
 	GLFWwindow& m_window;
 	Shader* m_shader;
+	Shader* m_tessShader;
 	Shader* m_debugShader;
 	Camera m_camera;
 	std::vector<Light*> m_lights;
@@ -63,6 +65,8 @@ protected:
 	int m_activeObject;
 
 	TriplanarMesh* m_mesh;
+	Icosahedron* m_greenOrb;
+	Icosahedron* m_redOrb;
 		
 	const GLuint MaxTexturesPerModel = 10;
 

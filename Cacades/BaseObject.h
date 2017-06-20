@@ -30,11 +30,15 @@ public:
 	virtual glm::quat GetOrientation() const;
 	virtual void Rotate(glm::quat rotation);
 
+	virtual void SetAngularVelocity(glm::vec3 velocity);
+	virtual glm::vec3 GetAngularVelocity() const;
+
 	virtual void SetScale(glm::vec3 scale);
 	virtual glm::vec3 GetScale() const;
 	virtual void Scale(glm::vec3 scale);
 	
 	virtual void FollowPath(BasePath* path);
+	virtual const BasePath* GetFollowedPath() const;
 	
 	virtual void IsEnabled(bool isEnabled);
 	virtual bool IsEnabled() const;
@@ -50,6 +54,7 @@ protected:
 	glm::vec3 m_velocity;
 	glm::vec3 m_scale;
 	glm::quat m_orientation;
+	glm::vec3 m_angularVelocity;
 	bool m_isEnabled;
 
 	BasePath* m_path;

@@ -13,10 +13,13 @@
 Engine::Engine(GLFWwindow& window)
 	: m_window(window), m_camera(), m_generator(),
 	m_particleSystem(m_camera, m_generator.GetDensityTexture(), m_generator.GetNormalTexture()),
-	m_activeObject(-1), m_mesh(nullptr)
+	m_activeObject(-1), m_mesh(nullptr), m_greenOrb(new Icosahedron(glm::vec3(0), MakeQuat(0,0,0), glm::vec3(0, 0.5f, 0.1f))), m_redOrb(new Icosahedron(glm::vec3(0), MakeQuat(0, 0, 0), glm::vec3(0, 0.5f, 0.1f)))
 {
 	m_shader = new Shader("./shaders/TriPlanar.vert", nullptr, "./shaders/TriPlanar.frag");
 	m_shader->Test("TriPlanar");
+
+	m_tessShader = new Shader("./shaders/Tessellation.vert", "./shaders/Tessellation.tesc", "./shaders/Tessellation.tese", "./shaders/Tessellation.geom", "./shaders/Tessellation.frag");
+	m_tessShader->Test("Tesselation");
 
 	m_debugShader = new Shader("./shaders/Simple.vert", nullptr, "./shaders/Simple.frag");
 	m_debugShader->Test("Debug");
@@ -25,6 +28,9 @@ Engine::Engine(GLFWwindow& window)
 	hudShader->Test("Text/Hud");
 	Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
 	m_hud = new Hud(*font, *hudShader);
+
+	m_greenOrb->SetScale(glm::vec3(0.3f));
+	m_redOrb->SetScale(glm::vec3(0.3f));
 }
 
 Engine::~Engine()
@@ -154,6 +160,14 @@ void Engine::Update(GLfloat deltaTime)
 		if ((*it)->IsEnabled())
 			(*it)->Update(deltaTime);
 	}
+	m_greenOrb->SetColor(m_lights[0]->GetColor());
+	m_greenOrb->SetPosition(m_lights[0]->GetPosition());
+	m_greenOrb->SetOrientation(m_lights[0]->GetOrientation());
+	m_greenOrb->SetLightingMode(!m_lights[0]->IsEnabled());
+	m_redOrb->SetColor(m_lights[1]->GetColor());
+	m_redOrb->SetPosition(m_lights[1]->GetPosition());
+	m_redOrb->SetOrientation(m_lights[1]->GetOrientation());
+	m_redOrb->SetLightingMode(!m_lights[1]->IsEnabled());
 
 	m_camera.Update(deltaTime);
 }
@@ -164,8 +178,17 @@ void Engine::RenderScene()
 	UpdateUniforms(*m_shader);
 	m_mesh->Render(*m_shader);
 
+	m_tessShader->Use();
+	UpdateUniforms(*m_tessShader);
+	m_greenOrb->Render(*m_tessShader);
+	m_redOrb->Render(*m_tessShader);
+
 	m_debugShader->Use();
 	UpdateUniforms(*m_debugShader);
+
+	//m_lights[0]->GetFollowedPath()->Render(*m_debugShader);
+	//m_lights[1]->GetFollowedPath()->Render(*m_debugShader);
+
 	if (m_renderInfo.DrawLightPosition)
 		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			if ((*it)->IsEnabled())

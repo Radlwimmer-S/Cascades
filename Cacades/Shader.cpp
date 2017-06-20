@@ -47,6 +47,25 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLcha
 	Load();
 }
 
+Shader::Shader(const GLchar* vertexPath, const GLchar* tessCtrlPath, const GLchar* tessEvalPath, const GLchar* geometryPath, const GLchar* fragmentPath) : Program(0), m_transformFeedbackVariables(nullptr), m_isTempValid(false), m_isValid(false), m_isDirty(true)
+{
+	if (vertexPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ vertexPath, GL_VERTEX_SHADER });
+	if (tessCtrlPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ tessCtrlPath, GL_TESS_CONTROL_SHADER });
+	if (tessEvalPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ tessEvalPath, GL_TESS_EVALUATION_SHADER });
+	if (geometryPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ geometryPath, GL_GEOMETRY_SHADER });
+	if (fragmentPath != nullptr)
+		m_sourceFiles.push_back(SourceFile{ fragmentPath, GL_FRAGMENT_SHADER });
+
+	const GLchar* sourceFiles[] = { vertexPath, tessCtrlPath, tessEvalPath , geometryPath, fragmentPath };
+	m_watcher = new FileWatcher(sourceFiles, 5, Delegate(&Shader::SetDirty, this));
+	//delete[] sourceFiles;
+	Load();
+}
+
 void Shader::Load()
 {
 	GLuint tempProgram = glCreateProgram();
@@ -203,10 +222,14 @@ GLchar* Shader::GetShaderName(GLenum shaderType)
 	{
 	case GL_VERTEX_SHADER:
 		return "VERTEX";
-	case GL_FRAGMENT_SHADER:
-		return "FRAGMENT";
+	case GL_TESS_CONTROL_SHADER:
+		return "TESS_CONTROL";
+	case GL_TESS_EVALUATION_SHADER:
+		return "TESS_EVALUATION";
 	case GL_GEOMETRY_SHADER:
 		return "GEOMETRY";
+	case GL_FRAGMENT_SHADER:
+		return "FRAGMENT";
 	default:
 		return "UNKNOWN";
 	}

@@ -164,6 +164,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GpuLookupTable.cpp" />
     <ClCompile Include="Hud.cpp" />
+    <ClCompile Include="Icosahedron.cpp" />
     <ClCompile Include="KdNode.cpp" />
     <ClCompile Include="KdPrimitive.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -207,6 +208,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <ClInclude Include="GpuLookupTable.h" />
     <ClInclude Include="HitResult.h" />
     <ClInclude Include="Hud.h" />
+    <ClInclude Include="Icosahedron.h" />
     <ClInclude Include="KdNode.h" />
     <ClInclude Include="KdPrimitive.h" />
     <ClInclude Include="Light.h" />
@@ -265,6 +267,11 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\default.frag" />
     <None Include="shaders\Simple.frag" />
     <None Include="shaders\Simple.vert" />
+    <None Include="Shaders\Tessellation.frag" />
+    <None Include="Shaders\Tessellation.tesc" />
+    <None Include="Shaders\Tessellation.tese" />
+    <None Include="Shaders\Tessellation.vert" />
+    <None Include="Shaders\Tessellation.geom" />
     <None Include="shaders\Text.frag" />
     <None Include="shaders\Text.vert" />
     <None Include="shaders\TriPlanar.vert" />

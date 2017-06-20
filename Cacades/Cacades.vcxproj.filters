@@ -70,6 +70,9 @@
     <Filter Include="Source Files\Generation">
       <UniqueIdentifier>{677e26b5-7ae4-4c73-bb2f-2c614b00d701}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Tessellation">
+      <UniqueIdentifier>{ea3c3aed-8db1-4651-8140-279a311db12f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -176,6 +179,9 @@
     </ClCompile>
     <ClCompile Include="ProcedualGenerator.cpp">
       <Filter>Source Files\Generation</Filter>
+    </ClCompile>
+    <ClCompile Include="Icosahedron.cpp">
+      <Filter>Source Files\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -317,6 +323,9 @@
     <ClInclude Include="shaders\EnumShadowMode.glh">
       <Filter>Shaders\Enums</Filter>
     </ClInclude>
+    <ClInclude Include="Icosahedron.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default.vert">
@@ -402,6 +411,21 @@
     </None>
     <None Include="shaders\Lighting.glh">
       <Filter>Shaders\Lights</Filter>
+    </None>
+    <None Include="Shaders\Tessellation.geom">
+      <Filter>Shaders\Tessellation</Filter>
+    </None>
+    <None Include="Shaders\Tessellation.tesc">
+      <Filter>Shaders\Tessellation</Filter>
+    </None>
+    <None Include="Shaders\Tessellation.tese">
+      <Filter>Shaders\Tessellation</Filter>
+    </None>
+    <None Include="Shaders\Tessellation.vert">
+      <Filter>Shaders\Tessellation</Filter>
+    </None>
+    <None Include="Shaders\Tessellation.frag">
+      <Filter>Shaders\Tessellation</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -69,7 +69,7 @@ glm::quat LinearPath::Squad(const std::vector<ControlPoint>& cp, float t) const
 	// parameter on the local curve interval
 	float local_t = glm::fract(t);
 
-	return BasePath::CatmullRomSpline(cp[i0], cp[i1], cp[i2], cp[i3], local_t);
+	return BasePath::Squad(cp[i0], cp[i1], cp[i2], cp[i3], local_t);
 }
 
 void LinearPath::CalculateTimeSteps()

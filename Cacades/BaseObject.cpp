@@ -70,6 +70,16 @@ void BaseObject::Rotate(glm::quat rotation)
 	m_orientation = glm::normalize(glm::quat(rotation) * m_orientation);
 }
 
+void BaseObject::SetAngularVelocity(glm::vec3 velocity)
+{
+	m_angularVelocity = velocity;
+}
+
+glm::vec3 BaseObject::GetAngularVelocity() const
+{
+	return m_angularVelocity;
+}
+
 void BaseObject::SetScale(glm::vec3 scale)
 {
 	m_scale = scale;
@@ -88,6 +98,11 @@ void BaseObject::Scale(glm::vec3 scale)
 void BaseObject::FollowPath(BasePath* path)
 {
 	m_path = path;
+}
+
+const BasePath* BaseObject::GetFollowedPath() const
+{
+	return m_path;
 }
 
 void BaseObject::IsEnabled(bool isEnabled)

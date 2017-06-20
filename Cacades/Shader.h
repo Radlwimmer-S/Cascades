@@ -22,6 +22,8 @@ public:
 	explicit Shader(const GLchar* computePath);
 	Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath);
 	Shader(const GLchar* vertexPath, const GLchar* geometryPath, const GLchar* fragmentPath, const GLchar** transformFeedbackVariables, int variablesCount);
+	Shader(const GLchar* vertexPath, const GLchar* tessCtrlPath, const GLchar* tessEvalPath, const GLchar* geometryPath, const GLchar* fragmentPath);
+	
 	void Use();
 	bool IsValid() const;
 

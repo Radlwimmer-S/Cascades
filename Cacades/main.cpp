@@ -13,30 +13,36 @@
 std::vector<ControlPoint>* GetGreenLightPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
-	path->push_back(ControlPoint(glm::vec3(0, -10, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 10, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -5, 0), glm::radians(glm::vec3(90, 90, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -10, 0), glm::radians(glm::vec3(180, 180, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -5, 0), glm::radians(glm::vec3(270, 270, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 5, 0), glm::radians(glm::vec3(90, 90, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 10, 0), glm::radians(glm::vec3(180, 180, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 5, 0), glm::radians(glm::vec3(270, 270, 0))));
 	return path;
 }
 
 std::vector<ControlPoint>* GetRedLightPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
-	path->push_back(ControlPoint(glm::vec3(5, 10, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 7.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(-5, 5, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 2.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(5, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, -2.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(-5, -5, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, -7.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(5, -10, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, -7.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(-5, -5, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, -2.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(5, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 2.5f, 5), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(-5, 5, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 7.5f, -5), glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(5, 0, 0),	 glm::radians(glm::vec3(0, -2 * 0,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, 2.5f, 5),	 glm::radians(glm::vec3(0, -2 * 45,  0))));
+	path->push_back(ControlPoint(glm::vec3(-5, 5, 0),	 glm::radians(glm::vec3(0, -2 * 90,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, 7.5f, -5), glm::radians(glm::vec3(0, -2 * 135,  0))));
+	path->push_back(ControlPoint(glm::vec3(5, 10, 0),	 glm::radians(glm::vec3(0, -2 * 180,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, 7.5f, 5),  glm::radians(glm::vec3(0, -2 * 225,  0))));
+	path->push_back(ControlPoint(glm::vec3(-5, 5, 0),	 glm::radians(glm::vec3(0, -2 * 270,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, 2.5f, -5), glm::radians(glm::vec3(0, -2 * 315,  0))));
+	path->push_back(ControlPoint(glm::vec3(5, 0, 0),	 glm::radians(glm::vec3(0, -2 * 0,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, -2.5f, 5), glm::radians(glm::vec3(0, -2 * 45,  0))));
+	path->push_back(ControlPoint(glm::vec3(-5, -5, 0),	 glm::radians(glm::vec3(0, -2 * 90,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, -7.5f, -5),glm::radians(glm::vec3(0, -2 * 135,  0))));
+	path->push_back(ControlPoint(glm::vec3(5, -10, 0),	 glm::radians(glm::vec3(0, -2 * 180,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, -7.5f, 5), glm::radians(glm::vec3(0, -2 * 225,  0))));
+	path->push_back(ControlPoint(glm::vec3(-5, -5, 0),	 glm::radians(glm::vec3(0, -2 * 270,  0))));
+	path->push_back(ControlPoint(glm::vec3(0, -2.5f, -5),glm::radians(glm::vec3(0, -2 * 315,  0))));
 	return path;
 }
 
@@ -91,7 +97,7 @@ int main(int argc, char** argv)
 		PointLight* greenLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0, 0.5f, 0), *pointLightShader, 15);
 		greenLight->IsEnabled(false);
 		greenLight->CastsShadows(true);
-		greenLight->FollowPath(new LinearPath(*GetGreenLightPath(), 10, true));
+		greenLight->FollowPath(new CircularPath(*GetGreenLightPath(), 20, true));
 		engine->AddLight(*greenLight);
 
 		PointLight* redLight = new PointLight(glm::vec3(0, 0, 0), glm::vec3(0.5f, 0, 0), *pointLightShader, 15);
@@ -100,7 +106,7 @@ int main(int argc, char** argv)
 		redLight->FollowPath(new CircularPath(*GetRedLightPath(), 20, true));
 		engine->AddLight(*redLight);
 
-		DirectionalLight* mainLight1 = new DirectionalLight(glm::vec3(10), glm::vec3(0.5f), *directionalLightShader, 50, -10);
+		DirectionalLight* mainLight1 = new DirectionalLight(glm::vec3(-10,10,0), glm::vec3(0.5f), *directionalLightShader, 50, -10);
 		mainLight1->IsEnabled(true);
 		mainLight1->CastsShadows(true);
 		engine->AddLight(*mainLight1);

@@ -90,3 +90,8 @@ bool Light::CastsShadows() const
 {
 	return m_castShadow;
 }
+
+glm::vec3 Light::GetColor() const
+{
+	return m_color;
+}

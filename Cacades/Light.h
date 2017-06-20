@@ -26,7 +26,7 @@ public:
 	bool CastsShadows() const;
 
 	virtual LightType GetType() = 0;
-
+	glm::vec3 GetColor() const;
 protected:
 	glm::vec3 m_color;
 	GLuint shadowMap;
