@@ -101,6 +101,14 @@ vec3 NormalizeNormal(vec3 tmpNormal)
   return normalize(tmpNormal * vec3(bumbiness, bumbiness, 1.0f));
 }
 
+float amplify(float d, float scale, float offset)
+{
+    d = scale * d + offset;
+    d = clamp(d, 0, 1);
+    d = 1 - exp2(-2*d*d);
+    return d;
+}
+
 void main()
 {
     vec3 blending = abs( fs_in.Normal );
@@ -126,8 +134,8 @@ void main()
     }
 
     vec3 color = colors[0] * blending[0] + colors[1] * blending[1] + colors[2] * blending[2];
-    vec3 normal = fs_in.Normal;//normals[0] * blending[0] + normals[1] * blending[1] + normals[2] * blending[2];
 
+    vec3 normal = fs_in.Normal;//normals[0] * blending[0] + normals[1] * blending[1] + normals[2] * blending[2];
     //normal = transpose(fs_in.TBN) * normal;
 
 	if (!EnableLighting || normal == vec3(0.0f))

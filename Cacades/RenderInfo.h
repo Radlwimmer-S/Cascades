@@ -18,4 +18,5 @@ struct RenderInfo
 	float NoiseScale;
 	glm::vec3 GeometryScale;
 	float IsoLevel;
+	bool WireFrameMode;
 };

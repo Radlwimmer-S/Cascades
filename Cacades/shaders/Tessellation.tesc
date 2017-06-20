@@ -4,8 +4,8 @@ layout (vertices=3) out;
 
 uniform int MinTessLevel = 1;
 uniform int MaxTessLevel = 16;
-uniform float MinDepth = 2;
-uniform float MaxDepth = 16;
+uniform float MinDepth = 1;
+uniform float MaxDepth = 8;
 
 uniform mat4 model;
 uniform mat4 view;

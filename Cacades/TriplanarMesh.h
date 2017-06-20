@@ -16,7 +16,7 @@ public:
 	void UpdateVao(int index, int triCount);
 
 	void Update(GLfloat deltaTime) override;
-	void Render(Shader& shader) const override;
+	void Render(Shader& shader, bool tesselate) const;
 
 	GLsizei GetTriCount(int index) const;
 	GLuint GetVaoCount() const;

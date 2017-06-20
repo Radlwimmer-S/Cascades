@@ -13,9 +13,9 @@
 Engine::Engine(GLFWwindow& window)
 	: m_window(window), m_camera(), m_generator(),
 	m_particleSystem(m_camera, m_generator.GetDensityTexture(), m_generator.GetNormalTexture()),
-	m_activeObject(-1), m_mesh(nullptr), m_greenOrb(new Icosahedron(glm::vec3(0), MakeQuat(0,0,0), glm::vec3(0, 0.5f, 0.1f))), m_redOrb(new Icosahedron(glm::vec3(0), MakeQuat(0, 0, 0), glm::vec3(0, 0.5f, 0.1f)))
+	m_activeObject(-1), m_mesh(nullptr), m_greenOrb(new Icosahedron(glm::vec3(0), MakeQuat(0, 0, 0), glm::vec3(0, 0.5f, 0.1f))), m_redOrb(new Icosahedron(glm::vec3(0), MakeQuat(0, 0, 0), glm::vec3(0, 0.5f, 0.1f)))
 {
-	m_shader = new Shader("./shaders/TriPlanar.vert", nullptr, "./shaders/TriPlanar.frag");
+	m_shader = new Shader("./shaders/TriPlanar.vert", "./shaders/TriPlanar.tesc", "./shaders/TriPlanar.tese", "./shaders/TriPlanar.geom", "./shaders/TriPlanar.frag");
 	m_shader->Test("TriPlanar");
 
 	m_tessShader = new Shader("./shaders/Tessellation.vert", "./shaders/Tessellation.tesc", "./shaders/Tessellation.tese", "./shaders/Tessellation.geom", "./shaders/Tessellation.frag");
@@ -121,6 +121,7 @@ void Engine::Start()
 	m_renderInfo.IsoLevel = 0;
 	m_renderInfo.GeometryScale = glm::vec3(5, 10, 5);
 	m_renderInfo.ShadowMode = PcfShadows;
+	m_renderInfo.WireFrameMode = false;
 
 	m_generator.SetRandomSeed(m_renderInfo.Seed);
 	m_generator.SetResolution(m_renderInfo.Resolution);
@@ -151,7 +152,7 @@ void Engine::Update(GLfloat deltaTime)
 	m_hud->Update(m_updateInfo.FPS, m_renderInfo);
 
 	if (m_updateInfo.IsPaused)
-		return; 
+		return;
 
 	m_particleSystem.Update(deltaTime, m_updateInfo);
 
@@ -174,9 +175,12 @@ void Engine::Update(GLfloat deltaTime)
 
 void Engine::RenderScene()
 {
+	if (m_renderInfo.WireFrameMode)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	m_shader->Use();
 	UpdateUniforms(*m_shader);
-	m_mesh->Render(*m_shader);
+	m_mesh->Render(*m_shader, true);
 
 	m_tessShader->Use();
 	UpdateUniforms(*m_tessShader);
@@ -185,6 +189,7 @@ void Engine::RenderScene()
 
 	m_debugShader->Use();
 	UpdateUniforms(*m_debugShader);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//m_lights[0]->GetFollowedPath()->Render(*m_debugShader);
 	//m_lights[1]->GetFollowedPath()->Render(*m_debugShader);
@@ -229,11 +234,11 @@ void Engine::Loop()
 		Update(deltaTime);
 
 		RenderLights();
-		
+
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glClearColor(.1f, .1f, .1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		RenderScene();
 
 		m_particleSystem.Render(m_renderInfo);
@@ -267,7 +272,7 @@ void Engine::RenderLights()
 			continue;
 
 		(*it)->PreRender();
-		m_mesh->Render((*it)->GetShadowShader());
+		m_mesh->Render((*it)->GetShadowShader(), false);
 		(*it)->PostRender();
 	}
 	glCullFace(GL_BACK);
@@ -355,6 +360,11 @@ void Engine::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action
 		case GLFW_KEY_F2:
 		{
 			m_particleSystem.Reset();
+		} break;
+
+		case GLFW_KEY_F3:
+		{
+			m_renderInfo.WireFrameMode = !m_renderInfo.WireFrameMode;
 		} break;
 
 		case GLFW_KEY_P:

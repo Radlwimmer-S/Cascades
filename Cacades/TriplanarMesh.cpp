@@ -34,7 +34,7 @@ TriplanarMesh::TriplanarMesh() : BaseObject(glm::vec3(0)), m_triCount(nullptr), 
 		glBindVertexArray(0);
 	}
 
-	m_texture = new Texture[3] {Texture("textures/floor_d.jpg"), Texture("textures/floor_d.jpg") , Texture("textures/floor_d.jpg") };
+	m_texture = new Texture[3]{ Texture("textures/floor_d.jpg"), Texture("textures/floor_d.jpg") , Texture("textures/floor_d.jpg") };
 	m_normalMap = new Texture[3]{ Texture("textures/floor_n.jpg"), Texture("textures/floor_n.jpg") , Texture("textures/floor_n.jpg") };
 	m_displacementMap = new Texture[3]{ Texture("textures/floor_h.jpg"), Texture("textures/floor_h.jpg") , Texture("textures/floor_h.jpg") };
 	//m_texture = new Texture[3] {Texture("textures/grass01.png"), Texture("textures/grass02.png") , Texture("textures/grass03.png") };
@@ -68,7 +68,7 @@ void TriplanarMesh::Update(GLfloat deltaTime)
 {
 }
 
-void TriplanarMesh::Render(Shader& shader) const
+void TriplanarMesh::Render(Shader& shader, bool tesselate) const
 {
 	GLint modelLoc = glGetUniformLocation(shader.Program, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(GetMatrix()));
@@ -109,7 +109,13 @@ void TriplanarMesh::Render(Shader& shader) const
 	{
 		glBindVertexArray(m_vao[i]);
 		glCheckError();
-		glDrawArrays(GL_TRIANGLES, 0, m_triCount[i] * 3);
+		if (tesselate)
+		{
+			glPatchParameteri(GL_PATCH_VERTICES, 3);
+			glDrawArrays(GL_PATCHES, 0, m_triCount[i] * 3);
+		}
+		else
+			glDrawArrays(GL_TRIANGLES, 0, m_triCount[i] * 3);
 		glCheckError();
 		glBindVertexArray(0);
 	}

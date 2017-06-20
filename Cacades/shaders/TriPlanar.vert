@@ -17,7 +17,7 @@ uniform mat4 projection;
 
 void main()
 {
-	gl_Position	= projection * view * model * vec4(position, 1.0f);
+	gl_Position	= model * vec4(position, 1.0f);
     vs_out.FragPos = vec3(model * vec4(position, 1.0f));
     vs_out.Normal = normalize(vec3(transpose(inverse(model)) * vec4(normal, 1.0f)));
     vs_out.UVW = uvw;
