@@ -285,20 +285,20 @@ void Engine::Loop()
 
 void Engine::RenderLights()
 {
-	glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
+	glCullFace(GL_FRONT);
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		if (!(*it)->CastsShadows() || !(*it)->IsEnabled())
 			continue;
 
 		(*it)->PreRender();
+		glEnable(GL_CULL_FACE);
 		m_mesh->Render((*it)->GetShadowShader(), false);
+		glDisable(GL_CULL_FACE);
 		m_floor->Render((*it)->GetShadowShader());
 		(*it)->PostRender();
 	}
-	//glCullFace(GL_BACK);
-	glDisable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 }
 
 void Engine::UpdateUniforms(const Shader& shader) const
