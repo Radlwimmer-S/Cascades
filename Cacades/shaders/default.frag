@@ -2,9 +2,19 @@
 
 out vec4 FragColor;
 
-#pragma include "EnumNormalMode.glh"
+#line 1 1 
 #pragma include "EnumLightType.glh"
+#line 1 2
+#pragma include "EnumShadowMode.glh"
+#line 1 3
 #pragma include "EnumColorMode.glh"
+#line 1 4
+#pragma include "EnumNormalMode.glh"
+#line 1 5
+#pragma include "EnumDisplacementMode.glh"
+#line 1 6
+#pragma include "Lighting.glh"
+#line 17 0
 
 in VS_OUT
 {
@@ -14,49 +24,109 @@ in VS_OUT
 	mat3 TBN;
 } fs_in;
 
-uniform bool SoftShadows = true;
-uniform bool EnableLighting = true;
-
-struct LightComponents
-{
-	float Ambient;
-	float Diffuse;
-	float Specular;
-};
-
-const int LIGHT_COUNT = 5;
-
-struct LightSource
-{
-	vec3 Pos;
-	vec3 Color;
-
-	int Type;
-	bool IsEnabled;
-	bool CastShadow;
-
-	mat4 lightSpaceMatrix;
-
-	float near_plane;
-	float far_plane;
-
-	samplerCube depthCube;
-	sampler2D depthMap;
-};
+const int LIGHT_COUNT = 4;
 
 uniform LightSource Lights[LIGHT_COUNT];
 
-uniform int colorMode = COLOR_ONLY_MODE;
-uniform vec3 objectColor = vec3(1);
+uniform int ShadowType = HARD_SHADOWS;
+uniform bool EnableLighting = true;
+
+uniform int colorMode;
+uniform vec3 objectColor;
 uniform sampler2D objectTexture;
 
-uniform int normalMode = NORMALS_ONLY_MODE;
+uniform int normalMode;
 uniform sampler2D normalMap;
-uniform float bumbiness = 2f;
+uniform float bumbiness = 2.0f;
+
+uniform int displacementMode;
+uniform sampler2D displacementMap;
+uniform int displacement_initialSteps;
+uniform int displacement_refinementSteps;
+uniform float displacement_scale = 0.025f;
 
 uniform vec3 viewPos;
 
-vec3 DetermineFragmentColor(in int colorMode)
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{ 
+    // calculate the size of each layer
+    float layerDepth = 1.0 / displacement_initialSteps;
+    // depth of current layer
+    float currentLayerDepth = 0.0;
+    // the amount to shift the texture coordinates per layer (from vector P)
+    vec2 P = vec2(viewDir.x, -viewDir.y) / viewDir.z * displacement_scale; 
+    vec2 deltaTexCoords = P / displacement_initialSteps;
+  
+    // get initial values
+    vec2  currentTexCoords     = texCoords;
+    float currentDepthMapValue = texture(displacementMap, currentTexCoords).r;
+
+ 	while(currentLayerDepth < currentDepthMapValue)
+    {
+        // shift texture coordinates along direction of P
+        currentTexCoords -= deltaTexCoords;
+        // get depthmap value at current texture coordinates
+        currentDepthMapValue = texture(displacementMap, currentTexCoords).r;  
+        // get depth of next layer
+        currentLayerDepth += layerDepth;  
+    }
+	
+    currentTexCoords += deltaTexCoords;
+    currentDepthMapValue = texture(displacementMap, currentTexCoords).r;  
+    currentLayerDepth -= layerDepth;  
+	currentLayerDepth -= 0.085f; //reduces artifacts
+
+	// decrease the step size as we do the refinement steps
+	deltaTexCoords /= displacement_refinementSteps;
+	layerDepth /= displacement_refinementSteps;
+	
+ 	while(currentLayerDepth < currentDepthMapValue)
+    {
+        // shift texture coordinates along direction of P
+        currentTexCoords -= deltaTexCoords;
+        // get depthmap value at current texture coordinates
+        currentDepthMapValue = texture(displacementMap, currentTexCoords).r;  
+        // get depth of next layer
+        currentLayerDepth += layerDepth;  
+    }
+    
+    // get texture coordinates before collision (reverse operations)
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+	float prevLayerDepth = currentLayerDepth - layerDepth; 
+
+    // get depth after and before collision for linear interpolation
+    float afterDepth  = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(displacementMap, prevTexCoords).r - prevLayerDepth;
+ 
+    // interpolation of texture coordinates
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
+} 
+
+vec2 DetermineTextureCoords(vec2 uv)
+{
+	switch(displacementMode)
+	{	
+		case DISPLACEMENT_HEIGHT_MODE:
+			return vec2(0,0);
+		case DISPLACEMENT_DEPTH_MODE:
+		{
+			mat3 AntiTBN = transpose(fs_in.TBN);
+			vec3 tangentViewDir = normalize((AntiTBN * viewPos) - (AntiTBN * fs_in.FragPos));
+			vec2 texCoords = ParallaxMapping(fs_in.UV,  tangentViewDir);
+			//if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
+			//	discard;
+
+			return texCoords;
+		}
+		case DISPLACEMENT_NON_MODE:
+			return uv;
+	}
+}
+
+vec3 DetermineFragmentColor(in int colorMode, vec2 uv)
 {
 	//Check for blending colorMode
 	switch (colorMode)
@@ -64,13 +134,13 @@ vec3 DetermineFragmentColor(in int colorMode)
 		case COLOR_ONLY_MODE:
 			return objectColor;
 		case COLOR_MIX_MODE:
-			return texture(objectTexture, fs_in.UV).rgb * objectColor;
+			return texture(objectTexture, uv).rgb * objectColor;
 		case TEXTURE_ONLY_MODE:
-			return texture(objectTexture, fs_in.UV).rgb;
+			return texture(objectTexture, uv).rgb;
 	}
 }
 
-vec3 DetermineFragmentNormal(in int normalMode)
+vec3 DetermineFragmentNormal(in int normalMode, vec2 uv)
 {
 	switch (normalMode)
 	{
@@ -80,200 +150,31 @@ vec3 DetermineFragmentNormal(in int normalMode)
 			return vec3(0.0f);
 		case BUMP_MAP_ONLY_MODE:
 			// Obtain normal from normal map in range [0,1]
-			vec3 tmpNormal = texture(normalMap, fs_in.UV).rgb;
+			vec3 tmpNormal = texture(normalMap, uv).rgb;
 			// Transform normal vector to range [-1,1]
 			tmpNormal = normalize(tmpNormal * 2.0 - 1.0);
 			// Apply "Bumpiness"
-			tmpNormal = normalize(tmpNormal * vec3(bumbiness, bumbiness, 1.0f));
+			tmpNormal = normalize(tmpNormal * vec3(bumbiness, -bumbiness, 1.0f));
 			// Convert to global
 			return normalize(fs_in.TBN * tmpNormal);
 	}
 }
 
-// array of offset direction for sampling
-vec3 gridSamplingDisk[20] = vec3[]
-(
-	vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
-	vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
-	vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
-	vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
-	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
-);
-
-float CalculatePointShadow(in LightSource light, in vec3 normal)
-{
-	// Get vector between fragment position and light position
-	vec3 fragToLight = fs_in.FragPos - light.Pos;
-	// Get current linear depth as the length between the fragment and light position
-	float currentDepth = length(fragToLight);
-	float bias = 0.05;
-	float shadow = 0.0;
-
-	if (!SoftShadows)
-	{
-		// Use the light to fragment vector to sample from the depth map
-		float closestDepth = texture(light.depthCube, fragToLight).r;
-		// It is currently in linear range between [0,1]. Re-transform back to original value
-		closestDepth *= light.far_plane;
-		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-	}
-	else
-	{
-		// Test for shadows with PCF
-		int samples = 20;
-		float viewDistance = length(viewPos - fs_in.FragPos);
-		float diskRadius = (1.0 + (viewDistance / light.far_plane)) / 25.0f;
-		for (int i = 0; i < samples; ++i)
-		{
-			float closestDepth = texture(light.depthCube, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-			closestDepth *= light.far_plane;   // Undo mapping [0;1]
-
-			float distance = length(light.Pos - fs_in.FragPos);
-			float distanceBias = max(bias, bias * distance / 5.0f);
-			if (currentDepth - distanceBias > closestDepth)
-				shadow += 1.0;
-		}
-		shadow /= float(samples);
-	}
-
-	// return shadow;
-	return shadow;
-}
-
-LightComponents CalculateLight(in LightSource light, in vec3 normal, in vec3 lightDir)
-{
-	LightComponents lighting;
-
-	// Ambient
-	float ambientStrength = 0.1f;
-	lighting.Ambient = ambientStrength;
-
-	// Diffuse
-	float diffuseStrength = 1.0f;
-	vec3 norm = normalize(normal);
-	float diff = max(dot(norm, lightDir), 0.0);
-	lighting.Diffuse = diffuseStrength * diff;
-
-	// Specular
-	float specularStrength = 0.1f;
-	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
-	lighting.Specular = specularStrength * spec;
-
-	return lighting;
-}
-
-float CalculateDirShadow(in LightSource light, in vec3 normal, in float baseBias)
-{
-	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
-
-	// perform perspective divide
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-	// Transform to [0,1] range
-	projCoords = projCoords * 0.5 + 0.5;
-
-	// Keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-	if (projCoords.z > 1.0)
-		return 0.0;
-
-	// Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-	float closestDepth = texture(light.depthMap, projCoords.xy).r;
-
-	// Get depth of current fragment from light's perspective
-	float currentDepth = projCoords.z;
-	// Calculate bias (based on depth map resolution and slope)
-	vec3 lightDir = normalize(light.Pos);
-
-	float bias = max(baseBias / 10 * (1.0 - dot(normal, lightDir)), baseBias);
-
-	float shadow = 0.0;
-	// Check whether current frag pos is in shadow
-	if (!SoftShadows)
-		shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-	else
-	{
-		// PCF
-		vec2 texelSize = 1.0 / textureSize(light.depthMap, 0);
-		for (int x = -1; x <= 1; ++x)
-		{
-			for (int y = -1; y <= 1; ++y)
-			{
-				float pcfDepth = texture(light.depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
-				shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-			}
-		}
-		shadow /= 9.0;
-	}
-
-	return shadow;
-}
-
-float CalculateCircularShadow(in LightSource light, in vec3 normal)
-{
-	vec4 fragPosLightSpace = light.lightSpaceMatrix * vec4(fs_in.FragPos, 1.0f);
-
-	// perform perspective divide
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-
-	//Generate Circular Shadow
-	float distanceToCenter = length(projCoords.xy);
-	return clamp(distanceToCenter * distanceToCenter, 0, 1);
-}
-
-float CalculateDistanceShadow(in LightSource light, in vec3 normal)
-{
-	float distance = length(light.Pos - fs_in.FragPos);
-	return distance / light.far_plane;
-}
-
-vec3 CalculateDirLightSource(in LightSource light, in vec3 normal)
-{
-	LightComponents components = CalculateLight(light, normal, normalize(light.Pos));
-	float shadow = 0;
-	if (light.CastShadow)
-		shadow = CalculateDirShadow(light, normal, 0.005);
-	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
-}
-
-vec3 CalculateSpotLightSource(in LightSource light, in vec3 normal)
-{
-	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
-	float shadow = 0;
-	if (light.CastShadow)
-	{
-		shadow = CalculateDirShadow(light, normal, 0.002);
-		float circular = CalculateCircularShadow(light, normal);
-		shadow = clamp(shadow + circular, 0, 1);
-	}
-	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
-}
-
-vec3 CalculatePointLightSource(in LightSource light, in vec3 normal)
-{
-	LightComponents components = CalculateLight(light, normal, normalize(light.Pos - fs_in.FragPos));
-	float shadow = 0;
-	if (light.CastShadow)
-	{
-		shadow = CalculatePointShadow(light, normal);
-		float distance = CalculateDistanceShadow(light, normal);
-		shadow = clamp(shadow + distance, 0, 1);
-	}
-	return (components.Ambient + (1.0 - shadow) * (components.Diffuse + components.Specular)) * light.Color;
-}
-
-
 void main()
-{
-	vec3 color = DetermineFragmentColor(colorMode);
+{	
+	vec2 texCoords = DetermineTextureCoords(fs_in.UV);
 
-	vec3 normal = DetermineFragmentNormal(normalMode);
+	vec3 color = DetermineFragmentColor(colorMode, texCoords);
+
+	vec3 normal = DetermineFragmentNormal(normalMode, texCoords);
 
 	if (!EnableLighting || normal == vec3(0.0f))
 	{
 		FragColor = vec4(color, 1.0f);
 		return;
-	}
+	}	
+
+	LightingGlobals globals = LightingGlobals(viewPos, fs_in.FragPos, normal, EnableLighting);
 
 	vec3 lighting = vec3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < LIGHT_COUNT; i++)
@@ -284,13 +185,13 @@ void main()
 		switch (Lights[i].Type)
 		{
 		case DIR_LIGHT:
-			lighting += CalculateDirLightSource(Lights[i], normal);
+			lighting += CalculateDirLightSource(Lights[i], globals);
 			break;
 		case SPOT_LIGHT:
-			lighting += CalculateSpotLightSource(Lights[i], normal);
+			lighting += CalculateSpotLightSource(Lights[i], globals);
 			break;
 		case POINT_LIGHT:
-			lighting += CalculatePointLightSource(Lights[i], normal);
+			lighting += CalculatePointLightSource(Lights[i], globals);
 			break;
 		}
 	}

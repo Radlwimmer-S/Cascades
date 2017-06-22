@@ -34,7 +34,7 @@ inline glm::quat MakeQuat(GLfloat pitch, GLfloat yaw, GLfloat roll)
 	return glm::quat(glm::vec3(glm::radians(pitch), glm::radians(yaw), glm::radians(roll)));
 }
 
-inline glm::quat MakeQuad(glm::vec3 v)
+inline glm::quat MakeQuat(glm::vec3 v)
 {
 	return MakeQuat(v.x, v.y, v.z);
 }

@@ -427,5 +427,8 @@
     <None Include="Shaders\Tessellation.frag">
       <Filter>Shaders\Tessellation</Filter>
     </None>
+    <None Include="Shaders\EnumDisplacementMode.glh">
+      <Filter>Shaders\Enums</Filter>
+    </None>
   </ItemGroup>
 </Project>

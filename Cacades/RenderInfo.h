@@ -19,4 +19,8 @@ struct RenderInfo
 	glm::vec3 GeometryScale;
 	float IsoLevel;
 	bool WireFrameMode;
+
+	int DisplacementInitialSteps = 16;
+	int DisplacementRefinementSteps = 16;
+	float DisplacementScale = 0.025f;
 };

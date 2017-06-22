@@ -101,14 +101,6 @@ vec3 NormalizeNormal(vec3 tmpNormal)
   return normalize(tmpNormal * vec3(bumbiness, bumbiness, 1.0f));
 }
 
-float amplify(float d, float scale, float offset)
-{
-    d = scale * d + offset;
-    d = clamp(d, 0, 1);
-    d = 1 - exp2(-2*d*d);
-    return d;
-}
-
 void main()
 {
     vec3 blending = abs( fs_in.Normal );
@@ -116,8 +108,8 @@ void main()
     float b = (blending.x + blending.y + blending.z);
     blending /= vec3(b, b, b);
 
-		mat3 AntiTBN = transpose(fs_in.TBN);
-		vec3 tangentViewDir = normalize((AntiTBN * viewPos) - (AntiTBN * fs_in.FragPos));
+	mat3 AntiTBN = transpose(fs_in.TBN);
+	vec3 tangentViewDir = normalize((AntiTBN * viewPos) - (AntiTBN * fs_in.FragPos));
 
     vec2[3] uvs;
     uvs[0] = fs_in.UVW.yz;

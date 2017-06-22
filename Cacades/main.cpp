@@ -13,14 +13,14 @@
 std::vector<ControlPoint>* GetGreenLightPath()
 {
 	std::vector<ControlPoint>* path = new std::vector<ControlPoint>();
-	path->push_back(ControlPoint(glm::vec3(0, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, -5, 0), glm::radians(glm::vec3(90, 90, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 0, 0),   glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -5, 0),  glm::radians(glm::vec3(90, 90, 0))));
 	path->push_back(ControlPoint(glm::vec3(0, -10, 0), glm::radians(glm::vec3(180, 180, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, -5, 0), glm::radians(glm::vec3(270, 270, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 0, 0), glm::radians(glm::vec3(0, 0, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 5, 0), glm::radians(glm::vec3(90, 90, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 10, 0), glm::radians(glm::vec3(180, 180, 0))));
-	path->push_back(ControlPoint(glm::vec3(0, 5, 0), glm::radians(glm::vec3(270, 270, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, -5, 0),  glm::radians(glm::vec3(270, 270, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 0, 0),   glm::radians(glm::vec3(0, 0, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 5, 0),   glm::radians(glm::vec3(90, 90, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 10, 0),  glm::radians(glm::vec3(180, 180, 0))));
+	path->push_back(ControlPoint(glm::vec3(0, 5, 0),   glm::radians(glm::vec3(270, 270, 0))));
 	return path;
 }
 
@@ -50,8 +50,8 @@ void TestCSAA()
 {
 	glfwInit();
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 

@@ -9,17 +9,21 @@
 #include "Font.h"
 #include "Hud.h"
 #include "Light.h"
+#include "Plane.h"
 
 Engine::Engine(GLFWwindow& window)
 	: m_window(window), m_camera(), m_generator(),
 	m_particleSystem(m_camera, m_generator.GetDensityTexture(), m_generator.GetNormalTexture()),
 	m_activeObject(-1), m_mesh(nullptr), m_greenOrb(new Icosahedron(glm::vec3(0), MakeQuat(0, 0, 0), glm::vec3(0, 0.5f, 0.1f))), m_redOrb(new Icosahedron(glm::vec3(0), MakeQuat(0, 0, 0), glm::vec3(0, 0.5f, 0.1f)))
 {
-	m_shader = new Shader("./shaders/TriPlanar.vert", "./shaders/TriPlanar.tesc", "./shaders/TriPlanar.tese", "./shaders/TriPlanar.geom", "./shaders/TriPlanar.frag");
-	m_shader->Test("TriPlanar");
+	m_geometryShader = new Shader("./shaders/TriPlanar.vert", "./shaders/TriPlanar.tesc", "./shaders/TriPlanar.tese", "./shaders/TriPlanar.geom", "./shaders/TriPlanar.frag");
+	m_geometryShader->Test("TriPlanar");
 
-	m_tessShader = new Shader("./shaders/Tessellation.vert", "./shaders/Tessellation.tesc", "./shaders/Tessellation.tese", "./shaders/Tessellation.geom", "./shaders/Tessellation.frag");
-	m_tessShader->Test("Tesselation");
+	m_oreShader = new Shader("./shaders/Tessellation.vert", "./shaders/Tessellation.tesc", "./shaders/Tessellation.tese", "./shaders/Tessellation.geom", "./shaders/Tessellation.frag");
+	m_oreShader->Test("Tesselation");
+
+	m_floorShader = new Shader("./shaders/default.vert", nullptr, "./shaders/default.frag");
+	m_floorShader->Test("Floor");
 
 	m_debugShader = new Shader("./shaders/Simple.vert", nullptr, "./shaders/Simple.frag");
 	m_debugShader->Test("Debug");
@@ -28,6 +32,11 @@ Engine::Engine(GLFWwindow& window)
 	hudShader->Test("Text/Hud");
 	Font* font = new Font("fonts/arial.ttf", glm::ivec2(0, 24));
 	m_hud = new Hud(*font, *hudShader);
+
+	Texture* floorTex = new Texture("textures/brick_d.png");
+	Texture* floorNormal = new Texture("textures/brick_n.png");
+	Texture* floorHeight = new Texture("textures/brick_h.png");
+	m_floor = new Model(glm::vec3(0, -10, 0), MakeQuat(0.0f, 0.0f, 0.0f), Plane::GetTris(glm::vec2(20, 20), glm::vec2(10, 10)), 2, glm::vec3(0.3f, 0.3f, 0.3f), TextureOnly, floorTex, BumpMapOnly, floorNormal, DepthDisplacement, floorHeight);
 
 	m_greenOrb->SetScale(glm::vec3(0.3f));
 	m_redOrb->SetScale(glm::vec3(0.3f));
@@ -178,17 +187,26 @@ void Engine::RenderScene()
 	if (m_renderInfo.WireFrameMode)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	m_shader->Use();
-	UpdateUniforms(*m_shader);
-	m_mesh->Render(*m_shader, true);
+	m_geometryShader->Use();
+	UpdateUniforms(*m_geometryShader);
+	m_mesh->Render(*m_geometryShader, true);
+	glCheckError();
 
-	m_tessShader->Use();
-	UpdateUniforms(*m_tessShader);
-	m_greenOrb->Render(*m_tessShader);
-	m_redOrb->Render(*m_tessShader);
+	m_oreShader->Use();
+	UpdateUniforms(*m_oreShader);
+	m_greenOrb->Render(*m_oreShader);
+	m_redOrb->Render(*m_oreShader);
+	glCheckError();
+
+	m_floorShader->Use();
+	UpdateUniforms(*m_floorShader);
+	m_floor->Render(*m_floorShader);
+	glCheckError();
 
 	m_debugShader->Use();
 	UpdateUniforms(*m_debugShader);
+	glCheckError();
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//m_lights[0]->GetFollowedPath()->Render(*m_debugShader);
@@ -198,6 +216,8 @@ void Engine::RenderScene()
 		for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 			if ((*it)->IsEnabled())
 				(*it)->RenderDebug(*m_debugShader);
+
+	glCheckError();
 }
 
 void Engine::RenderHud()
@@ -244,6 +264,7 @@ void Engine::Loop()
 		m_particleSystem.Render(m_renderInfo);
 
 		RenderHud();
+		glCheckError();
 
 
 		glfwSwapBuffers(&m_window);
@@ -265,7 +286,7 @@ void Engine::Loop()
 void Engine::RenderLights()
 {
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
+	//glCullFace(GL_FRONT);
 	for (std::vector<Light*>::const_iterator it = m_lights.begin(); it != m_lights.end(); ++it)
 	{
 		if (!(*it)->CastsShadows() || !(*it)->IsEnabled())
@@ -273,9 +294,10 @@ void Engine::RenderLights()
 
 		(*it)->PreRender();
 		m_mesh->Render((*it)->GetShadowShader(), false);
+		m_floor->Render((*it)->GetShadowShader());
 		(*it)->PostRender();
 	}
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 	glDisable(GL_CULL_FACE);
 }
 
@@ -299,6 +321,22 @@ void Engine::UpdateUniforms(const Shader& shader) const
 	glm::mat4 proj = m_camera.GetProjectionMatrix();
 	GLuint projLocation = glGetUniformLocation(shader.Program, "projection");
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(proj));
+	glCheckError();
+
+	GLuint bumbinessLocation = glGetUniformLocation(shader.Program, "bumbiness");
+	glUniform1f(bumbinessLocation, m_renderInfo.NormalMapFactor);
+	glCheckError();
+
+	GLuint initialStepsLocation = glGetUniformLocation(shader.Program, "displacement_initialSteps");
+	glUniform1i(initialStepsLocation, m_renderInfo.DisplacementInitialSteps);
+	glCheckError();
+
+	GLuint refinementStepsLocation = glGetUniformLocation(shader.Program, "displacement_refinementSteps");
+	glUniform1i(refinementStepsLocation, m_renderInfo.DisplacementRefinementSteps);
+	glCheckError();
+
+	GLuint scaleLocation = glGetUniformLocation(shader.Program, "displacement_scale");
+	glUniform1f(scaleLocation, m_renderInfo.DisplacementScale);
 	glCheckError();
 }
 

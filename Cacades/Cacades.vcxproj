@@ -250,6 +250,7 @@ xcopy /E /Y ".\fonts" "$(SolutionDir)$(Platform)\$(Configuration)\fonts"</Comman
     <None Include="shaders\Density.vert" />
     <None Include="shaders\DirectionalLight.frag" />
     <None Include="shaders\DirectionalLight.vert" />
+    <None Include="Shaders\EnumDisplacementMode.glh" />
     <None Include="shaders\Lighting.glh" />
     <None Include="shaders\MarchingCubes.geom" />
     <None Include="shaders\MarchingCubes.vert" />

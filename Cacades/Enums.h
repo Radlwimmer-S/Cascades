@@ -5,6 +5,14 @@
 #include "shaders/EnumLightType.glh"
 #include "shaders/EnumParticleType.glh"
 #include "shaders/EnumShadowMode.glh"
+#include "shaders/EnumDisplacementMode.glh"
+
+enum DisplacementMode
+{
+	DepthDisplacement = DISPLACEMENT_DEPTH_MODE,
+	HeightDisplacement = DISPLACEMENT_HEIGHT_MODE,
+	NoDisplacement = DISPLACEMENT_NON_MODE,
+};
 
 enum NormalBlendMode
 {

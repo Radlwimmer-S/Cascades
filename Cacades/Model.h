@@ -14,6 +14,7 @@ public:
 	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode = NormalsOnly);
 	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode, Texture* normalMap);
 	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap);
+	Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap, DisplacementMode displacementMode, Texture* heightMap);
 	virtual ~Model();
 
 	void Update(GLfloat deltaTime) override;
@@ -38,7 +39,9 @@ protected:
 	glm::vec3 m_color;
 	ColorBlendMode m_colorMode;
 	NormalBlendMode m_normalMode;
+	DisplacementMode m_displacementMode;
 	Texture* m_texture;
 	Texture* m_normalMap;
+	Texture* m_displacementMap;
 };
 

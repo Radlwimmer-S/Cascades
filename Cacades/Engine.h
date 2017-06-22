@@ -54,8 +54,9 @@ protected:
 
 	Hud* m_hud;
 	GLFWwindow& m_window;
-	Shader* m_shader;
-	Shader* m_tessShader;
+	Shader* m_geometryShader;
+	Shader* m_oreShader;
+	Shader* m_floorShader;
 	Shader* m_debugShader;
 	Camera m_camera;
 	std::vector<Light*> m_lights;
@@ -64,6 +65,7 @@ protected:
 	ParticleSystem m_particleSystem;
 	int m_activeObject;
 
+	Model* m_floor;
 	TriplanarMesh* m_mesh;
 	Icosahedron* m_greenOrb;
 	Icosahedron* m_redOrb;

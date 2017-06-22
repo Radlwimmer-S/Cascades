@@ -6,16 +6,24 @@
 #include "Vertex.h"
 #include "Triangle.h"
 
-Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode) : Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, normalMode, nullptr)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode)
+	: Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, normalMode, nullptr)
 {}
 
-Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode) : Model(position, orientaton, tris, triCount, color, colorMode, texture, normalMode, nullptr)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode)
+	: Model(position, orientaton, tris, triCount, color, colorMode, texture, normalMode, nullptr)
 {}
 
-Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode, Texture* normalMap) : Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, normalMode, normalMap)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, NormalBlendMode normalMode, Texture* normalMap)
+	: Model(position, orientaton, tris, triCount, color, ColorOnly, nullptr, normalMode, normalMap)
 {}
 
-Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap) : BaseObject(position, orientaton), m_isVisible(true), m_tris(tris), m_triCount(triCount), m_color(color), m_colorMode(colorMode), m_normalMode(normalMode), m_texture(texture), m_normalMap(normalMap)
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap)
+	: Model(position, orientaton, tris, triCount, color, colorMode, texture, normalMode, normalMap, NoDisplacement, nullptr)
+{}
+
+Model::Model(glm::vec3 position, glm::quat orientaton, Triangle* tris, GLsizei triCount, glm::vec3 color, ColorBlendMode colorMode, Texture* texture, NormalBlendMode normalMode, Texture* normalMap, DisplacementMode displacementMode, Texture* heightMap)
+	: BaseObject(position, orientaton), m_isVisible(true), m_tris(tris), m_triCount(triCount), m_color(color), m_colorMode(colorMode), m_normalMode(normalMode), m_displacementMode(displacementMode), m_texture(texture), m_normalMap(normalMap), m_displacementMap(heightMap)
 {
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
@@ -71,6 +79,19 @@ void Model::Render(Shader& shader) const
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_normalMap->GetId());
 		glUniform1i(normalLoc, 2);
+		glCheckError();
+	}
+
+	GLint displacementModeLoc = glGetUniformLocation(shader.Program, "displacementMode");
+	glUniform1i(displacementModeLoc, m_displacementMode);
+	glCheckError();
+
+	GLint displacementLoc = glGetUniformLocation(shader.Program, "displacementMap");
+	if (m_displacementMap != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_displacementMap->GetId());
+		glUniform1i(displacementLoc, 3);
 		glCheckError();
 	}
 

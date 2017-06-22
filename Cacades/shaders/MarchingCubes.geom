@@ -69,11 +69,11 @@ vec3 ComputeNormal(vec3 ws)
 {
 	vec3 gradient = vec3(
 		   texture(densityTex, ws_to_UVW(ws + vec3(resolution.x, 0, 0))).r
-     - texture(densityTex, ws_to_UVW(ws - vec3(resolution.x, 0, 0))).r,
+		 - texture(densityTex, ws_to_UVW(ws - vec3(resolution.x, 0, 0))).r,
 		   texture(densityTex, ws_to_UVW(ws + vec3(0, resolution.y, 0))).r
-     - texture(densityTex, ws_to_UVW(ws - vec3(0, resolution.y, 0))).r,
+		 - texture(densityTex, ws_to_UVW(ws - vec3(0, resolution.y, 0))).r,
 		   texture(densityTex, ws_to_UVW(ws + vec3(0, 0, resolution.z))).r
-     - texture(densityTex, ws_to_UVW(ws - vec3(0, 0, resolution.z))).r	);
+		 - texture(densityTex, ws_to_UVW(ws - vec3(0, 0, resolution.z))).r	);
 	return normalize(-gradient);
 }
 
